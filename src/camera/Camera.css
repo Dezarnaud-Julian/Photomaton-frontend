@@ -1,0 +1,30 @@
+.camera-container {
+  position: relative;
+}
+
+.camera-view.hidden {
+  display: none;
+}
+
+.captured-photo {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.captured-photo img {
+  max-width: 100%;
+  height: auto;
+}
+
+.buttons {
+  margin-top: 10px;
+}
+
+.capture-button,
+.save-button,
+.cancel-button {
+  margin: 5px;
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+}
