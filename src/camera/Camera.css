@@ -1,42 +1,41 @@
 .camera-container {
-  margin: 1%;
+  width: 100vw;
+  height: 100vh;
   display: flex;
-  flex-direction: column;
+  justify-content: center;
   align-items: center;
-}
-
-.camera-view {
-  width: 100%;
-  width: 600px;
   position: relative;
+  background-color: black; /* Optional: adds a background color for better contrast */
 }
 
-.buttons {
-  margin: 1%;
-}
-
-.cancel-button {
-  margin-left: 1%;
-}
-
-.save-button {
-  margin-left: 1%;
+.camera-left {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: left;
+  align-items: center;
+  position: relative;
+  background-color: black;
 }
 
 .video-stream {
-  width: 100%;
+  width: auto;
+  height: 100vh;
 }
 
-.captured-image {
-  width: 600px;
-  height: auto; /* Garde le ratio de l'image */
+.overlay-text-left {
+  transform: translate(+23%, 0%);
+  position: absolute;
+  color: white;
+  font-size: 2rem;
+  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background for better visibility */
+  padding: 10px 20px;
+  border-radius: 10px;
 }
 
 .countdown-display {
+  transform: translate(+520%, -5%);
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -70%);
   font-size: 8rem;
   color: white;
   z-index: 1000;
@@ -61,4 +60,57 @@
 
 .white-overlay.active {
   opacity: 1;
+}
+
+.overlay-captured-photo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.captured-image {
+  width: auto;
+  height: 100vh;
+}
+
+.save-button,
+.cancel-button {
+  position: absolute;
+  color: white;
+  font-size: 2rem;
+  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background for better visibility */
+  padding: 10px 20px;
+  border-radius: 10px;
+  background-color: #007bff;
+
+}
+
+.cancel-button {
+  background-color: #dc3545;
+}
+
+.email-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 20px;
+}
+
+.email-form input {
+  padding: 10px;
+  font-size: 1rem;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.send-button {
+  padding: 10px 20px;
+  font-size: 1rem;
+  cursor: pointer;
+  color: white;
+  background-color: #28a745;
+  border: none;
+  border-radius: 5px;
 }

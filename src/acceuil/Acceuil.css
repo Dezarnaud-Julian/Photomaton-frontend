@@ -1,0 +1,25 @@
+/* Acceuil.css */
+
+.camera {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  background-color: black; /* Optional: adds a background color for better contrast */
+}
+
+.video-stream {
+  width: auto;
+  height: 100vh;
+}
+
+.overlay-text {
+  position: absolute;
+  color: white;
+  font-size: 2rem;
+  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background for better visibility */
+  padding: 10px 20px;
+  border-radius: 10px;
+}

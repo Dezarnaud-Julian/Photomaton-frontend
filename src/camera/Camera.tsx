@@ -10,8 +10,11 @@ function Camera() {
   const [showEmailForm, setShowEmailForm] = useState(false);
   const [email, setEmail] = useState('');
   const [countdown, setCountdown] = useState(0);
+  const [textShown, setTextShown] = useState(true);
+  const [photoPath, setPhotoPath] = useState('');
 
   const startCountdown = () => {
+    setTextShown(false);
     setCountdown(3);
     const interval = setInterval(() => {
       setCountdown((prevCount) => {
@@ -68,8 +71,9 @@ function Camera() {
     }
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (photoBlob) {
+      setPhotoPath(await savePhoto()); // Save the photo first and get its path
       setShowEmailForm(true);
     } else {
       console.error('No photo blob to upload');
@@ -105,7 +109,6 @@ function Camera() {
 
   const handleSendEmail = async () => {
     if (photoBlob && email) {
-      const photoPath = await savePhoto(); // Save the photo first and get its path
       if (photoPath) {
         try {
           const response = await fetch('http://localhost:3001/sendEmail', {
@@ -143,10 +146,14 @@ function Camera() {
 
   return (
     <div className="camera-container">
-      <div className="camera">
-        <div className={`camera-view ${capturedPhoto ? 'hidden' : ''}`}>
+
+      {!capturedPhoto && (
+        <div className="camera-left" onClick={startCountdown}>
           <video ref={videoRef} autoPlay playsInline className="video-stream" />
-          <canvas ref={canvasRef} style={{ display: 'none' }}></canvas>
+          {textShown && (
+            <div className="overlay-text-left">📸 Touch me to take a picture ! 📸</div>
+          )}
+          <canvas ref={canvasRef} className="hidden"></canvas>
           <div ref={overlayRef} className="white-overlay"></div>
           {countdown > 0 && (
             <div className="countdown-display">
@@ -154,27 +161,14 @@ function Camera() {
             </div>
           )}
         </div>
-      </div>
-
-      <div className={`camera-view ${capturedPhoto ? 'hidden' : ''}`}>
-        <button className="capture-button" onClick={startCountdown}>
-          Capture
-        </button>
-      </div>
+      )}
 
       {capturedPhoto && (
-        <div className="captured-photo">
+        <div className="camera-left">
+          <div className="overlay-text-left">On la garde ?</div>
+          {/* <div className="save-button">On la garde !</div> */}
+          {/*<div className="cancel-button" onClick={handleCancel}>Nan elle est moche</div> */}
           <img className="captured-image" src={capturedPhoto} alt="Captured" />
-          <div className="buttons">
-            {!showEmailForm && (
-              <button className="save-button" onClick={handleSave}>
-                Ont la garde !
-              </button>
-            )}
-            <button className="cancel-button" onClick={handleCancel}>
-              Nan elle est moche
-            </button>
-          </div>
         </div>
       )}
 

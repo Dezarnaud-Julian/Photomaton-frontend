@@ -1,14 +1,18 @@
-// src/App.tsx
-import React from 'react';
-import logo from './logo.svg';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'; // Import necessary components from react-router-dom
 import './App.css';
+import Acceuil from './acceuil/Acceuil';
 import Camera from './camera/Camera';
 
 function App() {
   return (
-    <div className="App">
-      <Camera />
-    </div>
+    <Router>
+      <div className="App">
+        <Routes>
+          <Route path="/" element={<Acceuil />} />
+          <Route path="/menu" element={<Camera />} />
+        </Routes>
+      </div>
+    </Router>
   );
 }
 
