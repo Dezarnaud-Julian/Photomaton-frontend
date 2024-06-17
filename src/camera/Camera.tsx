@@ -12,6 +12,31 @@ function Camera() {
   const [countdown, setCountdown] = useState(0);
   const [textShown, setTextShown] = useState(true);
   const [photoPath, setPhotoPath] = useState('');
+  const [stream, setStream] = useState<MediaStream | null>(null); // State to hold the camera stream
+
+  const startCamera = async () => {
+    try {
+      const newStream = await navigator.mediaDevices.getUserMedia({ video: true });
+      if (videoRef.current) {
+        videoRef.current.srcObject = newStream;
+        setStream(newStream); // Store the new stream in state
+      }
+    } catch (err) {
+      console.error("Error accessing camera: ", err);
+    }
+  };
+
+  const stopCamera = () => {
+    if (stream) {
+      stream.getTracks().forEach(track => track.stop());
+      setStream(null);
+    }
+  };
+
+  const restartCamera = () => {
+    stopCamera();
+    startCamera();
+  };
 
   const startCountdown = () => {
     setTextShown(false);
@@ -36,18 +61,10 @@ function Camera() {
   };
 
   useEffect(() => {
-    async function getCameraStream() {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-        }
-      } catch (err) {
-        console.error("Error accessing camera: ", err);
-      }
-    }
-
-    getCameraStream();
+    startCamera(); // Initialize camera on component mount
+    return () => {
+      stopCamera(); // Clean up: stop camera when component unmounts
+    };
   }, []);
 
   const capturePhoto = () => {
@@ -135,18 +152,20 @@ function Camera() {
     } else {
       console.error('No photo blob to send or email not provided');
     }
+    handleCancel();
   };
 
   const handleCancel = () => {
     setCapturedPhoto(null);
     setPhotoBlob(null);
+    setTextShown(true);
     setShowEmailForm(false);
     setEmail('');
+    restartCamera();
   };
 
   return (
     <div className="camera-container">
-
       {!capturedPhoto && (
         <div className="camera-left" onClick={startCountdown}>
           <video ref={videoRef} autoPlay playsInline className="video-stream" />
@@ -165,9 +184,13 @@ function Camera() {
 
       {capturedPhoto && (
         <div className="camera-left">
-          <div className="overlay-text-left">On la garde ?</div>
-          {/* <div className="save-button">On la garde !</div> */}
-          {/*<div className="cancel-button" onClick={handleCancel}>Nan elle est moche</div> */}
+          {!showEmailForm &&(
+            <div>
+              <div className="overlay-text-keep">On la garde ?</div>
+              <div onClick={handleSave} className="overlay-text-keep-save">✅</div>
+              <div onClick={handleCancel} className="overlay-text-keep-cancel">❌</div>
+            </div>
+          )}
           <img className="captured-image" src={capturedPhoto} alt="Captured" />
         </div>
       )}
@@ -185,6 +208,13 @@ function Camera() {
           </button>
         </div>
       )}
+
+      {/* Nouvelle colonne à droite */}
+      <div className="new-column">
+        <div>Cadre 1</div>
+        <div>Cadre 2</div>
+        <div>GIF</div>
+      </div>
     </div>
   );
 }

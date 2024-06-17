@@ -5,17 +5,35 @@
   justify-content: center;
   align-items: center;
   position: relative;
-  background-color: black; /* Optional: adds a background color for better contrast */
+  background-color: black;
 }
 
 .camera-left {
-  width: 100vw;
+  width: 70vw; /* Laissez de l'espace pour la nouvelle colonne à droite */
   height: 100vh;
   display: flex;
   justify-content: left;
   align-items: center;
   position: relative;
   background-color: black;
+  overflow: hidden; /* Pour éviter que la colonne ne dépasse */
+}
+
+
+.new-column {
+  width: 50vw; /* Largeur de la colonne à droite */
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.5); /* Fond semi-transparent */
+}
+
+.new-column div {
+  margin: 20px;
+  color: white;
+  font-size: 1.5rem;
 }
 
 .video-stream {
@@ -24,17 +42,39 @@
 }
 
 .overlay-text-left {
-  transform: translate(+23%, 0%);
+  transform: translate(45%, 0%);
   position: absolute;
   color: white;
   font-size: 2rem;
-  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background for better visibility */
+  background-color: rgba(0, 0, 0, 0.5);
   padding: 10px 20px;
   border-radius: 10px;
 }
 
+.overlay-text-keep {
+  transform: translate(180%, -450%);
+  position: absolute;
+  color: white;
+  font-size: 2rem;
+  background-color: rgba(0, 0, 0, 0.5);
+  padding: 10px 20px;
+  border-radius: 10px;
+}
+
+.overlay-text-keep-save{
+  position: absolute;
+  transform: translate(30%, 100%);
+  font-size: 12rem;
+  }
+  
+.overlay-text-keep-cancel{
+position: absolute;
+transform: translate(260%, 100%);
+font-size: 12rem;
+}
+
 .countdown-display {
-  transform: translate(+520%, -5%);
+  transform: translate(700%, -5%);
   position: absolute;
   font-size: 8rem;
   color: white;
@@ -62,13 +102,6 @@
   opacity: 1;
 }
 
-.overlay-captured-photo {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-
 .captured-image {
   width: auto;
   height: 100vh;
@@ -79,11 +112,10 @@
   position: absolute;
   color: white;
   font-size: 2rem;
-  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background for better visibility */
+  background-color: rgba(0, 0, 0, 0.5);
   padding: 10px 20px;
   border-radius: 10px;
   background-color: #007bff;
-
 }
 
 .cancel-button {
