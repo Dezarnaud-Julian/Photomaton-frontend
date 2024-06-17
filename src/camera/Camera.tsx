@@ -4,10 +4,33 @@ import './Camera.css';
 function Camera() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const overlayRef = useRef<HTMLDivElement>(null);
   const [capturedPhoto, setCapturedPhoto] = useState<string | null>(null);
   const [photoBlob, setPhotoBlob] = useState<Blob | null>(null);
   const [showEmailForm, setShowEmailForm] = useState(false);
   const [email, setEmail] = useState('');
+  const [countdown, setCountdown] = useState(0);
+
+  const startCountdown = () => {
+    setCountdown(3);
+    const interval = setInterval(() => {
+      setCountdown((prevCount) => {
+        if (prevCount === 1) {
+          clearInterval(interval);
+          if (overlayRef.current) {
+            overlayRef.current.classList.add('active');
+          }
+          setTimeout(() => {
+            capturePhoto();
+            if (overlayRef.current) {
+              overlayRef.current.classList.remove('active');
+            }
+          }, 1000); // Capture the photo after the screen has turned white
+        }
+        return prevCount - 1;
+      });
+    }, 1000);
+  };
 
   useEffect(() => {
     async function getCameraStream() {
@@ -120,16 +143,28 @@ function Camera() {
 
   return (
     <div className="camera-container">
+      <div className="camera">
+        <div className={`camera-view ${capturedPhoto ? 'hidden' : ''}`}>
+          <video ref={videoRef} autoPlay playsInline className="video-stream" />
+          <canvas ref={canvasRef} style={{ display: 'none' }}></canvas>
+          <div ref={overlayRef} className="white-overlay"></div>
+          {countdown > 0 && (
+            <div className="countdown-display">
+              {countdown} {/* Display the current countdown */}
+            </div>
+          )}
+        </div>
+      </div>
+
       <div className={`camera-view ${capturedPhoto ? 'hidden' : ''}`}>
-        <video ref={videoRef} autoPlay playsInline className="video-stream" />
-        <canvas ref={canvasRef} style={{ display: 'none' }}></canvas>
-        <button className="capture-button" onClick={capturePhoto}>
+        <button className="capture-button" onClick={startCountdown}>
           Capture
         </button>
       </div>
+
       {capturedPhoto && (
         <div className="captured-photo">
-          <img src={capturedPhoto} alt="Captured" />
+          <img className="captured-image" src={capturedPhoto} alt="Captured" />
           <div className="buttons">
             {!showEmailForm && (
               <button className="save-button" onClick={handleSave}>
@@ -142,6 +177,7 @@ function Camera() {
           </div>
         </div>
       )}
+
       {showEmailForm && (
         <div className="email-form">
           <input
