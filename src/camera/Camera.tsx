@@ -1,18 +1,21 @@
 import React, { useRef, useEffect, useState } from 'react';
 import './Camera.css';
+import gifshot from 'gifshot';
 
 function Camera() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
+  const [mode, setMode] = useState<string>("PICTURE");
   const [capturedPhoto, setCapturedPhoto] = useState<string | null>(null);
   const [photoBlob, setPhotoBlob] = useState<Blob | null>(null);
-  const [showEmailForm, setShowEmailForm] = useState(false);
+  const [showSavingOptions, setShowSavingOptions] = useState(false);
   const [email, setEmail] = useState('');
   const [countdown, setCountdown] = useState(0);
   const [textShown, setTextShown] = useState(true);
   const [photoPath, setPhotoPath] = useState('');
   const [stream, setStream] = useState<MediaStream | null>(null); // State to hold the camera stream
+  const [printCopies, setPrintCopies] = useState(1); // State to hold the number of print copies
 
   const startCamera = async () => {
     try {
@@ -38,26 +41,33 @@ function Camera() {
     startCamera();
   };
 
-  const startCountdown = () => {
+  const startCountdown = async (secondes : number) => {
     setTextShown(false);
-    setCountdown(3);
-    const interval = setInterval(() => {
-      setCountdown((prevCount) => {
-        if (prevCount === 1) {
-          clearInterval(interval);
-          if (overlayRef.current) {
-            overlayRef.current.classList.add('active');
-          }
-          setTimeout(() => {
-            capturePhoto();
+    setCountdown(secondes);
+  
+    return new Promise<void>((resolve) => {
+      const interval = setInterval(() => {
+        setCountdown((prevCount) => {
+          if (prevCount === 1) {
+            clearInterval(interval);
             if (overlayRef.current) {
-              overlayRef.current.classList.remove('active');
+              overlayRef.current.classList.add('active');
             }
-          }, 1000); // Capture the photo after the screen has turned white
-        }
-        return prevCount - 1;
-      });
-    }, 1000);
+            setTimeout(() => {
+              if (overlayRef.current) {
+                overlayRef.current.classList.remove('active');
+              }
+              resolve();  // Resolve the promise after the overlay is hidden
+            }, 1000);
+          }
+          return prevCount - 1;
+        });
+      }, 1000);
+    });
+  };
+  
+  const captureMedia = async () => {
+    capture();
   };
 
   useEffect(() => {
@@ -67,7 +77,36 @@ function Camera() {
     };
   }, []);
 
-  const capturePhoto = () => {
+  const capture = async () => {
+    if(mode === "PICTURE") {
+      await startCountdown(3);
+      capturePhoto();
+    } else if(mode === "GIF"){
+      let photosForGif: string[] = [];
+      for(let i = 0; i < 4; i++) {
+        await startCountdown(3);
+        const photoGif = await capturePhoto() as string;
+        photosForGif.push(photoGif);
+      }
+      createGif(photosForGif);
+    }
+  };
+
+  const createGif = async (photos: string[]) => {
+    gifshot.createGIF({
+      images: photos,
+      interval: 0.5,
+    }, function (obj: { error: any; image: any; errorMsg: any; }) {
+      if (!obj.error) {
+        const image = obj.image;
+        setCapturedPhoto(image); // Set the generated GIF as the captured photo
+      } else {
+        console.error('Failed to create GIF:', obj.errorMsg);
+      }
+    });
+  };
+
+  const capturePhoto = async () => {
     if (canvasRef.current && videoRef.current) {
       const context = canvasRef.current.getContext('2d');
       if (context) {
@@ -75,23 +114,33 @@ function Camera() {
         canvasRef.current.width = videoWidth;
         canvasRef.current.height = videoHeight;
         context.drawImage(videoRef.current, 0, 0, videoWidth, videoHeight);
-
-        canvasRef.current.toBlob((blob) => {
-          if (blob) {
-            setCapturedPhoto(URL.createObjectURL(blob));
-            setPhotoBlob(blob);
+    
+        return new Promise((resolve, reject) => {
+          if (canvasRef.current) {
+            canvasRef.current.toBlob((blob) => {
+              if (blob) {
+                const url = URL.createObjectURL(blob);
+                setCapturedPhoto(url);
+                setPhotoBlob(blob);
+                resolve(url); // Resolve the promise with the URL
+              } else {
+                console.error('Failed to capture image');
+                reject(new Error('Failed to capture image')); // Reject the promise on failure
+              }
+            }, 'image/jpeg');
           } else {
-            console.error('Failed to capture image');
+            reject(new Error('Canvas element not found')); // Reject if canvas element is not found
           }
-        }, 'image/jpeg');
+        });
       }
     }
+    return Promise.reject(new Error('Canvas or video element not found')); // Reject if canvas or video is not found
   };
 
   const handleSave = async () => {
     if (photoBlob) {
       setPhotoPath(await savePhoto()); // Save the photo first and get its path
-      setShowEmailForm(true);
+      setShowSavingOptions(true);
     } else {
       console.error('No photo blob to upload');
     }
@@ -139,7 +188,7 @@ function Camera() {
           if (!response.ok) {
             throw new Error('Failed to send email');
           }
-          setShowEmailForm(false);
+          setShowSavingOptions(false);
           setCapturedPhoto(null);
           setPhotoBlob(null);
           setEmail('');
@@ -152,22 +201,52 @@ function Camera() {
     } else {
       console.error('No photo blob to send or email not provided');
     }
-    handleCancel();
   };
 
   const handleCancel = () => {
     setCapturedPhoto(null);
     setPhotoBlob(null);
     setTextShown(true);
-    setShowEmailForm(false);
+    setShowSavingOptions(false);
     setEmail('');
     restartCamera();
   };
 
+  const switchMode = (mode :string) => {
+    setMode(mode);
+  };
+
+  const handlePrint = async () => {
+    if (photoBlob) {
+      if (photoPath) {
+        try {
+          const response = await fetch('http://localhost:3001/print', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ filePath: photoPath, copies: printCopies }),
+          });
+
+          if (!response.ok) {
+            throw new Error('Failed to print photo');
+          }
+          console.log('Photo sent for printing');
+        } catch (error) {
+          console.error('Error printing photo:', error);
+        }
+      } else {
+        console.error('Failed to save photo before printing');
+      }
+    } else {
+      console.error('No photo blob to print');
+    }
+  };
+
   return (
     <div className="camera-container">
-      {!capturedPhoto && (
-        <div className="camera-left" onClick={startCountdown}>
+      {false && (
+        <div className="camera-left" onClick={captureMedia}>
           <video ref={videoRef} autoPlay playsInline className="video-stream" />
           {textShown && (
             <div className="overlay-text-left">📸 Touch me to take a picture ! 📸</div>
@@ -184,7 +263,7 @@ function Camera() {
 
       {capturedPhoto && (
         <div className="camera-left">
-          {!showEmailForm &&(
+          {!showSavingOptions &&(
             <div>
               <div className="overlay-text-keep">On la garde ?</div>
               <div onClick={handleSave} className="overlay-text-keep-save">✅</div>
@@ -195,26 +274,47 @@ function Camera() {
         </div>
       )}
 
-      {showEmailForm && (
-        <div className="email-form">
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="Enter email address"
-          />
-          <button className="send-button" onClick={handleSendEmail}>
-            Envoie la moi !
-          </button>
+      {showSavingOptions && (
+        <div className="new-column">
+            <div className="email-form">
+              <input
+                className="send-text"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Enter email address"
+              />
+              <button className="send-button" onClick={handleSendEmail}>
+                Envoie la moi!
+              </button>
+            </div>
+          
+            <div>Imprime là!</div>
+            <div className="print-form">
+              <input
+                type="number"
+                value={printCopies}
+                onChange={(e) => setPrintCopies(parseInt(e.target.value, 10))}
+                min="1"
+              />
+              <button onClick={handlePrint}>Imprimer</button>
+            </div>
+          <div>
+            <button onClick={handleCancel}>Retour</button>
+          </div>
         </div>
       )}
 
-      {/* Nouvelle colonne à droite */}
-      <div className="new-column">
-        <div>Cadre 1</div>
-        <div>Cadre 2</div>
-        <div>GIF</div>
-      </div>
+      {!showSavingOptions && (
+        <div className="new-column">
+          <div>
+            <button onClick={() => switchMode("PICTURE")}>PICTURE</button>
+          </div>
+          <div>
+            <button onClick={() => switchMode("GIF")}>GIF</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
