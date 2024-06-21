@@ -17,6 +17,7 @@ function Camera() {
   const [stream, setStream] = useState<MediaStream | null>(null); // State to hold the camera stream
   const [printCopies, setPrintCopies] = useState(1); // State to hold the number of print copies
 
+
   const startCamera = async () => {
     try {
       const newStream = await navigator.mediaDevices.getUserMedia({ video: true });
@@ -98,13 +99,27 @@ function Camera() {
       interval: 0.5,
     }, function (obj: { error: any; image: any; errorMsg: any; }) {
       if (!obj.error) {
-        const image = obj.image;
+        const image = obj.image; // Data URL
         setCapturedPhoto(image); // Set the generated GIF as the captured photo
+        const blob = dataURLToBlob(image);
+        setPhotoBlob(blob);
       } else {
         console.error('Failed to create GIF:', obj.errorMsg);
       }
     });
   };
+  
+  // Utility function to convert data URL to Blob
+  function dataURLToBlob(dataURL: string) {
+    const byteString = atob(dataURL.split(',')[1]);
+    const mimeString = dataURL.split(',')[0].split(':')[1].split(';')[0];
+    const ab = new ArrayBuffer(byteString.length);
+    const ia = new Uint8Array(ab);
+    for (let i = 0; i < byteString.length; i++) {
+      ia[i] = byteString.charCodeAt(i);
+    }
+    return new Blob([ab], { type: mimeString });
+  }
 
   const capturePhoto = async () => {
     if (canvasRef.current && videoRef.current) {
@@ -149,7 +164,11 @@ function Camera() {
   const savePhoto = async () => {
     if (photoBlob) {
       const formData = new FormData();
-      formData.append('file', photoBlob, 'photo.jpg');
+      if(mode === "PICTURE"){
+        formData.append('file', photoBlob, 'photo.jpg');
+      }else if(mode === "GIF"){
+        formData.append('file', photoBlob, 'photo.gif');
+      }
 
       try {
         const response = await fetch('http://localhost:3001/upload', {
@@ -245,7 +264,7 @@ function Camera() {
 
   return (
     <div className="camera-container">
-      {false && (
+      {true && (
         <div className="camera-left" onClick={captureMedia}>
           <video ref={videoRef} autoPlay playsInline className="video-stream" />
           {textShown && (
