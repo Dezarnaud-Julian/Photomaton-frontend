@@ -94,20 +94,26 @@ function Camera() {
   };
 
   const createGif = async (photos: string[]) => {
+    const gifWidth = 1600; // Largeur souhaitée du GIF
+    const gifHeight = 1200; // Hauteur souhaitée du GIF
+
     gifshot.createGIF({
-      images: photos,
-      interval: 0.5,
+        images: photos,
+        interval: 0.5,
+        gifWidth: gifWidth,
+        gifHeight: gifHeight,
     }, function (obj: { error: any; image: any; errorMsg: any; }) {
-      if (!obj.error) {
-        const image = obj.image; // Data URL
-        setCapturedPhoto(image); // Set the generated GIF as the captured photo
-        const blob = dataURLToBlob(image);
-        setPhotoBlob(blob);
-      } else {
-        console.error('Failed to create GIF:', obj.errorMsg);
-      }
+        if (!obj.error) {
+            const image = obj.image; // Data URL
+            setCapturedPhoto(image); // Set the generated GIF as the captured photo
+            const blob = dataURLToBlob(image);
+            setPhotoBlob(blob);
+        } else {
+            console.error('Failed to create GIF:', obj.errorMsg);
+        }
     });
-  };
+};
+
   
   // Utility function to convert data URL to Blob
   function dataURLToBlob(dataURL: string) {
@@ -166,8 +172,10 @@ function Camera() {
       const formData = new FormData();
       if(mode === "PICTURE"){
         formData.append('file', photoBlob, 'photo.jpg');
+        formData.append('mode', '.jpg');
       }else if(mode === "GIF"){
         formData.append('file', photoBlob, 'photo.gif');
+        formData.append('mode', '.gif');
       }
 
       try {
