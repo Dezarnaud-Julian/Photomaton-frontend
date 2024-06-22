@@ -1,11 +1,14 @@
 import React, { useRef, useEffect, useState } from 'react';
 import './Camera.css';
 import gifshot from 'gifshot';
+import cadre1 from '../cadres/cadre1.png';
+
 
 function Camera() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
+  const [cadre, setCadre] = useState<string>("");
   const [mode, setMode] = useState<string>("PICTURE");
   const [capturedPhoto, setCapturedPhoto] = useState<string | null>(null);
   const [photoBlob, setPhotoBlob] = useState<Blob | null>(null);
@@ -16,7 +19,7 @@ function Camera() {
   const [photoPath, setPhotoPath] = useState('');
   const [stream, setStream] = useState<MediaStream | null>(null); // State to hold the camera stream
   const [printCopies, setPrintCopies] = useState(1); // State to hold the number of print copies
-
+  const [gifFinished, setGifFinished] = useState(true);
 
   const startCamera = async () => {
     try {
@@ -42,7 +45,7 @@ function Camera() {
     startCamera();
   };
 
-  const startCountdown = async (secondes : number) => {
+  const startCountdown = async (secondes: number) => {
     setTextShown(false);
     setCountdown(secondes);
   
@@ -66,7 +69,7 @@ function Camera() {
       }, 1000);
     });
   };
-  
+
   const captureMedia = async () => {
     capture();
   };
@@ -79,16 +82,18 @@ function Camera() {
   }, []);
 
   const capture = async () => {
-    if(mode === "PICTURE") {
+    if (mode === "PICTURE") {
       await startCountdown(3);
       capturePhoto();
-    } else if(mode === "GIF"){
+    } else if (mode === "GIF") {
+      setGifFinished(false);
       let photosForGif: string[] = [];
-      for(let i = 0; i < 4; i++) {
+      for (let i = 0; i < 4; i++) {
         await startCountdown(3);
         const photoGif = await capturePhoto() as string;
         photosForGif.push(photoGif);
       }
+      setGifFinished(true);
       createGif(photosForGif);
     }
   };
@@ -98,23 +103,22 @@ function Camera() {
     const gifHeight = 1200; // Hauteur souhaitée du GIF
 
     gifshot.createGIF({
-        images: photos,
-        interval: 0.5,
-        gifWidth: gifWidth,
-        gifHeight: gifHeight,
+      images: photos,
+      interval: 0.5,
+      gifWidth: gifWidth,
+      gifHeight: gifHeight,
     }, function (obj: { error: any; image: any; errorMsg: any; }) {
-        if (!obj.error) {
-            const image = obj.image; // Data URL
-            setCapturedPhoto(image); // Set the generated GIF as the captured photo
-            const blob = dataURLToBlob(image);
-            setPhotoBlob(blob);
-        } else {
-            console.error('Failed to create GIF:', obj.errorMsg);
-        }
+      if (!obj.error) {
+        const image = obj.image; // Data URL
+        setCapturedPhoto(image); // Set the generated GIF as the captured photo
+        const blob = dataURLToBlob(image);
+        setPhotoBlob(blob);
+      } else {
+        console.error('Failed to create GIF:', obj.errorMsg);
+      }
     });
-};
+  };
 
-  
   // Utility function to convert data URL to Blob
   function dataURLToBlob(dataURL: string) {
     const byteString = atob(dataURL.split(',')[1]);
@@ -135,28 +139,58 @@ function Camera() {
         canvasRef.current.width = videoWidth;
         canvasRef.current.height = videoHeight;
         context.drawImage(videoRef.current, 0, 0, videoWidth, videoHeight);
-    
-        return new Promise((resolve, reject) => {
-          if (canvasRef.current) {
-            canvasRef.current.toBlob((blob) => {
-              if (blob) {
-                const url = URL.createObjectURL(blob);
-                setCapturedPhoto(url);
-                setPhotoBlob(blob);
-                resolve(url); // Resolve the promise with the URL
-              } else {
-                console.error('Failed to capture image');
-                reject(new Error('Failed to capture image')); // Reject the promise on failure
-              }
-            }, 'image/jpeg');
-          } else {
-            reject(new Error('Canvas element not found')); // Reject if canvas element is not found
-          }
-        });
+  
+        // Dessiner le cadre par-dessus l'image capturée
+        if (cadre !== "") {
+          const cadreImage = new Image();
+          cadreImage.src = cadre;
+  
+          return new Promise((resolve, reject) => {
+            cadreImage.onload = () => {
+              context.drawImage(cadreImage, 0, 0, videoWidth, videoHeight);
+              canvasRef.current!.toBlob((blob) => {
+                if (blob) {
+                  const url = URL.createObjectURL(blob);
+                  setCapturedPhoto(url);
+                  setPhotoBlob(blob);
+                  resolve(url); // Résoudre la promesse avec l'URL
+                } else {
+                  console.error('Failed to capture image');
+                  reject(new Error('Failed to capture image')); // Rejeter la promesse en cas d'échec
+                }
+              }, 'image/jpeg');
+            };
+  
+            cadreImage.onerror = () => {
+              console.error('Failed to load the frame image');
+              reject(new Error('Failed to load the frame image'));
+            };
+          });
+        } else {
+          // Si aucun cadre n'est défini, convertir directement le canvas en Blob et en URL
+          return new Promise((resolve, reject) => {
+            if (canvasRef.current) {
+              canvasRef.current.toBlob((blob) => {
+                if (blob) {
+                  const url = URL.createObjectURL(blob);
+                  setCapturedPhoto(url);
+                  setPhotoBlob(blob);
+                  resolve(url); // Résoudre la promesse avec l'URL
+                } else {
+                  console.error('Failed to capture image');
+                  reject(new Error('Failed to capture image')); // Rejeter la promesse en cas d'échec
+                }
+              }, 'image/jpeg');
+            } else {
+              reject(new Error('Canvas element not found')); // Rejeter si l'élément canvas est introuvable
+            }
+          });
+        }
       }
+    } else {
+      return Promise.reject(new Error('Canvas or video element not found')); // Rejeter si le canvas ou la vidéo est introuvable
     }
-    return Promise.reject(new Error('Canvas or video element not found')); // Reject if canvas or video is not found
-  };
+  };  
 
   const handleSave = async () => {
     if (photoBlob) {
@@ -170,10 +204,10 @@ function Camera() {
   const savePhoto = async () => {
     if (photoBlob) {
       const formData = new FormData();
-      if(mode === "PICTURE"){
+      if (mode === "PICTURE") {
         formData.append('file', photoBlob, 'photo.jpg');
         formData.append('mode', '.jpg');
-      }else if(mode === "GIF"){
+      } else if (mode === "GIF") {
         formData.append('file', photoBlob, 'photo.gif');
         formData.append('mode', '.gif');
       }
@@ -215,10 +249,6 @@ function Camera() {
           if (!response.ok) {
             throw new Error('Failed to send email');
           }
-          setShowSavingOptions(false);
-          setCapturedPhoto(null);
-          setPhotoBlob(null);
-          setEmail('');
         } catch (error) {
           console.error('Error sending email:', error);
         }
@@ -239,7 +269,7 @@ function Camera() {
     restartCamera();
   };
 
-  const switchMode = (mode :string) => {
+  const switchMode = (mode: string) => {
     setMode(mode);
   };
 
@@ -272,25 +302,25 @@ function Camera() {
 
   return (
     <div className="camera-container">
-      {true && (
-        <div className="camera-left" onClick={captureMedia}>
-          <video ref={videoRef} autoPlay playsInline className="video-stream" />
-          {textShown && (
-            <div className="overlay-text-left">📸 Touch me to take a picture ! 📸</div>
-          )}
-          <canvas ref={canvasRef} className="hidden"></canvas>
-          <div ref={overlayRef} className="white-overlay"></div>
-          {countdown > 0 && (
-            <div className="countdown-display">
-              {countdown} {/* Display the current countdown */}
-            </div>
-          )}
-        </div>
-      )}
+      <div className="camera-left" onClick={captureMedia}>
+        <video ref={videoRef} autoPlay playsInline className="video-stream" />
+        <img className="captured-image-cadre" src={cadre} alt="Captured" />
+
+        {textShown && (
+          <div className="overlay-text-left">📸 Touch me to take a picture ! 📸</div>
+        )}
+        <canvas ref={canvasRef} className="hidden"></canvas>
+        <div ref={overlayRef} className="white-overlay"></div>
+        {countdown > 0 && (
+          <div className="countdown-display">
+            {countdown} {/* Display the current countdown */}
+          </div>
+        )}
+      </div>
 
       {capturedPhoto && (
-        <div className="camera-left">
-          {!showSavingOptions &&(
+        <div className={gifFinished ? "camera-left" : "camera-left-picture"}>
+          {!showSavingOptions && gifFinished && (
             <div>
               <div className="overlay-text-keep">On la garde ?</div>
               <div onClick={handleSave} className="overlay-text-keep-save">✅</div>
@@ -302,7 +332,8 @@ function Camera() {
       )}
 
       {showSavingOptions && (
-        <div className="new-column">
+        <div className="porte-column">
+          <div className="new-column">
             <div className="email-form">
               <input
                 className="send-text"
@@ -315,7 +346,7 @@ function Camera() {
                 Envoie la moi!
               </button>
             </div>
-          
+
             <div>Imprime là!</div>
             <div className="print-form">
               <input
@@ -326,19 +357,25 @@ function Camera() {
               />
               <button onClick={handlePrint}>Imprimer</button>
             </div>
-          <div>
-            <button onClick={handleCancel}>Retour</button>
+            <div>
+              <button onClick={handleCancel}>Retour</button>
+            </div>
           </div>
         </div>
       )}
 
       {!showSavingOptions && (
-        <div className="new-column">
-          <div>
-            <button onClick={() => switchMode("PICTURE")}>PICTURE</button>
-          </div>
-          <div>
-            <button onClick={() => switchMode("GIF")}>GIF</button>
+        <div className="porte-column">
+          <div className="new-column">
+            <div>
+              <button onClick={() => switchMode("PICTURE")}>PICTURE</button>
+            </div>
+            <div>
+              <button onClick={() => switchMode("GIF")}>GIF</button>
+            </div>
+            <div>
+              <button onClick={() => setCadre(cadre1)}>CADRE</button>
+            </div>
           </div>
         </div>
       )}

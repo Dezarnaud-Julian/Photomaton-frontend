@@ -8,21 +8,40 @@
   background-color: black;
 }
 
+.camera-left-picture,
 .camera-left {
-  width: 70vw; /* Laissez de l'espace pour la nouvelle colonne à droite */
+  width: 64vw; /* Laissez de l'espace pour la nouvelle colonne à droite */
   height: 100vh;
   display: flex;
-  justify-content: left;
+  justify-content: flex-start; /* Utilisez flex-start pour aligner à gauche */
   align-items: center;
-  position: relative;
+  position: fixed; /* Utilisez 'fixed' pour fixer l'élément à la vue */
   background-color: black;
-  overflow: hidden; /* Pour éviter que la colonne ne dépasse */
+  overflow: hidden;
+  top: 0; /* Fixer en haut */
+  left: 0; /* Fixer à gauche */
+  margin: 0; /* S'assurer qu'il n'y a pas de marge */
+  padding: 0; /* S'assurer qu'il n'y a pas de padding */
+  box-sizing: border-box; /* Inclure le padding et la bordure dans les dimensions totales */
 }
 
+.camera-left-picture {
+  opacity: 0.5;
+}
+
+.porte-column {
+  width: 36vw; /* Largeur de la colonne */
+  height: 100vh; /* Hauteur de la colonne */
+  display: flex;
+  flex-direction: column; /* Flex-direction en colonne */
+  justify-content: center; /* Centrer verticalement le contenu */
+  align-items: center; /* Centrer horizontalement le contenu */
+  background-color: rgba(0, 0, 0, 0.5); /* Fond semi-transparent */
+  position: fixed; /* Position fixe pour coller à la gauche de l'écran */
+  right: 0; /* Aligné à gauche */
+}
 
 .new-column {
-  width: 50vw; /* Largeur de la colonne à droite */
-  height: 100vh;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -30,7 +49,7 @@
   background-color: rgba(0, 0, 0, 0.5); /* Fond semi-transparent */
 }
 
-.new-column div {
+.porte-column div {
   margin: 20px;
   color: white;
   font-size: 1.5rem;
@@ -68,9 +87,9 @@
   }
   
 .overlay-text-keep-cancel{
-position: absolute;
-transform: translate(260%, 50%);
-font-size: 12rem;
+  position: absolute;
+  transform: translate(260%, 50%);
+  font-size: 12rem;
 }
 
 .countdown-display {
@@ -87,10 +106,10 @@ font-size: 12rem;
 }
 
 .white-overlay {
-  position: absolute;
+  position: absolute; /* Change de relative à absolute */
   top: 0;
   left: 0;
-  width: 100%;
+  width: 64vw;
   height: 100%;
   background-color: white;
   opacity: 0;
@@ -105,6 +124,12 @@ font-size: 12rem;
 .captured-image {
   width: auto;
   height: 100vh;
+}
+
+.captured-image-cadre {
+  width: auto;
+  height: 100vh;
+  position: absolute;
 }
 
 .save-button,
