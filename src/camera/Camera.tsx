@@ -1,14 +1,16 @@
 import React, { useRef, useEffect, useState } from 'react';
 import './Camera.css';
 import gifshot from 'gifshot';
-import cadre1 from '../cadres/cadre1.png';
+import foule from '../cadres/foule.png';
+import onirique from '../cadres/onirique.png';
 
 
 function Camera() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
-  const [cadre, setCadre] = useState<string>("null");
+  const [cadre, setCadre] = useState<number>(0);
+  const [cadres, setCadres] = useState<string[]>([]);
   const [mode, setMode] = useState<string>("PICTURE");
   const [capturedPhoto, setCapturedPhoto] = useState<string | null>(null);
   const [photoBlob, setPhotoBlob] = useState<Blob | null>(null);
@@ -21,7 +23,11 @@ function Camera() {
   const [printCopies, setPrintCopies] = useState(1); // State to hold the number of print copies
   const [gifFinished, setGifFinished] = useState(true);
 
+  
+
   const startCamera = async () => {
+    setCadres(["Aucun",onirique,foule]);
+    setCadre(0);
     try {
       const newStream = await navigator.mediaDevices.getUserMedia({ video: true });
       if (videoRef.current) {
@@ -141,14 +147,14 @@ function Camera() {
         context.drawImage(videoRef.current, 0, 0, videoWidth, videoHeight);
   
         // Dessiner le cadre par-dessus l'image capturée
-        if (cadre !== "null") {
+        if (cadre !== 0) {
           const cadreImage = new Image();
-          cadreImage.src = cadre;
+          cadreImage.src = cadres[cadre];
   
           return new Promise((resolve, reject) => {
+            const bottomPosition = videoHeight - videoHeight / 2;
             cadreImage.onload = () => {
-              context.drawImage(cadreImage, 0, 0, videoWidth, videoHeight);
-              canvasRef.current!.toBlob((blob) => {
+              context.drawImage(cadreImage, 0, bottomPosition, videoWidth, videoHeight / 2);              canvasRef.current!.toBlob((blob) => {
                 if (blob) {
                   const url = URL.createObjectURL(blob);
                   setCapturedPhoto(url);
@@ -300,19 +306,37 @@ function Camera() {
     }
   };
 
-  const putCadre = async (cadreToPut:any) => {
+  const putCadre = async (cadreToPut : number) => {
     if(cadre === cadreToPut){
-      setCadre("null");
+      setCadre(0);
     }else{
       setCadre(cadreToPut);
     }
+    if(cadreToPut < 0){setCadre(cadres.length-1);}
+    else if(cadreToPut >= cadres.length){setCadre(0);}
   };
+
+  function extractTextFromPath(path:string) {
+    if(path === "Aucun" || path === undefined){
+      return "Aucun";
+    }
+    // Trouver la position du texte "/static/media/"
+    const startIndex = path.indexOf("/static/media/") + "/static/media/".length;
+    
+    // Trouver la position du caractère "."
+    const endIndex = path.indexOf(".", startIndex);
+    
+    // Extraire le texte entre startIndex et endIndex
+    const extractedText = path.substring(startIndex, endIndex);
+    
+    return extractedText;
+  }
 
   return (
     <div className="camera-container">
       <div className="camera-left" onClick={captureMedia}>
         <video ref={videoRef} autoPlay playsInline className="video-stream" />
-        {cadre!=="null" && (<img className="captured-image-cadre" src={cadre} alt="Captured" />)}
+        {cadre!==0 && (<img className="captured-image-cadre" src={cadres[cadre]} alt="Captured" />)}
 
         {textShown && (
           <div className="overlay-text-left">📸 Touch me to take a picture ! 📸</div>
@@ -376,14 +400,16 @@ function Camera() {
         <div className="porte-column">
           <div className="new-column">
             <div>
-              <button className={mode === 'PICTURE' ? 'active' : ''} onClick={() => switchMode("PICTURE")}>PICTURE</button>
+              <div className={`new-columnParts ${mode === 'PICTURE' ? 'active' : ''}`}  onClick={() => switchMode("PICTURE")}>PICTURE</div>
             </div>
             <div>
-              <button className={mode === 'GIF' ? 'active' : ''} onClick={() => switchMode("GIF")}>GIF</button>
+              <div className={`new-columnParts ${mode === 'GIF' ? 'active' : ''}`} onClick={() => switchMode("GIF")}>GIF</div>
             </div>
-            <div>
-              <button className={cadre !== "null" ? 'active' : ''} onClick={() => putCadre(cadre1)}>CADRE</button>
-            </div>
+              <div className={`inner-div ${extractTextFromPath(cadres[cadre])!=="Aucun" ? 'active' : ''}`} >
+                <div onClick={() => putCadre(cadre-1)}className="inner-div-arrow">&lt;</div>
+                <div onClick={() => putCadre(1)} className="center">{extractTextFromPath(cadres[cadre])}</div>
+                <div onClick={() => putCadre(cadre+1)} className="inner-div-arrow">&gt;</div>
+              </div>
           </div>
         </div>
       )}

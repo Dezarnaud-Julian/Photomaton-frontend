@@ -26,7 +26,7 @@
 }
 
 .camera-left-picture {
-  opacity: 0.5;
+  opacity: 0.20;
 }
 
 .porte-column {
@@ -41,22 +41,54 @@
   right: 0; /* Aligné à gauche */
 }
 
-button.active {
-  border: 2px solid yellow; /* Vous pouvez ajuster la taille et la couleur du contour ici */
+.porte-column div {
+  color: white;
+  font-size: 3rem;
 }
 
-.new-column {
+.active {
+  background-color: blue; /* Vous pouvez ajuster la taille et la couleur du contour ici */
+}
+
+.new-columnParts {
+  width: 37.8vw;
+  height: 34vh;
   display: flex;
-  flex-direction: column;
   justify-content: center;
   align-items: center;
-  background-color: rgba(0, 0, 0, 0.5); /* Fond semi-transparent */
+  text-align: center;
+  margin: 0px;
+  padding: 0px;
 }
 
-.porte-column div {
-  margin: 20px;
-  color: white;
-  font-size: 1.5rem;
+.inner-div {
+  height: 34vh;
+  display: flex;
+  justify-content: space-between;
+  text-align: center;
+  align-items: center;
+  width: 100%;
+}
+
+.inner-div .inner-div-arrow {
+  text-align: center;
+  background-color: blueviolet;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+.inner-div-arrow {
+  width: 10vw;
+}
+
+.center{
+  height: 100%;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  text-align: center;
+  justify-content: center;
 }
 
 .video-stream {
@@ -65,7 +97,7 @@ button.active {
 }
 
 .overlay-text-left {
-  transform: translate(45%, 0%);
+  transform: translate(23%, 0%);
   position: absolute;
   color: white;
   font-size: 2rem;
@@ -75,7 +107,7 @@ button.active {
 }
 
 .overlay-text-keep {
-  transform: translate(180%, -450%);
+  transform: translate(130%, -400%);
   position: absolute;
   color: white;
   font-size: 2rem;
@@ -86,18 +118,18 @@ button.active {
 
 .overlay-text-keep-save{
   position: absolute;
-  transform: translate(30%, 50%);
+  transform: translate(20%, 20%);
   font-size: 12rem;
   }
   
 .overlay-text-keep-cancel{
   position: absolute;
-  transform: translate(260%, 50%);
+  transform: translate(180%, 20%);
   font-size: 12rem;
 }
 
 .countdown-display {
-  transform: translate(700%, -5%);
+  transform: translate(530%, -5%);
   position: absolute;
   font-size: 8rem;
   color: white;
@@ -113,7 +145,7 @@ button.active {
   position: absolute; /* Change de relative à absolute */
   top: 0;
   left: 0;
-  width: 64vw;
+  width: 63.1vw;
   height: 100%;
   background-color: white;
   opacity: 0;
@@ -131,9 +163,10 @@ button.active {
 }
 
 .captured-image-cadre {
-  width: auto;
-  height: 100vh;
+  width: 100%;
+  height: 50vh;
   position: absolute;
+  bottom: 0;
 }
 
 .save-button,
