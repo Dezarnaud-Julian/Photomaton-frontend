@@ -41,6 +41,10 @@
   right: 0; /* Aligné à gauche */
 }
 
+button.active {
+  border: 2px solid yellow; /* Vous pouvez ajuster la taille et la couleur du contour ici */
+}
+
 .new-column {
   display: flex;
   flex-direction: column;

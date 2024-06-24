@@ -8,7 +8,7 @@ function Camera() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
-  const [cadre, setCadre] = useState<string>("");
+  const [cadre, setCadre] = useState<string>("null");
   const [mode, setMode] = useState<string>("PICTURE");
   const [capturedPhoto, setCapturedPhoto] = useState<string | null>(null);
   const [photoBlob, setPhotoBlob] = useState<Blob | null>(null);
@@ -141,7 +141,7 @@ function Camera() {
         context.drawImage(videoRef.current, 0, 0, videoWidth, videoHeight);
   
         // Dessiner le cadre par-dessus l'image capturée
-        if (cadre !== "") {
+        if (cadre !== "null") {
           const cadreImage = new Image();
           cadreImage.src = cadre;
   
@@ -300,11 +300,19 @@ function Camera() {
     }
   };
 
+  const putCadre = async (cadreToPut:any) => {
+    if(cadre === cadreToPut){
+      setCadre("null");
+    }else{
+      setCadre(cadreToPut);
+    }
+  };
+
   return (
     <div className="camera-container">
       <div className="camera-left" onClick={captureMedia}>
         <video ref={videoRef} autoPlay playsInline className="video-stream" />
-        <img className="captured-image-cadre" src={cadre} alt="Captured" />
+        {cadre!=="null" && (<img className="captured-image-cadre" src={cadre} alt="Captured" />)}
 
         {textShown && (
           <div className="overlay-text-left">📸 Touch me to take a picture ! 📸</div>
@@ -368,13 +376,13 @@ function Camera() {
         <div className="porte-column">
           <div className="new-column">
             <div>
-              <button onClick={() => switchMode("PICTURE")}>PICTURE</button>
+              <button className={mode === 'PICTURE' ? 'active' : ''} onClick={() => switchMode("PICTURE")}>PICTURE</button>
             </div>
             <div>
-              <button onClick={() => switchMode("GIF")}>GIF</button>
+              <button className={mode === 'GIF' ? 'active' : ''} onClick={() => switchMode("GIF")}>GIF</button>
             </div>
             <div>
-              <button onClick={() => setCadre(cadre1)}>CADRE</button>
+              <button className={cadre !== "null" ? 'active' : ''} onClick={() => putCadre(cadre1)}>CADRE</button>
             </div>
           </div>
         </div>
