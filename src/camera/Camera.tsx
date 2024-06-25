@@ -22,6 +22,7 @@ function Camera() {
   const [stream, setStream] = useState<MediaStream | null>(null); // State to hold the camera stream
   const [printCopies, setPrintCopies] = useState(1); // State to hold the number of print copies
   const [gifFinished, setGifFinished] = useState(true);
+  const [showMenu, setShowMenu] = useState(true);
 
   
 
@@ -77,7 +78,8 @@ function Camera() {
   };
 
   const captureMedia = async () => {
-    capture();
+    setShowMenu(false);
+    await capture();
   };
 
   useEffect(() => {
@@ -272,6 +274,7 @@ function Camera() {
     setTextShown(true);
     setShowSavingOptions(false);
     setEmail('');
+    setShowMenu(true);
     restartCamera();
   };
 
@@ -307,13 +310,28 @@ function Camera() {
   };
 
   const putCadre = async (cadreToPut : number) => {
-    if(cadre === cadreToPut){
-      setCadre(0);
+    if(cadreToPut === -5){
+      if(cadre === 0){
+        setCadre(1);
+      }else{
+        setCadre(0);
+      }
     }else{
-      setCadre(cadreToPut);
+      if(cadre === cadreToPut){
+        setCadre(0);
+      }else{
+        setCadre(cadreToPut);
+      }
+      if(cadreToPut < 0){setCadre(cadres.length-1);}
+      else if(cadreToPut >= cadres.length){setCadre(0);}
     }
-    if(cadreToPut < 0){setCadre(cadres.length-1);}
-    else if(cadreToPut >= cadres.length){setCadre(0);}
+  };
+
+  const putCopies = async (copies : number) => {
+      console.log(copies);
+      if(copies < 0){setPrintCopies(0)}
+      else if(copies > 6){setPrintCopies(6)}
+      else {setPrintCopies(copies)}
   };
 
   function extractTextFromPath(path:string) {
@@ -374,29 +392,29 @@ function Camera() {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Enter email address"
               />
-              <button className="send-button" onClick={handleSendEmail}>
-                Envoie la moi!
-              </button>
             </div>
+            <div className={`new-columnParts-imprimer`}  onClick={handleSendEmail}>ENVOYER</div>
 
-            <div>Imprime là!</div>
+
+            <div className="new-columnParts-imprimerLA">Imprime là!</div>
             <div className="print-form">
-              <input
-                type="number"
-                value={printCopies}
-                onChange={(e) => setPrintCopies(parseInt(e.target.value, 10))}
-                min="1"
-              />
-              <button onClick={handlePrint}>Imprimer</button>
+              <div className={`inner-div-copies ${printCopies !==0 ? 'active' : ''}`} >
+                  <div onClick={() => putCopies(printCopies-1)}className="inner-div-arrow">&lt;</div>
+                    <div onClick={() => putCopies(0)} className="center">
+                      Copies : {printCopies}
+                    </div>
+                  <div onClick={() => putCopies(printCopies+1)} className="inner-div-arrow">&gt;</div>
+              </div>
+              <div className={`new-columnParts-imprimer`}  onClick={handlePrint}>IMPRIMER</div>
             </div>
             <div>
-              <button onClick={handleCancel}>Retour</button>
+              <div className={`new-columnParts-retour`}  onClick={handleCancel}>RETOUR</div>
             </div>
           </div>
         </div>
       )}
 
-      {!showSavingOptions && (
+      {!showSavingOptions && showMenu &&(
         <div className="porte-column">
           <div className="new-column">
             <div>
@@ -407,7 +425,10 @@ function Camera() {
             </div>
               <div className={`inner-div ${extractTextFromPath(cadres[cadre])!=="Aucun" ? 'active' : ''}`} >
                 <div onClick={() => putCadre(cadre-1)}className="inner-div-arrow">&lt;</div>
-                <div onClick={() => putCadre(1)} className="center">{extractTextFromPath(cadres[cadre])}</div>
+                <div onClick={() => putCadre(-5)} className="center">
+                  Cadre :<br />
+                  {extractTextFromPath(cadres[cadre])}
+                </div>
                 <div onClick={() => putCadre(cadre+1)} className="inner-div-arrow">&gt;</div>
               </div>
           </div>

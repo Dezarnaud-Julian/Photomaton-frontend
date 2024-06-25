@@ -10,7 +10,7 @@
 
 .camera-left-picture,
 .camera-left {
-  width: 64vw; /* Laissez de l'espace pour la nouvelle colonne à droite */
+  width: 63,1vw; /* Laissez de l'espace pour la nouvelle colonne à droite */
   height: 100vh;
   display: flex;
   justify-content: flex-start; /* Utilisez flex-start pour aligner à gauche */
@@ -49,7 +49,9 @@
 .active {
   background-color: blue; /* Vous pouvez ajuster la taille et la couleur du contour ici */
 }
-
+.new-columnParts-imprimerLA,
+.new-columnParts-imprimer,
+.new-columnParts-retour,
 .new-columnParts {
   width: 37.8vw;
   height: 34vh;
@@ -59,6 +61,23 @@
   text-align: center;
   margin: 0px;
   padding: 0px;
+  border: black;
+  border: 10px;
+}
+
+.new-columnParts-retour{
+  background-color: #dc3545;
+  height: 20vh;
+}
+
+.new-columnParts-imprimer{
+  background-color: blueviolet;
+  height: 20vh;
+}
+
+.new-columnParts-imprimerLA{
+  background-color: blue;
+  height: 15vh;
 }
 
 .inner-div {
@@ -70,7 +89,16 @@
   width: 100%;
 }
 
-.inner-div .inner-div-arrow {
+.inner-div-copies{
+  height: 20vh;
+  display: flex;
+  justify-content: space-between;
+  text-align: center;
+  align-items: center;
+  width: 100%;
+}
+
+.inner-div-arrow {
   text-align: center;
   background-color: blueviolet;
   display: flex;
@@ -187,14 +215,14 @@
 .email-form {
   display: flex;
   flex-direction: row;
-  margin: 20px;
 }
 
 .email-form input {
   padding: 10px;
-  font-size: 1rem;
+  font-size: 2rem;
   border: 1px solid #ccc;
   border-radius: 5px;
+  width: 100%;
 }
 
 .send-button {
