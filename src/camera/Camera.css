@@ -1,16 +1,21 @@
+body {
+  user-select: none; /* Standard */
+  -webkit-user-select: none; /* Chrome, Safari */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* Internet Explorer/Edge */
+}
 .camera-container {
   width: 100vw;
   height: 100vh;
   display: flex;
-  justify-content: center;
-  align-items: center;
+  flex-direction: column; /* Colonne pour aligner les éléments verticalement */
   position: relative;
   background-color: black;
 }
 
 .camera-left-picture,
 .camera-left {
-  width: 63,1vw; /* Laissez de l'espace pour la nouvelle colonne à droite */
+  width: 100vw; /* Laissez de l'espace pour la nouvelle colonne à droite */
   height: 100vh;
   display: flex;
   justify-content: flex-start; /* Utilisez flex-start pour aligner à gauche */
@@ -122,47 +127,58 @@
 .video-stream {
   width: auto;
   height: 100vh;
+  transform: scaleX(-1);
 }
 
 .overlay-text-left {
-  transform: translate(23%, 0%);
   position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   color: white;
   font-size: 2rem;
   background-color: rgba(0, 0, 0, 0.5);
   padding: 10px 20px;
   border-radius: 10px;
-}
-
-.overlay-text-keep {
-  transform: translate(130%, -400%);
-  position: absolute;
-  color: white;
-  font-size: 2rem;
-  background-color: rgba(0, 0, 0, 0.5);
-  padding: 10px 20px;
-  border-radius: 10px;
-}
-
-.overlay-text-keep-save{
-  position: absolute;
-  transform: translate(20%, 20%);
-  font-size: 12rem;
-  }
-  
-.overlay-text-keep-cancel{
-  position: absolute;
-  transform: translate(180%, 20%);
-  font-size: 12rem;
 }
 
 .countdown-display {
-  transform: translate(530%, -5%);
   position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -57%);
   font-size: 8rem;
   color: white;
   z-index: 1000;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+}
+
+.overlay-text-keep {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -400%);
+  color: white;
+  font-size: 2rem;
+  background-color: rgba(0, 0, 0, 0.5);
+  padding: 10px 20px;
+  border-radius: 10px;
+}
+
+.overlay-text-keep-save {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(50%, 25%);
+  font-size: 12rem;
+}
+  
+.overlay-text-keep-cancel {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-150%, 25%);
+  font-size: 12rem;
 }
 
 .hidden {
@@ -173,8 +189,8 @@
   position: absolute; /* Change de relative à absolute */
   top: 0;
   left: 0;
-  width: 63.1vw;
-  height: 100%;
+  width: 100vw;
+  height: 100vh;
   background-color: white;
   opacity: 0;
   transition: opacity 0.5s;
@@ -192,7 +208,7 @@
 
 .captured-image-cadre {
   width: 100%;
-  height: 50vh;
+  height: 100vh;
   position: absolute;
   bottom: 0;
 }
@@ -235,4 +251,42 @@
   border: none;
   border-radius: 5px;
   margin-left: 5%;
+}
+
+.camera-buttons {
+  display: flex;
+  justify-content: flex-start; /* Aligner les boutons à gauche */
+  align-items: center;
+  position: absolute; /* Positionner en bas de la vue */
+  bottom: 0;
+  left: 0;
+  width: 100vw;
+}
+
+.camera-buttons div {
+  margin-right: 10px; /* Espacement entre les boutons */
+  color: white;
+  font-size: 2.5rem; /* Taille de la police */
+  cursor: pointer;
+  padding: 15px; /* Padding */
+  width: 300px;
+  border-radius: 5px; /* Coins arrondis */
+  background-color: rgba(0, 0, 0, 0.2); /* Couleur de fond avec opacité */
+}
+
+.camera-buttons .right {
+  margin-right: 100px;
+}
+
+.camera-buttons .active {
+  background-color: rgba(0, 0, 255, 0.8); /* Couleur de fond active avec opacité */
+}
+
+.camera-buttons .inactive {
+  background-color: rgba(128, 128, 128, 0.3); /* Couleur de fond inactive avec opacité */
+}
+
+.camera-buttons .navigation {
+  background-color: rgba(128, 0, 128, 0.9); /* Couleur de fond pour les boutons de navigation avec opacité */
+  width: 50px;
 }

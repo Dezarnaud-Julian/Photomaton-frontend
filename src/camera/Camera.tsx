@@ -1,9 +1,8 @@
 import React, { useRef, useEffect, useState } from 'react';
 import './Camera.css';
 import gifshot from 'gifshot';
-import foule from '../cadres/foule.png';
-import onirique from '../cadres/onirique.png';
-
+import crowd from '../cadres/crowd.png';
+import dreamlike from '../cadres/dreamlike.png';
 
 function Camera() {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -24,16 +23,24 @@ function Camera() {
   const [gifFinished, setGifFinished] = useState(true);
   const [showMenu, setShowMenu] = useState(true);
 
-  
+  const videoConstraints = {
+    width: { ideal: 3050 }, // ou 600 pour 150 DPI
+    height: { ideal: 2040 }, // ou 900 pour 150 DPI
+    facingMode: 'user',
+  };
 
   const startCamera = async () => {
-    setCadres(["Aucun",onirique,foule]);
+    setCadres(["None", dreamlike, crowd]);
     setCadre(0);
     try {
-      const newStream = await navigator.mediaDevices.getUserMedia({ video: true });
+      const newStream = await navigator.mediaDevices.getUserMedia({
+        video: videoConstraints
+      });
       if (videoRef.current) {
         videoRef.current.srcObject = newStream;
-        setStream(newStream); // Store the new stream in state
+        videoRef.current.width = 3050;
+        videoRef.current.height = 2040;
+        setStream(newStream);
       }
     } catch (err) {
       console.error("Error accessing camera: ", err);
@@ -127,7 +134,6 @@ function Camera() {
     });
   };
 
-  // Utility function to convert data URL to Blob
   function dataURLToBlob(dataURL: string) {
     const byteString = atob(dataURL.split(',')[1]);
     const mimeString = dataURL.split(',')[0].split(':')[1].split(';')[0];
@@ -146,25 +152,36 @@ function Camera() {
         const { videoWidth, videoHeight } = videoRef.current;
         canvasRef.current.width = videoWidth;
         canvasRef.current.height = videoHeight;
+        context.save(); // Sauvegarde l'état du contexte
+  
+        // Retourner horizontalement le canvas
+        context.translate(videoWidth, 0);
+        context.scale(-1, 1);
+  
+        // Dessiner la vidéo sur le canvas
         context.drawImage(videoRef.current, 0, 0, videoWidth, videoHeight);
   
-        // Dessiner le cadre par-dessus l'image capturée
+        // Restaurer l'état du contexte
+        context.restore();
+  
+        // Ajouter un cadre si nécessaire
         if (cadre !== 0) {
           const cadreImage = new Image();
           cadreImage.src = cadres[cadre];
   
           return new Promise((resolve, reject) => {
-            const bottomPosition = videoHeight - videoHeight / 2;
             cadreImage.onload = () => {
-              context.drawImage(cadreImage, 0, bottomPosition, videoWidth, videoHeight / 2);              canvasRef.current!.toBlob((blob) => {
+              // Dessiner le cadre sur le canvas
+              context.drawImage(cadreImage, 0, 0, videoWidth, videoHeight);
+              canvasRef.current!.toBlob((blob) => {
                 if (blob) {
                   const url = URL.createObjectURL(blob);
                   setCapturedPhoto(url);
                   setPhotoBlob(blob);
-                  resolve(url); // Résoudre la promesse avec l'URL
+                  resolve(url);
                 } else {
                   console.error('Failed to capture image');
-                  reject(new Error('Failed to capture image')); // Rejeter la promesse en cas d'échec
+                  reject(new Error('Failed to capture image'));
                 }
               }, 'image/jpeg');
             };
@@ -175,7 +192,6 @@ function Camera() {
             };
           });
         } else {
-          // Si aucun cadre n'est défini, convertir directement le canvas en Blob et en URL
           return new Promise((resolve, reject) => {
             if (canvasRef.current) {
               canvasRef.current.toBlob((blob) => {
@@ -183,26 +199,26 @@ function Camera() {
                   const url = URL.createObjectURL(blob);
                   setCapturedPhoto(url);
                   setPhotoBlob(blob);
-                  resolve(url); // Résoudre la promesse avec l'URL
+                  resolve(url);
                 } else {
                   console.error('Failed to capture image');
-                  reject(new Error('Failed to capture image')); // Rejeter la promesse en cas d'échec
+                  reject(new Error('Failed to capture image'));
                 }
-              }, 'image/jpeg');
+              }, 'image/jpeg', 1.0);
             } else {
-              reject(new Error('Canvas element not found')); // Rejeter si l'élément canvas est introuvable
+              reject(new Error('Canvas element not found'));
             }
           });
         }
       }
     } else {
-      return Promise.reject(new Error('Canvas or video element not found')); // Rejeter si le canvas ou la vidéo est introuvable
+      return Promise.reject(new Error('Canvas or video element not found'));
     }
   };  
 
   const handleSave = async () => {
     if (photoBlob) {
-      setPhotoPath(await savePhoto()); // Save the photo first and get its path
+      setPhotoPath(await savePhoto());
       setShowSavingOptions(true);
     } else {
       console.error('No photo blob to upload');
@@ -231,7 +247,7 @@ function Camera() {
         }
 
         const result = await response.json();
-        return result.path; // Return the path of the saved photo
+        return result.path;
       } catch (error) {
         console.error('Error saving photo:', error);
         return null;
@@ -335,18 +351,12 @@ function Camera() {
   };
 
   function extractTextFromPath(path:string) {
-    if(path === "Aucun" || path === undefined){
-      return "Aucun";
+    if(path === "None" || path === undefined){
+      return "None";
     }
-    // Trouver la position du texte "/static/media/"
     const startIndex = path.indexOf("/static/media/") + "/static/media/".length;
-    
-    // Trouver la position du caractère "."
     const endIndex = path.indexOf(".", startIndex);
-    
-    // Extraire le texte entre startIndex et endIndex
     const extractedText = path.substring(startIndex, endIndex);
-    
     return extractedText;
   }
 
@@ -354,8 +364,8 @@ function Camera() {
     <div className="camera-container">
       <div className="camera-left" onClick={captureMedia}>
         <video ref={videoRef} autoPlay playsInline className="video-stream" />
-        {cadre!==0 && (<img className="captured-image-cadre" src={cadres[cadre]} alt="Captured" />)}
-
+        {cadre !== 0 && (<img className="captured-image-cadre" src={cadres[cadre]} alt="Captured" />)}
+  
         {textShown && (
           <div className="overlay-text-left">📸 Touch me to take a picture ! 📸</div>
         )}
@@ -363,11 +373,11 @@ function Camera() {
         <div ref={overlayRef} className="white-overlay"></div>
         {countdown > 0 && (
           <div className="countdown-display">
-            {countdown} {/* Display the current countdown */}
+            {countdown}
           </div>
         )}
       </div>
-
+  
       {capturedPhoto && (
         <div className={gifFinished ? "camera-left" : "camera-left-picture"}>
           {!showSavingOptions && gifFinished && (
@@ -380,7 +390,7 @@ function Camera() {
           <img className="captured-image" src={capturedPhoto} alt="Captured" />
         </div>
       )}
-
+  
       {showSavingOptions && (
         <div className="porte-column">
           <div className="new-column">
@@ -393,49 +403,38 @@ function Camera() {
                 placeholder="Enter email address"
               />
             </div>
-            <div className={`new-columnParts-imprimer`}  onClick={handleSendEmail}>ENVOYER</div>
-
-
+            <div className={`new-columnParts-imprimer`} onClick={handleSendEmail}>ENVOYER</div>
             <div className="new-columnParts-imprimerLA">Imprime là!</div>
             <div className="print-form">
-              <div className={`inner-div-copies ${printCopies !==0 ? 'active' : ''}`} >
-                  <div onClick={() => putCopies(printCopies-1)}className="inner-div-arrow">&lt;</div>
-                    <div onClick={() => putCopies(0)} className="center">
-                      Copies : {printCopies}
-                    </div>
-                  <div onClick={() => putCopies(printCopies+1)} className="inner-div-arrow">&gt;</div>
-              </div>
-              <div className={`new-columnParts-imprimer`}  onClick={handlePrint}>IMPRIMER</div>
-            </div>
-            <div>
-              <div className={`new-columnParts-retour`}  onClick={handleCancel}>RETOUR</div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {!showSavingOptions && showMenu &&(
-        <div className="porte-column">
-          <div className="new-column">
-            <div>
-              <div className={`new-columnParts ${mode === 'PICTURE' ? 'active' : ''}`}  onClick={() => switchMode("PICTURE")}>PICTURE</div>
-            </div>
-            <div>
-              <div className={`new-columnParts ${mode === 'GIF' ? 'active' : ''}`} onClick={() => switchMode("GIF")}>GIF</div>
-            </div>
-              <div className={`inner-div ${extractTextFromPath(cadres[cadre])!=="Aucun" ? 'active' : ''}`} >
-                <div onClick={() => putCadre(cadre-1)}className="inner-div-arrow">&lt;</div>
-                <div onClick={() => putCadre(-5)} className="center">
-                  Cadre :<br />
-                  {extractTextFromPath(cadres[cadre])}
+              <div className={`inner-div-copies ${printCopies !== 0 ? 'active' : ''}`}>
+                <div onClick={() => putCopies(printCopies - 1)} className="inner-div-arrow">&lt;</div>
+                <div onClick={() => putCopies(0)} className="center">
+                  Copies : {printCopies}
                 </div>
-                <div onClick={() => putCadre(cadre+1)} className="inner-div-arrow">&gt;</div>
+                <div onClick={() => putCopies(printCopies + 1)} className="inner-div-arrow">&gt;</div>
               </div>
+              <div className={`new-columnParts-imprimer`} onClick={handlePrint}>IMPRIMER</div>
+            </div>
+            <div>
+              <div className={`new-columnParts-retour`} onClick={handleCancel}>RETOUR</div>
+            </div>
           </div>
         </div>
       )}
+  
+      {!showSavingOptions && showMenu && (
+      <div className="camera-buttons">
+        <div className={`camera-button ${mode === 'PICTURE' ? 'active' : 'inactive'}`} onClick={() => switchMode("PICTURE")}>PICTURE</div>
+        <div className={`camera-button right ${mode === 'GIF' ? 'active' : 'inactive'}`} onClick={() => switchMode("GIF")}>GIF</div>
+        <div className="camera-button navigation" onClick={() => putCadre(cadre - 1)}>&lt;</div>
+        <div className={`camera-button ${extractTextFromPath(cadres[cadre]) !== "None" ? 'active' : 'inactive'}`} onClick={() => putCadre(-5)}>
+          {extractTextFromPath(cadres[cadre])}
+        </div>
+        <div className="camera-button navigation" onClick={() => putCadre(cadre + 1)}>&gt;</div>
+      </div>
+    )}
     </div>
-  );
+  );  
 }
 
 export default Camera;
