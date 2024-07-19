@@ -117,13 +117,13 @@ function Camera() {
 
   const capture = async () => {
     if (mode === "PICTURE") {
-      await startCountdown(3);
+      await startCountdown(2);
       capturePhoto();
     } else if (mode === "GIF") {
       setGifFinished(false);
       let photosForGif: string[] = [];
       for (let i = 0; i < 2; i++) {
-        await startCountdown(3);
+        await startCountdown(2);
         const photoGif = await capturePhoto() as string;
         photosForGif.push(photoGif);
       }
@@ -392,7 +392,7 @@ function Camera() {
         <div ref={overlayRef} className="white-overlay"></div>
         {countdown > 0 && (
           <div className="countdown-display">
-            {countdown}
+            {countdown+1}
           </div>
         )}
       </div>
