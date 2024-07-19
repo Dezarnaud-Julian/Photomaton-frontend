@@ -5,6 +5,9 @@ import crowd from '../cadres/crowd.png';
 import dreamlike from '../cadres/dreamlike.png';
 
 function Camera() {
+  // État pour le texte de chargement
+  const [loading, setLoading] = useState(false);
+
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
@@ -18,34 +21,50 @@ function Camera() {
   const [countdown, setCountdown] = useState(0);
   const [textShown, setTextShown] = useState(true);
   const [photoPath, setPhotoPath] = useState('');
-  const [stream, setStream] = useState<MediaStream | null>(null); // State to hold the camera stream
-  const [printCopies, setPrintCopies] = useState(1); // State to hold the number of print copies
+  const [stream, setStream] = useState<MediaStream | null>(null);
+  const [printCopies, setPrintCopies] = useState(1);
   const [gifFinished, setGifFinished] = useState(true);
   const [showMenu, setShowMenu] = useState(true);
 
-  const videoConstraints = {
-    width: { ideal: 3050 }, // ou 600 pour 150 DPI
-    height: { ideal: 2040 }, // ou 900 pour 150 DPI
-    facingMode: 'user',
+  let videoConstraints = {
+    video: {
+      width: { ideal: 305, min: 305, max: 305 },
+      height: { ideal: 204, min: 204, max: 204 },
+      facingMode: 'user',
+    },
   };
-
+  
   const startCamera = async () => {
-    setCadres(["None", dreamlike, crowd]);
+    setCadres(["Frame : None", dreamlike, crowd]);
     setCadre(0);
     try {
-      const newStream = await navigator.mediaDevices.getUserMedia({
-        video: videoConstraints
-      });
+      const initialStream = await navigator.mediaDevices.getUserMedia({ video: true });
+      const videoTrack = initialStream.getVideoTracks()[0];
+      const capabilities = videoTrack.getCapabilities();
+      videoTrack.stop();
+  
+      if (capabilities.width && capabilities.height && capabilities.width.max && capabilities.height.max) {
+        const maxHeight = capabilities.height.max;
+        const maxWidth = maxHeight * (videoConstraints.video.width.ideal/videoConstraints.video.height.ideal);
+  
+        videoConstraints = {
+          video: {
+            width: { ideal: maxWidth, min: maxWidth, max: maxWidth },
+            height: { ideal: maxHeight, min: maxHeight, max: maxHeight },
+            facingMode: 'user',
+          },
+        };
+      }
+  
+      const newStream = await navigator.mediaDevices.getUserMedia(videoConstraints);
       if (videoRef.current) {
         videoRef.current.srcObject = newStream;
-        videoRef.current.width = 3050;
-        videoRef.current.height = 2040;
         setStream(newStream);
       }
     } catch (err) {
       console.error("Error accessing camera: ", err);
     }
-  };
+  };  
 
   const stopCamera = () => {
     if (stream) {
@@ -75,7 +94,7 @@ function Camera() {
               if (overlayRef.current) {
                 overlayRef.current.classList.remove('active');
               }
-              resolve();  // Resolve the promise after the overlay is hidden
+              resolve();
             }, 1000);
           }
           return prevCount - 1;
@@ -90,9 +109,9 @@ function Camera() {
   };
 
   useEffect(() => {
-    startCamera(); // Initialize camera on component mount
+    startCamera();
     return () => {
-      stopCamera(); // Clean up: stop camera when component unmounts
+      stopCamera();
     };
   }, []);
 
@@ -103,7 +122,7 @@ function Camera() {
     } else if (mode === "GIF") {
       setGifFinished(false);
       let photosForGif: string[] = [];
-      for (let i = 0; i < 4; i++) {
+      for (let i = 0; i < 2; i++) {
         await startCountdown(3);
         const photoGif = await capturePhoto() as string;
         photosForGif.push(photoGif);
@@ -114,8 +133,8 @@ function Camera() {
   };
 
   const createGif = async (photos: string[]) => {
-    const gifWidth = 1600; // Largeur souhaitée du GIF
-    const gifHeight = 1200; // Hauteur souhaitée du GIF
+    const gifWidth = 1614;
+    const gifHeight = 1080;
 
     gifshot.createGIF({
       images: photos,
@@ -124,8 +143,8 @@ function Camera() {
       gifHeight: gifHeight,
     }, function (obj: { error: any; image: any; errorMsg: any; }) {
       if (!obj.error) {
-        const image = obj.image; // Data URL
-        setCapturedPhoto(image); // Set the generated GIF as the captured photo
+        const image = obj.image;
+        setCapturedPhoto(image);
         const blob = dataURLToBlob(image);
         setPhotoBlob(blob);
       } else {
@@ -152,26 +171,21 @@ function Camera() {
         const { videoWidth, videoHeight } = videoRef.current;
         canvasRef.current.width = videoWidth;
         canvasRef.current.height = videoHeight;
-        context.save(); // Sauvegarde l'état du contexte
-  
-        // Retourner horizontalement le canvas
+        context.save();
+
         context.translate(videoWidth, 0);
         context.scale(-1, 1);
-  
-        // Dessiner la vidéo sur le canvas
+
         context.drawImage(videoRef.current, 0, 0, videoWidth, videoHeight);
-  
-        // Restaurer l'état du contexte
+
         context.restore();
-  
-        // Ajouter un cadre si nécessaire
+
         if (cadre !== 0) {
           const cadreImage = new Image();
           cadreImage.src = cadres[cadre];
-  
+
           return new Promise((resolve, reject) => {
             cadreImage.onload = () => {
-              // Dessiner le cadre sur le canvas
               context.drawImage(cadreImage, 0, 0, videoWidth, videoHeight);
               canvasRef.current!.toBlob((blob) => {
                 if (blob) {
@@ -185,7 +199,7 @@ function Camera() {
                 }
               }, 'image/jpeg');
             };
-  
+
             cadreImage.onerror = () => {
               console.error('Failed to load the frame image');
               reject(new Error('Failed to load the frame image'));
@@ -261,6 +275,7 @@ function Camera() {
   const handleSendEmail = async () => {
     if (photoBlob && email) {
       if (photoPath) {
+        setLoading(true);
         try {
           const response = await fetch('http://localhost:3001/sendEmail', {
             method: 'POST',
@@ -275,6 +290,8 @@ function Camera() {
           }
         } catch (error) {
           console.error('Error sending email:', error);
+        } finally {
+          setLoading(false);
         }
       } else {
         console.error('Failed to save photo before sending email');
@@ -301,6 +318,7 @@ function Camera() {
   const handlePrint = async () => {
     if (photoBlob) {
       if (photoPath) {
+        setLoading(true);
         try {
           const response = await fetch('http://localhost:3001/print', {
             method: 'POST',
@@ -316,6 +334,8 @@ function Camera() {
           console.log('Photo sent for printing');
         } catch (error) {
           console.error('Error printing photo:', error);
+        } finally {
+          setLoading(false);
         }
       } else {
         console.error('Failed to save photo before printing');
@@ -344,15 +364,14 @@ function Camera() {
   };
 
   const putCopies = async (copies : number) => {
-      console.log(copies);
       if(copies < 0){setPrintCopies(0)}
       else if(copies > 6){setPrintCopies(6)}
       else {setPrintCopies(copies)}
   };
 
   function extractTextFromPath(path:string) {
-    if(path === "None" || path === undefined){
-      return "None";
+    if(path === "Frame : None" || path === undefined){
+      return "Frame : None";
     }
     const startIndex = path.indexOf("/static/media/") + "/static/media/".length;
     const endIndex = path.indexOf(".", startIndex);
@@ -392,49 +411,54 @@ function Camera() {
       )}
   
       {showSavingOptions && (
-        <div className="porte-column">
-          <div className="new-column">
-            <div className="email-form">
-              <input
-                className="send-text"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter email address"
-              />
-            </div>
-            <div className={`new-columnParts-imprimer`} onClick={handleSendEmail}>ENVOYER</div>
-            <div className="new-columnParts-imprimerLA">Imprime là!</div>
-            <div className="print-form">
-              <div className={`inner-div-copies ${printCopies !== 0 ? 'active' : ''}`}>
-                <div onClick={() => putCopies(printCopies - 1)} className="inner-div-arrow">&lt;</div>
-                <div onClick={() => putCopies(0)} className="center">
-                  Copies : {printCopies}
-                </div>
-                <div onClick={() => putCopies(printCopies + 1)} className="inner-div-arrow">&gt;</div>
+        <div className="form-buttons">
+          <input
+            className={`${mode === 'PICTURE' ? 'email-input-short' : 'email-input-long'}`}
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Enter email address"
+          />
+        
+          <div className={`form-button active`} onClick={handleSendEmail}>SEND</div>
+
+          {mode === 'PICTURE' && (
+            <div className="form-impr">
+              <div onClick={() => putCopies(printCopies - 1)} className="form-button navigation">&lt;</div>
+              <div onClick={() => putCopies(0)} className="form-button copies">
+                {"Copies:"+printCopies.toString()}
               </div>
-              <div className={`new-columnParts-imprimer`} onClick={handlePrint}>IMPRIMER</div>
+              <div onClick={() => putCopies(printCopies + 1)} className="form-button navigation">&gt;</div>
+              <div className={`form-button ${printCopies !== 0 ? 'active' : 'inactive'}`} onClick={handlePrint}>PRINT</div>
             </div>
-            <div>
-              <div className={`new-columnParts-retour`} onClick={handleCancel}>RETOUR</div>
-            </div>
-          </div>
-        </div>
+          )} 
+        
+          <div className={`form-button red`} onClick={handleCancel}>CANCEL</div>
+        </div>      
       )}
   
       {!showSavingOptions && showMenu && (
-      <div className="camera-buttons">
-        <div className={`camera-button ${mode === 'PICTURE' ? 'active' : 'inactive'}`} onClick={() => switchMode("PICTURE")}>PICTURE</div>
-        <div className={`camera-button right ${mode === 'GIF' ? 'active' : 'inactive'}`} onClick={() => switchMode("GIF")}>GIF</div>
-        <div className="camera-button navigation" onClick={() => putCadre(cadre - 1)}>&lt;</div>
-        <div className={`camera-button ${extractTextFromPath(cadres[cadre]) !== "None" ? 'active' : 'inactive'}`} onClick={() => putCadre(-5)}>
-          {extractTextFromPath(cadres[cadre])}
+        <div className="camera-buttons">
+          <div className={`camera-button ${mode === 'PICTURE' ? 'active' : 'inactive'}`} onClick={() => switchMode("PICTURE")}>PICTURE</div>
+          <div className={`camera-button right ${mode === 'GIF' ? 'active' : 'inactive'}`} onClick={() => switchMode("GIF")}>GIF</div>
+
+          <div className="camera-button navigation" onClick={() => putCadre(cadre - 1)}>&lt;</div>
+          <div className={`camera-button ${extractTextFromPath(cadres[cadre]) !== "Frame : None" ? 'active' : 'inactive'}`} onClick={() => putCadre(-5)}>
+            {extractTextFromPath(cadres[cadre])}
+          </div>
+          <div className="camera-button navigation" onClick={() => putCadre(cadre + 1)}>&gt;</div>
         </div>
-        <div className="camera-button navigation" onClick={() => putCadre(cadre + 1)}>&gt;</div>
-      </div>
-    )}
+      )}
+
+      {loading && (
+        <div className="loading-overlay">
+          <div className="loading-text">Please Wait</div>
+          <div className="spinner"></div>
+        </div>
+      )}
+
     </div>
-  );  
+  );
 }
 
 export default Camera;
