@@ -178,10 +178,25 @@ body {
   left: 50%;
   transform: translate(-50%, -50%);
   color: white;
-  font-size: 2rem;
-  background-color: rgba(0, 0, 0, 0.5);
-  padding: 10px 20px;
+  font-size: 4rem;
+  padding: 30px;
   border-radius: 10px;
+  background: #0003;
+  backdrop-filter: blur(5px);
+}
+
+.spinner-alt {
+  animation: touch 1s ease-in-out infinite alternate;
+}
+
+@keyframes touch {
+  0% {
+    transform: translateY(0px) rotate(0deg)
+  }
+
+  100% {
+    transform: translateY(50px) rotate(30deg);
+  }
 }
 
 .countdown-display {
@@ -189,7 +204,7 @@ body {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -57%);
-  font-size: 8rem;
+  font-size: 15rem;
   color: white;
   z-index: 1000;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);

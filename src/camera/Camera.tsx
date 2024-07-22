@@ -37,7 +37,7 @@ function Camera() {
   };
   
   const startCamera = async () => {
-    setCadres(["Frame : None", dreamlike, crowd]);
+    setCadres(["Aucun cadre", dreamlike, crowd]);
     setCadre(0);
     try {
       const initialStream = await navigator.mediaDevices.getUserMedia({ video: true });
@@ -119,7 +119,7 @@ function Camera() {
 
   const capture = async () => {
     if (mode === "PICTURE") {
-      await startCountdown(2);
+      await startCountdown(4);
       capturePhoto();
     } else if (mode === "GIF") {
       setGifFinished(false);
@@ -388,7 +388,10 @@ function Camera() {
         {cadre !== 0 && (<div className='captured-image-cadre-container'><img className="captured-image-cadre" style={{aspectRatio: videoRef.current?.videoWidth!+"/"+videoRef.current?.videoHeight!}} src={cadres[cadre]} alt="Captured" /></div>)}
   
         {textShown && (
-          <div className="overlay-text-left">📸 Touch me to take a picture ! 📸</div>
+          <div className="overlay-text-left">
+            <p style={{margin: 0, textWrap: "nowrap"}}>📸 Appuies pour commencer 📸</p>
+            <p style={{fontSize: "15vh", margin: 0, height: 0}} className='spinner-alt'>👆</p>
+          </div>
         )}
         <canvas ref={canvasRef} className="hidden"></canvas>
         <div ref={overlayRef} className="white-overlay"></div>
@@ -419,10 +422,10 @@ function Camera() {
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="Enter email address"
+            placeholder="Entres ton adresse email"
           />
         
-          <div className={`form-button active`} onClick={handleSendEmail}>SEND</div>
+          <div className={`form-button active`} onClick={handleSendEmail}>ENVOYER</div>
 
           {mode === 'PICTURE' && (
             <div className="form-impr">
@@ -431,21 +434,21 @@ function Camera() {
                 {"Copies:"+printCopies.toString()}
               </div>
               <div onClick={() => putCopies(printCopies + 1)} className="form-button navigation">&gt;</div>
-              <div className={`form-button ${printCopies !== 0 ? 'active' : 'inactive'}`} onClick={handlePrint}>PRINT</div>
+              <div className={`form-button ${printCopies !== 0 ? 'active' : 'inactive'}`} onClick={handlePrint}>IMPRIMER</div>
             </div>
           )} 
         
-          <div className={`form-button red`} onClick={handleCancel}>CANCEL</div>
+          <div className={`form-button red`} onClick={handleCancel}>ANNULER</div>
         </div>      
       )}
   
       {!showSavingOptions && showMenu && (
         <div className="camera-buttons">
-          <div className={`camera-button ${mode === 'PICTURE' ? 'active' : 'inactive'}`} onClick={() => switchMode("PICTURE")}>PICTURE</div>
-          <div className={`camera-button right ${mode === 'GIF' ? 'active' : 'inactive'}`} onClick={() => switchMode("GIF")}>GIF</div>
+          <div className={`camera-button ${mode === 'PICTURE' ? 'active' : 'inactive'}`} onClick={() => switchMode("PICTURE")}>IMAGE</div>
+          <div className={`camera-button right ${mode === 'GIF' ? 'active' : 'inactive'}`} onClick={() => switchMode("GIF")}>IMAGE ANIMÉE</div>
 
           <div className="camera-button navigation" onClick={() => putCadre(cadre - 1)}>&lt;</div>
-          <div className={`camera-button ${extractTextFromPath(cadres[cadre]) !== "Frame : None" ? 'active' : 'inactive'}`} onClick={() => putCadre(-5)}>
+          <div className={`camera-button ${extractTextFromPath(cadres[cadre]) !== "Aucun cadre" ? 'active' : 'inactive'}`} onClick={() => putCadre(-5)}>
             {extractTextFromPath(cadres[cadre])}
           </div>
           <div className="camera-button navigation" onClick={() => putCadre(cadre + 1)}>&gt;</div>
@@ -454,7 +457,7 @@ function Camera() {
 
       {loading && (
         <div className="loading-overlay">
-          <div className="loading-text">Please Wait</div>
+          <div className="loading-text">Patientez</div>
           <div className="spinner"></div>
         </div>
       )}
