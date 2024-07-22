@@ -1,33 +1,47 @@
 body {
-  user-select: none; /* Standard */
-  -webkit-user-select: none; /* Chrome, Safari */
-  -moz-user-select: none; /* Firefox */
-  -ms-user-select: none; /* Internet Explorer/Edge */
+  user-select: none;
+  /* Standard */
+  -webkit-user-select: none;
+  /* Chrome, Safari */
+  -moz-user-select: none;
+  /* Firefox */
+  -ms-user-select: none;
+  /* Internet Explorer/Edge */
 }
+
 .camera-container {
   width: 100vw;
   height: 100vh;
   display: flex;
-  flex-direction: column; /* Colonne pour aligner les éléments verticalement */
+  flex-direction: column;
+  /* Colonne pour aligner les éléments verticalement */
   position: relative;
-  background-color: black;
+  background-color: white;
 }
 
 .camera-left-picture,
 .camera-left {
-  width: 100vw; /* Laissez de l'espace pour la nouvelle colonne à droite */
+  width: 100vw;
+  /* Laissez de l'espace pour la nouvelle colonne à droite */
   height: 100vh;
   display: flex;
-  justify-content: flex-start; /* Utilisez flex-start pour aligner à gauche */
+  justify-content: flex-start;
+  /* Utilisez flex-start pour aligner à gauche */
   align-items: center;
-  position: fixed; /* Utilisez 'fixed' pour fixer l'élément à la vue */
-  background-color: black;
+  position: fixed;
+  /* Utilisez 'fixed' pour fixer l'élément à la vue */
+  background-color: white;
   overflow: hidden;
-  top: 0; /* Fixer en haut */
-  left: 0; /* Fixer à gauche */
-  margin: 0; /* S'assurer qu'il n'y a pas de marge */
-  padding: 0; /* S'assurer qu'il n'y a pas de padding */
-  box-sizing: border-box; /* Inclure le padding et la bordure dans les dimensions totales */
+  top: 0;
+  /* Fixer en haut */
+  left: 0;
+  /* Fixer à gauche */
+  margin: 0;
+  /* S'assurer qu'il n'y a pas de marge */
+  padding: 0;
+  /* S'assurer qu'il n'y a pas de padding */
+  box-sizing: border-box;
+  /* Inclure le padding et la bordure dans les dimensions totales */
 }
 
 .camera-left-picture {
@@ -35,15 +49,23 @@ body {
 }
 
 .porte-column {
-  width: 36vw; /* Largeur de la colonne */
-  height: 100vh; /* Hauteur de la colonne */
+  width: 36vw;
+  /* Largeur de la colonne */
+  height: 100vh;
+  /* Hauteur de la colonne */
   display: flex;
-  flex-direction: column; /* Flex-direction en colonne */
-  justify-content: center; /* Centrer verticalement le contenu */
-  align-items: center; /* Centrer horizontalement le contenu */
-  background-color: rgba(0, 0, 0, 0.5); /* Fond semi-transparent */
-  position: fixed; /* Position fixe pour coller à la gauche de l'écran */
-  right: 0; /* Aligné à gauche */
+  flex-direction: column;
+  /* Flex-direction en colonne */
+  justify-content: center;
+  /* Centrer verticalement le contenu */
+  align-items: center;
+  /* Centrer horizontalement le contenu */
+  background-color: rgba(0, 0, 0, 0.5);
+  /* Fond semi-transparent */
+  position: fixed;
+  /* Position fixe pour coller à la gauche de l'écran */
+  right: 0;
+  /* Aligné à gauche */
 }
 
 .porte-column div {
@@ -52,8 +74,10 @@ body {
 }
 
 .active {
-  background-color: blue; /* Vous pouvez ajuster la taille et la couleur du contour ici */
+  background-color: blue;
+  /* Vous pouvez ajuster la taille et la couleur du contour ici */
 }
+
 .new-columnParts-imprimerLA,
 .new-columnParts-imprimer,
 .new-columnParts-retour,
@@ -70,17 +94,17 @@ body {
   border: 10px;
 }
 
-.new-columnParts-retour{
+.new-columnParts-retour {
   background-color: #dc3545;
   height: 20vh;
 }
 
-.new-columnParts-imprimer{
+.new-columnParts-imprimer {
   background-color: blueviolet;
   height: 20vh;
 }
 
-.new-columnParts-imprimerLA{
+.new-columnParts-imprimerLA {
   background-color: blue;
   height: 15vh;
 }
@@ -94,7 +118,7 @@ body {
   width: 100%;
 }
 
-.inner-div-copies{
+.inner-div-copies {
   display: flex;
   justify-content: space-between;
   text-align: center;
@@ -109,11 +133,12 @@ body {
   justify-content: center;
   height: 100%;
 }
+
 .inner-div-arrow {
   width: 10vw;
 }
 
-.center{
+.center {
   height: 100%;
   width: 100%;
   display: flex;
@@ -124,18 +149,27 @@ body {
 
 
 .video-stream {
-  width: auto;
+  width: 100vw;
   height: 100vh;
-  transform: translate(9.6%, 0%) scaleX(-1); /* Combine les transformations */
+  transform: scaleX(-1);
+  object-fit: contain;
 }
 
 .captured-image-cadre {
-  width: 1077px;
+  height: 100vh;
+  object-fit: contain;
+  /* border: 2px solid red; */
+}
+
+.captured-image-cadre-container {
+  width: 100vw;
   height: 100vh;
   position: absolute;
   bottom: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   /*border: 2px solid red; */
-  transform: translate(9.6%, 0%)
 }
 
 .overlay-text-left {
@@ -180,7 +214,7 @@ body {
   transform: translate(50%, 25%);
   font-size: 12rem;
 }
-  
+
 .overlay-text-keep-cancel {
   position: absolute;
   top: 50%;
@@ -194,7 +228,8 @@ body {
 }
 
 .white-overlay {
-  position: absolute; /* Change de relative à absolute */
+  position: absolute;
+  /* Change de relative à absolute */
   top: 0;
   left: 0;
   width: 100vw;
@@ -210,9 +245,9 @@ body {
 }
 
 .captured-image {
-  width: auto;
+  width: 100vw;
   height: 100vh;
-  margin-left: 8%;
+  object-fit: contain;
 }
 
 
@@ -234,24 +269,33 @@ body {
 
 .camera-buttons {
   display: flex;
-  justify-content: flex-start; /* Aligner les boutons à gauche */
+  justify-content: flex-start;
+  /* Aligner les boutons à gauche */
   align-items: center;
-  position: absolute; /* Positionner en bas de la vue */
+  position: absolute;
+  /* Positionner en bas de la vue */
   bottom: 0;
   left: 0;
   width: 100vw;
+  /* background: #0003; */
+  backdrop-filter: blur(5px);
 }
 
 .camera-buttons div {
   margin: 20px;
-  margin-right: 10px; /* Espacement entre les boutons */
+  margin-right: 10px;
+  /* Espacement entre les boutons */
   color: white;
-  font-size: 2.5rem; /* Taille de la police */
+  font-size: 2.5rem;
+  /* Taille de la police */
   cursor: pointer;
-  padding: 15px; /* Padding */
+  padding: 15px;
+  /* Padding */
   width: 300px;
-  border-radius: 5px; /* Coins arrondis */
-  background-color: rgba(0, 0, 0, 0.2); /* Couleur de fond avec opacité */
+  border-radius: 5px;
+  /* Coins arrondis */
+  background-color: rgba(0, 0, 0, 0.2);
+  /* Couleur de fond avec opacité */
 }
 
 .camera-buttons .right {
@@ -259,92 +303,121 @@ body {
 }
 
 .camera-buttons .active {
-  background-color: rgba(0, 0, 255, 0.8); /* Couleur de fond active avec opacité */
+  background-color: rgba(0, 0, 255, 0.8);
+  /* Couleur de fond active avec opacité */
 }
 
 .camera-buttons .inactive {
-  background-color: rgba(128, 128, 128, 0.3); /* Couleur de fond inactive avec opacité */
+  background-color: rgba(128, 128, 128, 0.3);
+  /* Couleur de fond inactive avec opacité */
 }
 
 .camera-buttons .navigation {
-  background-color: rgba(128, 0, 128, 0.9); /* Couleur de fond pour les boutons de navigation avec opacité */
+  background-color: rgba(128, 0, 128, 0.9);
+  /* Couleur de fond pour les boutons de navigation avec opacité */
   width: 50px;
 }
 
-.email-input-short{
+.email-input-short {
   border: 1px solid rgba(255, 255, 255, 0.3);
-  background-color: rgba(255, 255, 255, 0.2); /* Fond avec opacité */
+  background-color: rgba(255, 255, 255, 0.2);
+  /* Fond avec opacité */
   margin: 10px;
-  margin-right: 10px; /* Espacement entre les boutons */
+  margin-right: 10px;
+  /* Espacement entre les boutons */
   color: white;
-  font-size: 1.0rem; /* Taille de la police */
+  font-size: 1.0rem;
+  /* Taille de la police */
   cursor: pointer;
-  padding: 15px; /* Padding */
+  padding: 15px;
+  /* Padding */
   width: 200px;
   height: 40px;
-  border-radius: 5px; /* Coins arrondis */
-  background-color: rgba(0, 0, 0, 0.2); /* Couleur de fond avec opacité */
+  border-radius: 5px;
+  /* Coins arrondis */
+  background-color: rgba(0, 0, 0, 0.2);
+  /* Couleur de fond avec opacité */
 }
 
 .email-input-long {
   border: 1px solid rgba(255, 255, 255, 0.3);
-  background-color: rgba(255, 255, 255, 0.2); /* Fond avec opacité */
+  background-color: rgba(255, 255, 255, 0.2);
+  /* Fond avec opacité */
   margin: 10px;
-  margin-right: 10px; /* Espacement entre les boutons */
+  margin-right: 10px;
+  /* Espacement entre les boutons */
   color: white;
-  font-size: 2.0rem; /* Taille de la police */
+  font-size: 2.0rem;
+  /* Taille de la police */
   cursor: pointer;
-  padding: 15px; /* Padding */
+  padding: 15px;
+  /* Padding */
   width: 500px;
   height: 40px;
-  border-radius: 5px; /* Coins arrondis */
-  background-color: rgba(0, 0, 0, 0.2); /* Couleur de fond avec opacité */
+  border-radius: 5px;
+  /* Coins arrondis */
+  background-color: rgba(0, 0, 0, 0.2);
+  /* Couleur de fond avec opacité */
 }
 
 .form-buttons {
   display: flex;
-  justify-content: flex-start; /* Aligner les boutons à gauche */
+  justify-content: flex-start;
+  /* Aligner les boutons à gauche */
   align-items: center;
-  position: absolute; /* Positionner en bas de la vue */
+  position: absolute;
+  /* Positionner en bas de la vue */
   bottom: 0;
   left: 0;
   width: 100vw;
+  background: #0003;
+  backdrop-filter: blur(20px);
 }
 
 .form-impr {
   display: flex;
-  justify-content: flex-start; /* Aligner les boutons à gauche */
+  justify-content: flex-start;
+  /* Aligner les boutons à gauche */
   align-items: center;
   width: 50vw;
 }
 
 .form-buttons .form-button {
   margin: 10px;
-  margin-right: 10px; /* Espacement entre les boutons */
+  margin-right: 10px;
+  /* Espacement entre les boutons */
   color: white;
-  font-size: 2rem; /* Taille de la police */
+  font-size: 2rem;
+  /* Taille de la police */
   cursor: pointer;
-  padding: 15px; /* Padding */
+  padding: 15px;
+  /* Padding */
   width: 300px;
-  border-radius: 5px; /* Coins arrondis */
-  background-color: rgba(0, 0, 0, 0.2); /* Couleur de fond avec opacité */
+  border-radius: 5px;
+  /* Coins arrondis */
+  background-color: rgba(0, 0, 0, 0.2);
+  /* Couleur de fond avec opacité */
 }
 
 .form-buttons .navigation {
-  background-color: rgba(128, 0, 128, 0.9); /* Couleur de fond pour les boutons de navigation avec opacité */
+  background-color: rgba(128, 0, 128, 0.9);
+  /* Couleur de fond pour les boutons de navigation avec opacité */
   width: 50px;
 }
 
 .form-buttons .active {
-  background-color: rgba(0, 0, 255, 0.8); /* Couleur de fond active avec opacité */
+  background-color: rgba(0, 0, 255, 0.8);
+  /* Couleur de fond active avec opacité */
 }
 
 .form-buttons .inactive {
-  background-color: rgba(128, 128, 128, 0.3); /* Couleur de fond inactive avec opacité */
+  background-color: rgba(128, 128, 128, 0.3);
+  /* Couleur de fond inactive avec opacité */
 }
 
 .form-buttons .red {
-  background-color: rgba(255, 0, 0, 0.8); /* Couleur de fond rouge avec opacité */
+  background-color: rgba(255, 0, 0, 0.8);
+  /* Couleur de fond rouge avec opacité */
 }
 
 .copies-control {
@@ -354,7 +427,8 @@ body {
 }
 
 .copies {
-  font-size: 2.5rem; /* Taille de la police */
+  font-size: 2.5rem;
+  /* Taille de la police */
 }
 
 .loading-overlay {
@@ -367,7 +441,8 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000; /* Assurez-vous que le texte de chargement est au-dessus des autres éléments */
+  z-index: 1000;
+  /* Assurez-vous que le texte de chargement est au-dessus des autres éléments */
 }
 
 /* Styles pour le texte de chargement */
@@ -380,8 +455,10 @@ body {
 
 /* Styles pour l'icône de chargement */
 .spinner {
-  border: 8px solid rgba(0, 0, 0, 0.1); /* Light grey background */
-  border-left: 8px solid white; /* Main spinner color */
+  border: 8px solid rgba(0, 0, 0, 0.1);
+  /* Light grey background */
+  border-left: 8px solid white;
+  /* Main spinner color */
   border-radius: 50%;
   width: 40px;
   height: 40px;
@@ -390,6 +467,11 @@ body {
 
 /* Animation pour faire tourner l'icône */
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
 }

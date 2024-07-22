@@ -385,7 +385,7 @@ function Camera() {
     <div className="camera-container">
       <div className="camera-left" onClick={captureMedia}>
         <video ref={videoRef} autoPlay playsInline className="video-stream" />
-        {cadre !== 0 && (<img className="captured-image-cadre" src={cadres[cadre]} alt="Captured" />)}
+        {cadre !== 0 && (<div className='captured-image-cadre-container'><img className="captured-image-cadre" style={{aspectRatio: videoRef.current?.videoWidth!+"/"+videoRef.current?.videoHeight!}} src={cadres[cadre]} alt="Captured" /></div>)}
   
         {textShown && (
           <div className="overlay-text-left">📸 Touch me to take a picture ! 📸</div>
