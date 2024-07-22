@@ -389,8 +389,9 @@ function Camera() {
   
         {textShown && (
           <div className="overlay-text-left">
-            <p style={{margin: 0, textWrap: "nowrap"}}>📸 Appuies pour commencer 📸</p>
-            <p style={{fontSize: "15vh", margin: 0, height: 0}} className='spinner-alt'>👆</p>
+            <p style={{margin: 0, textWrap: "nowrap"}}>Appuies pour commencer</p>
+            <p style={{margin: 0}} className='photo-anim'></p>
+            <p style={{fontSize: "15vh", margin: 0, height: 0}} className='touch-anim'>👆</p>
           </div>
         )}
         <canvas ref={canvasRef} className="hidden"></canvas>

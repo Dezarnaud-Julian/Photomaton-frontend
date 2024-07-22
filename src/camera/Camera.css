@@ -185,17 +185,50 @@ body {
   backdrop-filter: blur(5px);
 }
 
-.spinner-alt {
+.touch-anim {
   animation: touch 1s ease-in-out infinite alternate;
 }
 
 @keyframes touch {
   0% {
-    transform: translateY(0px) rotate(0deg)
+    transform: translateY(-20px) translateX(20px) rotate(0deg) scale(0.8)
+  }
+
+  20% {
+    transform: translateY(-20px) translateX(0) rotate(0deg) scale(1);
   }
 
   100% {
-    transform: translateY(50px) rotate(30deg);
+    transform: translateY(50px) translateX(0) rotate(30deg) scale(1);
+  }
+}
+
+.photo-anim::after {
+  animation: photo 1s ease-in-out infinite alternate;
+  content: "📸";
+}
+
+.photo-anim {
+  animation: photo 1s ease-in-out infinite alternate;
+}
+
+@keyframes photo {
+  0% {
+    transform: rotate(0deg) scale(1);
+    filter: brightness(1);
+    content: "📷"
+  }
+
+  80% {
+    transform: rotate(0deg) scale(1);
+    filter: brightness(1);
+    content: "📷"
+  }
+
+  100% {
+    transform: rotate(0deg) scale(1.5);
+    filter: brightness(2);
+    content: "📸"
   }
 }
 
