@@ -4,6 +4,8 @@ import gifshot from 'gifshot';
 import crowd from '../cadres/crowd.png';
 import dreamlike from '../cadres/dreamlike.png';
 
+
+const backendAdress = process.env.REACT_APP_BACKEND_ADRESS ?? 'http://127.0.0.1:3001'
 function Camera() {
   // État pour le texte de chargement
   const [loading, setLoading] = useState(false);
@@ -251,7 +253,7 @@ function Camera() {
       }
 
       try {
-        const response = await fetch('http://localhost:3001/upload', {
+        const response = await fetch(`${backendAdress}/upload`, {
           method: 'POST',
           body: formData,
         });
@@ -277,7 +279,7 @@ function Camera() {
       if (photoPath) {
         setLoading(true);
         try {
-          const response = await fetch('http://localhost:3001/sendEmail', {
+          const response = await fetch(`${backendAdress}/sendEmail`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -320,7 +322,7 @@ function Camera() {
       if (photoPath) {
         setLoading(true);
         try {
-          const response = await fetch('http://localhost:3001/print', {
+          const response = await fetch(`${backendAdress}/print`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
