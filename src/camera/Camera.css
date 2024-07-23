@@ -182,7 +182,7 @@ body {
   padding: 30px;
   border-radius: 10px;
   background: #0003;
-  backdrop-filter: blur(5px);
+  /* backdrop-filter: blur(5px); */
 }
 
 .touch-anim {
@@ -326,7 +326,7 @@ body {
   left: 0;
   width: 100vw;
   /* background: #0003; */
-  backdrop-filter: blur(5px);
+  /* backdrop-filter: blur(5px); */
 }
 
 .camera-buttons div {
@@ -419,7 +419,7 @@ body {
   left: 0;
   width: 100vw;
   background: #0003;
-  backdrop-filter: blur(20px);
+  /* backdrop-filter: blur(20px); */
 }
 
 .form-impr {
