@@ -30,8 +30,8 @@ function Camera() {
 
   let videoConstraints = {
     video: {
-      width: { ideal: 305, min: 305, max: 305 },
-      height: { ideal: 204, min: 204, max: 204 },
+      width: { ideal: 1614, min: 1614, max: 1614 },
+      height: { ideal: 1080, min: 1080, max: 1080 },
       facingMode: 'user',
     },
   };
@@ -40,7 +40,7 @@ function Camera() {
     setCadres(["Aucun cadre", dreamlike, crowd]);
     setCadre(0);
     try {
-      const initialStream = await navigator.mediaDevices.getUserMedia({ video: true });
+      /*const initialStream = await navigator.mediaDevices.getUserMedia({ video: true });
       const videoTrack = initialStream.getVideoTracks()[0];
       const capabilities = videoTrack.getCapabilities();
       videoTrack.stop();
@@ -56,7 +56,7 @@ function Camera() {
             facingMode: 'user',
           },
         };
-      }
+      }*/
   
       const newStream = await navigator.mediaDevices.getUserMedia(videoConstraints);
       if (videoRef.current) {
@@ -310,7 +310,6 @@ function Camera() {
     setShowSavingOptions(false);
     setEmail('');
     setShowMenu(true);
-    restartCamera();
   };
 
   const switchMode = (mode: string) => {
