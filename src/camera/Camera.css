@@ -7,6 +7,8 @@ body {
   /* Firefox */
   -ms-user-select: none;
   /* Internet Explorer/Edge */
+
+  cursor: none;
 }
 
 .camera-container {
@@ -410,6 +412,7 @@ body {
 
 .form-buttons {
   display: flex;
+  flex-direction: column;
   justify-content: flex-start;
   /* Aligner les boutons à gauche */
   align-items: center;

@@ -3,7 +3,10 @@ import './Camera.css';
 import gifshot from 'gifshot';
 import crowd from '../cadres/crowd.png';
 import dreamlike from '../cadres/dreamlike.png';
+import cadre_or from '../cadres/or.png';
 
+import Keyboard from 'react-simple-keyboard';
+import 'react-simple-keyboard/build/css/index.css';
 
 const backendAdress = process.env.REACT_APP_BACKEND_ADRESS ?? 'http://127.0.0.1:3001'
 function Camera() {
@@ -27,17 +30,18 @@ function Camera() {
   const [printCopies, setPrintCopies] = useState(1);
   const [gifFinished, setGifFinished] = useState(true);
   const [showMenu, setShowMenu] = useState(true);
+  const [enteringEmail, setEnteringEmail] = useState(false);
 
   let videoConstraints = {
     video: {
-      width: { ideal: 1614, min: 1614, max: 1614 },
-      height: { ideal: 1080, min: 1080, max: 1080 },
+      width: { ideal: 1280, min: 0, max: 1280 },
+      height: { ideal: 1080, min: 0, max: 1080 },
       facingMode: 'user',
     },
   };
   
   const startCamera = async () => {
-    setCadres(["Aucun cadre", dreamlike, crowd]);
+    setCadres(["Aucun cadre", cadre_or]);
     setCadre(0);
     try {
       /*const initialStream = await navigator.mediaDevices.getUserMedia({ video: true });
@@ -275,6 +279,7 @@ function Camera() {
   };
 
   const handleSendEmail = async () => {
+    setEnteringEmail(false)
     if (photoBlob && email) {
       if (photoPath) {
         setLoading(true);
@@ -345,6 +350,16 @@ function Camera() {
       console.error('No photo blob to print');
     }
   };
+
+  const onKeyboardChange = (input:string) => {
+    console.log("Input changed", input);
+    setEmail(input)
+  }
+
+  const onKeyPress = (button:string) => {
+    console.log("Button pressed", button);
+    if(button==="{enter}") setEnteringEmail(false)
+  }
 
   const putCadre = async (cadreToPut : number) => {
     if(cadreToPut === -5){
@@ -417,28 +432,42 @@ function Camera() {
   
       {showSavingOptions && (
         <div className="form-buttons">
-          <input
-            className={`${mode === 'PICTURE' ? 'email-input-short' : 'email-input-long'}`}
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="Entres ton adresse email"
-          />
-        
-          <div className={`form-button active`} onClick={handleSendEmail}>ENVOYER</div>
+          <div style={{
+              display: "flex",
+              justifyContent: "flex-start",
+              alignItems: "center"
+          }}>
+            <input
+              className={`${mode === 'PICTURE' ? 'email-input-short' : 'email-input-long'}`}
+              type="email"
+              value={email}
+              onFocus={() => setEnteringEmail(true)}
+              // onBlur={() => setEnteringEmail(false)}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Entres ton adresse email"
+            />
+          
+            <div className={`form-button active`} onClick={handleSendEmail}>ENVOYER</div>
 
-          {mode === 'PICTURE' && (
-            <div className="form-impr">
-              <div onClick={() => putCopies(printCopies - 1)} className="form-button navigation">&lt;</div>
-              <div onClick={() => putCopies(0)} className="form-button copies">
-                {"Copies:"+printCopies.toString()}
+            {mode === 'PICTURE' && (
+              <div className="form-impr">
+                <div onClick={() => putCopies(printCopies - 1)} className="form-button navigation">&lt;</div>
+                <div onClick={() => putCopies(0)} className="form-button copies">
+                  {"Copies:"+printCopies.toString()}
+                </div>
+                <div onClick={() => putCopies(printCopies + 1)} className="form-button navigation">&gt;</div>
+                <div className={`form-button ${printCopies !== 0 ? 'active' : 'inactive'}`} onClick={handlePrint}>IMPRIMER</div>
               </div>
-              <div onClick={() => putCopies(printCopies + 1)} className="form-button navigation">&gt;</div>
-              <div className={`form-button ${printCopies !== 0 ? 'active' : 'inactive'}`} onClick={handlePrint}>IMPRIMER</div>
-            </div>
-          )} 
-        
-          <div className={`form-button red`} onClick={handleCancel}>ANNULER</div>
+            )} 
+          
+            <div className={`form-button red`} onClick={handleCancel}>ANNULER</div>
+          </div>
+          {enteringEmail && <div style={{ width: "100%"}}>
+            <Keyboard
+              onChange={onKeyboardChange}
+              onKeyPress={onKeyPress}
+            />
+          </div>}     
         </div>      
       )}
   
