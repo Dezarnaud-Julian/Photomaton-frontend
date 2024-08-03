@@ -319,6 +319,7 @@ function Camera() {
     setShowSavingOptions(false);
     setEmail('');
     setShowMenu(true);
+    setEnteringEmail(false);
   };
 
   const switchMode = (mode: string) => {
