@@ -6,6 +6,8 @@ import dreamlike from '../cadres/dreamlike.png';
 import cadre_or from '../cadres/or.png';
 import VS from '../cadres/VS.png';
 import HappyBirthday from '../cadres/HappyBirthday.png';
+import HappyBirthday2 from '../cadres/HappyBirthday2.png';
+import Moustaches from '../cadres/Moustaches.png';
 
 import Keyboard from 'react-simple-keyboard';
 import 'react-simple-keyboard/build/css/index.css';
@@ -43,7 +45,7 @@ function Camera() {
   };
   
   const startCamera = async () => {
-    setCadres(["Aucun cadre", cadre_or, VS, HappyBirthday]);
+    setCadres(["Aucun cadre", cadre_or, HappyBirthday, HappyBirthday2, VS, Moustaches]);
     setCadre(0);
     try {
       /*const initialStream = await navigator.mediaDevices.getUserMedia({ video: true });
@@ -130,8 +132,8 @@ function Camera() {
     } else if (mode === "GIF") {
       setGifFinished(false);
       let photosForGif: string[] = [];
-      for (let i = 0; i < 2; i++) {
-        await startCountdown(2);
+      for (let i = 0; i < 4; i++) {
+        await startCountdown(3);
         const photoGif = await capturePhoto() as string;
         photosForGif.push(photoGif);
       }

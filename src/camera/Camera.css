@@ -1,3 +1,16 @@
+body,
+html,
+a,
+button,
+div,
+p,
+h1,
+h2,
+h3,
+h4 {
+  cursor: none;
+}
+
 body {
   user-select: none;
   /* Standard */
@@ -7,8 +20,6 @@ body {
   /* Firefox */
   -ms-user-select: none;
   /* Internet Explorer/Edge */
-
-  cursor: none;
 }
 
 .camera-container {
@@ -337,8 +348,6 @@ body {
   /* Espacement entre les boutons */
   color: white;
   font-size: 2.5rem;
-  /* Taille de la police */
-  cursor: pointer;
   padding: 15px;
   /* Padding */
   width: 300px;
@@ -377,8 +386,6 @@ body {
   /* Espacement entre les boutons */
   color: white;
   font-size: 1.0rem;
-  /* Taille de la police */
-  cursor: pointer;
   padding: 15px;
   /* Padding */
   width: 200px;
@@ -398,8 +405,6 @@ body {
   /* Espacement entre les boutons */
   color: white;
   font-size: 2.0rem;
-  /* Taille de la police */
-  cursor: pointer;
   padding: 15px;
   /* Padding */
   width: 500px;
@@ -439,8 +444,6 @@ body {
   /* Espacement entre les boutons */
   color: white;
   font-size: 2rem;
-  /* Taille de la police */
-  cursor: pointer;
   padding: 15px;
   /* Padding */
   width: 300px;
