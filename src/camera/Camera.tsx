@@ -1,17 +1,15 @@
 import React, { useRef, useEffect, useState } from 'react';
 import './Camera.css';
 import gifshot from 'gifshot';
-import crowd from '../cadres/crowd.png';
-import dreamlike from '../cadres/dreamlike.png';
 import cadre_or from '../cadres/or.png';
 import VS from '../cadres/VS.png';
 import HappyBirthday from '../cadres/HappyBirthday.png';
 import HappyBirthday2 from '../cadres/HappyBirthday2.png';
 import Moustaches from '../cadres/Moustaches.png';
 
-import Keyboard from 'react-simple-keyboard';
+import Keyboard, { KeyboardLayoutObject } from 'react-simple-keyboard';
 import 'react-simple-keyboard/build/css/index.css';
-
+import { layout } from '../keyboard-layouts/french';
 const backendAdress = process.env.REACT_APP_BACKEND_ADRESS ?? 'http://127.0.0.1:3001'
 function Camera() {
   // État pour le texte de chargement
@@ -471,6 +469,7 @@ function Camera() {
             <Keyboard
               onChange={onKeyboardChange}
               onKeyPress={onKeyPress}
+              layout={layout}
             />
           </div>}     
         </div>      
