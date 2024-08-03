@@ -4,6 +4,8 @@ import gifshot from 'gifshot';
 import crowd from '../cadres/crowd.png';
 import dreamlike from '../cadres/dreamlike.png';
 import cadre_or from '../cadres/or.png';
+import VS from '../cadres/VS.png';
+import HappyBirthday from '../cadres/HappyBirthday.png';
 
 import Keyboard from 'react-simple-keyboard';
 import 'react-simple-keyboard/build/css/index.css';
@@ -34,14 +36,14 @@ function Camera() {
 
   let videoConstraints = {
     video: {
-      width: { ideal: 1280, min: 0, max: 1280 },
+      width: { ideal: 1614, min: 1614, max: 1614 },
       height: { ideal: 1080, min: 0, max: 1080 },
       facingMode: 'user',
     },
   };
   
   const startCamera = async () => {
-    setCadres(["Aucun cadre", cadre_or]);
+    setCadres(["Aucun cadre", cadre_or, VS, HappyBirthday]);
     setCadre(0);
     try {
       /*const initialStream = await navigator.mediaDevices.getUserMedia({ video: true });
@@ -403,7 +405,7 @@ function Camera() {
   
         {textShown && (
           <div className="overlay-text-left">
-            <p style={{margin: 0, textWrap: "nowrap"}}>Appuies pour commencer</p>
+            <p style={{margin: 0, textWrap: "nowrap"}}>Appuies pour prendre une photo</p>
             <p style={{margin: 0}} className='photo-anim'></p>
             <p style={{fontSize: "15vh", margin: 0, height: 0}} className='touch-anim'>👆</p>
           </div>
