@@ -34,10 +34,18 @@ function Camera() {
   const [showMenu, setShowMenu] = useState(true);
   const [enteringEmail, setEnteringEmail] = useState(false);
 
-  let videoConstraints = {
+  let videoConstraintsFull = {
     video: {
       width: { ideal: 1614, min: 1614, max: 1614 },
-      height: { ideal: 1080, min: 0, max: 1080 },
+      height: { ideal: 1080, min: 1080, max: 1080 },
+      facingMode: 'user',
+    },
+  };
+
+  let videoConstraints4X6 = {
+    video: {
+      width: { ideal: 540, min: 540, max: 540 },
+      height: { ideal: 540, min: 540, max: 540 },
       facingMode: 'user',
     },
   };
@@ -64,7 +72,7 @@ function Camera() {
         };
       }*/
   
-      const newStream = await navigator.mediaDevices.getUserMedia(videoConstraints);
+      const newStream = await navigator.mediaDevices.getUserMedia(videoConstraints4X6);
       if (videoRef.current) {
         videoRef.current.srcObject = newStream;
         setStream(newStream);
