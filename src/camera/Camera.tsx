@@ -30,14 +30,16 @@ function Camera() {
   const [photoPath, setPhotoPath] = useState('');
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [printCopies, setPrintCopies] = useState(1);
+  const [printError, setPrintError] = useState<string | null>(null);
   const [gifFinished, setGifFinished] = useState(true);
   const [showMenu, setShowMenu] = useState(true);
   const [enteringEmail, setEnteringEmail] = useState(false);
+  const [template, setTemplate] = useState('POLAROID');
 
   let videoConstraintsFull = {
     video: {
-      width: { ideal: 1614, min: 1614, max: 1614 },
-      height: { ideal: 1080, min: 1080, max: 1080 },
+      width: { ideal: 807, min: 807, max: 807 },
+      height: { ideal: 540, min: 540, max: 540 },
       facingMode: 'user',
     },
   };
@@ -71,8 +73,14 @@ function Camera() {
           },
         };
       }*/
-  
-      const newStream = await navigator.mediaDevices.getUserMedia(videoConstraints4X6);
+      console.log(template);
+      let newStream;
+      if(template === "POLAROID"){
+        newStream = await navigator.mediaDevices.getUserMedia(videoConstraints4X6);
+      }else{
+        newStream = await navigator.mediaDevices.getUserMedia(videoConstraintsFull);
+      }
+      
       if (videoRef.current) {
         videoRef.current.srcObject = newStream;
         setStream(newStream);
@@ -129,7 +137,7 @@ function Camera() {
     return () => {
       stopCamera();
     };
-  }, []);
+  }, [template]);
 
   const capture = async () => {
     if (mode === "PICTURE") {
@@ -149,9 +157,13 @@ function Camera() {
   };
 
   const createGif = async (photos: string[]) => {
-    const gifWidth = 1614;
-    const gifHeight = 1080;
+    let gifWidth = 1614;
+    let gifHeight = 1080;
 
+    if(template === "POLAROID"){
+       gifWidth = 540;
+       gifHeight = 540;
+    }
     gifshot.createGIF({
       images: photos,
       interval: 0.5,
@@ -332,24 +344,39 @@ function Camera() {
     setMode(mode);
   };
 
+  const switchTemplate = () => {
+    console.log("Switching template");
+    console.log(template);
+    if(template !== "POLAROID"){
+      setTemplate("POLAROID");
+    }else{
+      setTemplate("PAYSAGE");
+    }
+    console.log(template);
+    restartCamera();
+  };
+
   const handlePrint = async () => {
     if (photoBlob) {
       if (photoPath) {
         setLoading(true);
+        setPrintError(null); // Réinitialiser l'erreur avant chaque impression
         try {
           const response = await fetch(`${backendAdress}/print`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ filePath: photoPath, copies: printCopies }),
+            body: JSON.stringify({ filePath: photoPath, copies: printCopies, template: template }),
           });
-
+  
           if (!response.ok) {
-            throw new Error('Failed to print photo');
+            throw new Error('L\'imprimante n\'a plus de papier. Veuillez changer le rouleau.');
           }
+  
           console.log('Photo sent for printing');
-        } catch (error) {
+        } catch (error : any) {
+          setPrintError(error.message);
           console.error('Error printing photo:', error);
         } finally {
           setLoading(false);
@@ -361,6 +388,7 @@ function Camera() {
       console.error('No photo blob to print');
     }
   };
+  
 
   const onKeyboardChange = (input:string) => {
     console.log("Input changed", input);
@@ -392,7 +420,7 @@ function Camera() {
 
   const putCopies = async (copies : number) => {
       if(copies < 0){setPrintCopies(0)}
-      else if(copies > 6){setPrintCopies(6)}
+      else if(copies > 6){setPrintCopies(5)}
       else {setPrintCopies(copies)}
   };
 
@@ -448,7 +476,9 @@ function Camera() {
               justifyContent: "flex-start",
               alignItems: "center"
           }}>
-            <input
+
+            SAUVEGARDÉ !
+            {/* <input
               className={`${mode === 'PICTURE' ? 'email-input-short' : 'email-input-long'}`}
               type="email"
               value={email}
@@ -456,9 +486,9 @@ function Camera() {
               // onBlur={() => setEnteringEmail(false)}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Entres ton adresse email"
-            />
+            /> */}
           
-            <div className={`form-button active`} onClick={handleSendEmail}>ENVOYER</div>
+            {/* <div className={`form-button active`} onClick={handleSendEmail}>ENVOYER</div> */}
 
             {mode === 'PICTURE' && (
               <div className="form-impr">
@@ -471,7 +501,7 @@ function Camera() {
               </div>
             )} 
           
-            <div className={`form-button red`} onClick={handleCancel}>ANNULER</div>
+            <div className={`form-button red`} onClick={handleCancel}>RETOUR</div>
           </div>
           {enteringEmail && <div style={{ width: "100%"}}>
             <Keyboard
@@ -485,6 +515,7 @@ function Camera() {
   
       {!showSavingOptions && showMenu && (
         <div className="camera-buttons">
+          <div className={`camera-button template`} onClick={() => switchTemplate()}>{template}</div>
           <div className={`camera-button ${mode === 'PICTURE' ? 'active' : 'inactive'}`} onClick={() => switchMode("PICTURE")}>IMAGE</div>
           <div className={`camera-button right ${mode === 'GIF' ? 'active' : 'inactive'}`} onClick={() => switchMode("GIF")}>IMAGE ANIMÉE</div>
 
@@ -500,6 +531,15 @@ function Camera() {
         <div className="loading-overlay">
           <div className="loading-text">Patientez</div>
           <div className="spinner"></div>
+        </div>
+      )}
+
+      {printError && (
+        <div className="print-error-overlay">
+          <div className="print-error-content">
+            <div className="print-error-text">{printError}</div>
+            <button onClick={() => setPrintError(null)} className="print-error-button">OK : La photo est sauvegardée</button>
+          </div>
         </div>
       )}
 
