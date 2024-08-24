@@ -371,8 +371,10 @@ function Camera() {
           });
   
           if (!response.ok) {
-            throw new Error('L\'imprimante n\'a plus de papier. Veuillez changer le rouleau.');
-          }
+            const errorData = await response.json().catch(() => null); // En cas d'erreur de parsing JSON
+            const errorMessage = errorData && errorData.message ? errorData.message : `Erreur lors de l'impression: ${response.statusText}`;
+            throw new Error(errorMessage);
+        }
   
           console.log('Photo sent for printing');
         } catch (error : any) {
@@ -490,7 +492,7 @@ function Camera() {
           
             {/* <div className={`form-button active`} onClick={handleSendEmail}>ENVOYER</div> */}
 
-            {mode === 'PICTURE' && (
+            {mode === 'PICTURE' && printError !== 'LU' &&(
               <div className="form-impr">
                 <div onClick={() => putCopies(printCopies - 1)} className="form-button navigation">&lt;</div>
                 <div onClick={() => putCopies(0)} className="form-button copies">
@@ -534,11 +536,11 @@ function Camera() {
         </div>
       )}
 
-      {printError && (
+      {printError && printError!== 'LU' && (
         <div className="print-error-overlay">
           <div className="print-error-content">
             <div className="print-error-text">{printError}</div>
-            <button onClick={() => setPrintError(null)} className="print-error-button">OK : La photo est sauvegardée</button>
+            <button onClick={() => setPrintError("LU")} className="print-error-button">OK : La photo est sauvegardée</button>
           </div>
         </div>
       )}
