@@ -34,12 +34,12 @@ function Camera() {
   const [gifFinished, setGifFinished] = useState(true);
   const [showMenu, setShowMenu] = useState(true);
   const [enteringEmail, setEnteringEmail] = useState(false);
-  const [template, setTemplate] = useState('POLAROID');
+  const [template, setTemplate] = useState('PAYSAGE');
 
   let videoConstraintsFull = {
     video: {
-      width: { ideal: 807, min: 807, max: 807 },
-      height: { ideal: 540, min: 540, max: 540 },
+      width: { ideal: 1614, min: 1614, max: 1614 },
+      height: { ideal: 1080, min: 1080, max: 1080 },
       facingMode: 'user',
     },
   };
