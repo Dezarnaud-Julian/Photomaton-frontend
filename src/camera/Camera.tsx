@@ -46,8 +46,8 @@ function Camera() {
 
   let videoConstraints4X6 = {
     video: {
-      width: { ideal: 540, min: 540, max: 540 },
-      height: { ideal: 540, min: 540, max: 540 },
+      width: { ideal: 720, min: 720, max: 720 },
+      height: { ideal: 720, min: 720, max: 720 },
       facingMode: 'user',
     },
   };
