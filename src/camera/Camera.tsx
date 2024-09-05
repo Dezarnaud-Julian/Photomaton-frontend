@@ -1,11 +1,13 @@
 import React, { useRef, useEffect, useState } from 'react';
 import './Camera.css';
 import gifshot from 'gifshot';
-import cadre_or from '../cadres/or.png';
-import VS from '../cadres/VS.png';
-import HappyBirthday from '../cadres/HappyBirthday.png';
-import HappyBirthday2 from '../cadres/HappyBirthday2.png';
-import Moustaches from '../cadres/Moustaches.png';
+import cadre_or from '../cadres/PAYSAGE/or.png';
+import VS from '../cadres/PAYSAGE/VS.png';
+import HappyBirthday from '../cadres/PAYSAGE/HappyBirthday.png';
+import HappyBirthday2 from '../cadres/PAYSAGE/HappyBirthday2.png';
+import Moustaches from '../cadres/PAYSAGE/Moustaches.png';
+import Matous from '../cadres/POLAROID/MATOUS.png';
+import Settings from '../settings/Settings';
 
 import Keyboard, { KeyboardLayoutObject } from 'react-simple-keyboard';
 import 'react-simple-keyboard/build/css/index.css';
@@ -19,7 +21,9 @@ function Camera() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
   const [cadre, setCadre] = useState<number>(0);
-  const [cadres, setCadres] = useState<string[]>([]);
+  const [cadresPAYSAGE, setCadresPAYSAGE] = useState<string[]>([]);
+  const [cadresPOLAROID, setCadresPOLAROID] = useState<string[]>([]);
+
   const [mode, setMode] = useState<string>("PICTURE");
   const [capturedPhoto, setCapturedPhoto] = useState<string | null>(null);
   const [photoBlob, setPhotoBlob] = useState<Blob | null>(null);
@@ -34,12 +38,14 @@ function Camera() {
   const [gifFinished, setGifFinished] = useState(true);
   const [showMenu, setShowMenu] = useState(true);
   const [enteringEmail, setEnteringEmail] = useState(false);
-  const [template, setTemplate] = useState('PAYSAGE');
+  const [template, setTemplate] = useState("POLAROID");
 
   let videoConstraintsFull = {
     video: {
-      width: { ideal: 1614, min: 1614, max: 1614 },
-      height: { ideal: 1080, min: 1080, max: 1080 },
+      width: { ideal: 1614/2, min: 1614/2, max: 1614/2 },
+      height: { ideal: 1080/2, min: 1080/2, max: 1080/2 },
+      // width: { ideal: 1614, min: 1614, max: 1614 },
+      // height: { ideal: 1080, min: 1080, max: 1080 },
       facingMode: 'user',
     },
   };
@@ -53,7 +59,8 @@ function Camera() {
   };
   
   const startCamera = async () => {
-    setCadres(["Aucun cadre", cadre_or, HappyBirthday, HappyBirthday2, VS, Moustaches]);
+    setCadresPAYSAGE(["Aucun cadre", cadre_or, HappyBirthday, HappyBirthday2, VS, Moustaches]);
+    setCadresPOLAROID(["Aucun cadre", Matous]);
     setCadre(0);
     try {
       /*const initialStream = await navigator.mediaDevices.getUserMedia({ video: true });
@@ -210,7 +217,7 @@ function Camera() {
 
         if (cadre !== 0) {
           const cadreImage = new Image();
-          cadreImage.src = cadres[cadre];
+          cadreImage.src = cadresPAYSAGE[cadre];
 
           return new Promise((resolve, reject) => {
             cadreImage.onload = () => {
@@ -415,8 +422,13 @@ function Camera() {
       }else{
         setCadre(cadreToPut);
       }
-      if(cadreToPut < 0){setCadre(cadres.length-1);}
-      else if(cadreToPut >= cadres.length){setCadre(0);}
+      if(template === "POLAROID"){
+        if(cadreToPut < 0){setCadre(cadresPOLAROID.length-1);}
+        else if(cadreToPut >= cadresPOLAROID.length){setCadre(0);}
+      }else{
+        if(cadreToPut < 0){setCadre(cadresPAYSAGE.length-1);}
+        else if(cadreToPut >= cadresPAYSAGE.length){setCadre(0);}
+      }
     }
   };
 
@@ -440,8 +452,8 @@ function Camera() {
     <div className="camera-container">
       <div className="camera-left" onClick={textShown ? captureMedia : undefined}>
         <video ref={videoRef} autoPlay playsInline className="video-stream" />
-        {cadre !== 0 && (<div className='captured-image-cadre-container'><img className="captured-image-cadre" style={{aspectRatio: videoRef.current?.videoWidth!+"/"+videoRef.current?.videoHeight!}} src={cadres[cadre]} alt="Captured" /></div>)}
-  
+        {cadre !== 0 && template=="PAYSAGE" && (<div className='captured-image-cadre-container'><img className="captured-image-cadre" style={{aspectRatio: videoRef.current?.videoWidth!+"/"+videoRef.current?.videoHeight!}} src={cadresPAYSAGE[cadre]} alt="Captured" /></div>)}
+        {cadre !== 0 && template=="POLAROID" && (<div className='captured-image-cadre-container'><img className="captured-image-cadre" style={{aspectRatio: videoRef.current?.videoWidth!+"/"+videoRef.current?.videoHeight!}} src={cadresPOLAROID[cadre]} alt="Captured" /></div>)}
         {textShown && (
           <div className="overlay-text-left">
             <p style={{margin: 0, textWrap: "nowrap"}}>Appuies pour prendre une photo</p>
@@ -522,12 +534,23 @@ function Camera() {
           <div className={`camera-button right ${mode === 'GIF' ? 'active' : 'inactive'}`} onClick={() => switchMode("GIF")}>IMAGE ANIMÉE</div>
 
           <div className="camera-button navigation" onClick={() => putCadre(cadre - 1)}>&lt;</div>
-          <div className={`camera-button ${extractTextFromPath(cadres[cadre]) !== "Aucun cadre" ? 'active' : 'inactive'}`} onClick={() => putCadre(-5)}>
-            {extractTextFromPath(cadres[cadre])}
-          </div>
+          {template==="PAYSAGE" && (
+            <div className={`camera-button ${extractTextFromPath(cadresPAYSAGE[cadre]) !== "Aucun cadre" ? 'active' : 'inactive'}`} onClick={() => putCadre(-5)}>
+              {extractTextFromPath(cadresPAYSAGE[cadre])}
+            </div>
+          )} 
+          {template==="POLAROID" && (
+            <div className={`camera-button ${extractTextFromPath(cadresPOLAROID[cadre]) !== "Aucun cadre" ? 'active' : 'inactive'}`} onClick={() => putCadre(-5)}>
+              {extractTextFromPath(cadresPOLAROID[cadre])}
+            </div>
+          )} 
           <div className="camera-button navigation" onClick={() => putCadre(cadre + 1)}>&gt;</div>
         </div>
       )}
+
+      <div className="settings">
+        <Settings />
+      </div>
 
       {loading && (
         <div className="loading-overlay">
