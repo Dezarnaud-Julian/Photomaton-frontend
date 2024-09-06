@@ -23,7 +23,7 @@ function Camera() {
   const [cadre, setCadre] = useState<number>(0);
   const [cadresPAYSAGE, setCadresPAYSAGE] = useState<string[]>([]);
   const [cadresPOLAROID, setCadresPOLAROID] = useState<string[]>([]);
-
+  const [cadresMINIPOLAROID, setCadresMINIPOLAROID] = useState<string[]>([]);
   const [mode, setMode] = useState<string>("PICTURE");
   const [capturedPhoto, setCapturedPhoto] = useState<string | null>(null);
   const [photoBlob, setPhotoBlob] = useState<Blob | null>(null);
@@ -38,6 +38,7 @@ function Camera() {
   const [gifFinished, setGifFinished] = useState(true);
   const [showMenu, setShowMenu] = useState(true);
   const [enteringEmail, setEnteringEmail] = useState(false);
+  const [templates, setTemplates] = useState<string[]>([]);
   const [template, setTemplate] = useState("POLAROID");
 
   let videoConstraintsFull = {
@@ -57,10 +58,23 @@ function Camera() {
       facingMode: 'user',
     },
   };
+
+  let videoConstraintsMiniPolaroid = {
+    video: {
+      // width: { ideal: 720, min: 720, max: 720 },
+      // height: { ideal: 1080, min: 1080, max: 1080 },
+      width: { ideal: 720/2, min: 720/2, max: 720/2 },
+      height: { ideal: 1080/2, min: 1080/2, max: 1080/2 },
+      facingMode: 'user',
+    },
+  };
   
   const startCamera = async () => {
+    setTemplates(["POLAROID","PAYSAGE","MINIPOLAROID"])
     setCadresPAYSAGE(["Aucun cadre", cadre_or, HappyBirthday, HappyBirthday2, VS, Moustaches]);
     setCadresPOLAROID(["Aucun cadre", Matous]);
+    setCadresMINIPOLAROID(["Aucun cadre"]);
+
     setCadre(0);
     try {
       /*const initialStream = await navigator.mediaDevices.getUserMedia({ video: true });
@@ -84,8 +98,14 @@ function Camera() {
       let newStream;
       if(template === "POLAROID"){
         newStream = await navigator.mediaDevices.getUserMedia(videoConstraints4X6);
-      }else{
-        newStream = await navigator.mediaDevices.getUserMedia(videoConstraintsFull);
+      }
+      else{
+        if(template === "MINIPOLAROID"){
+          console.log("MINIIIIIIIIIII")
+          newStream = await navigator.mediaDevices.getUserMedia(videoConstraintsMiniPolaroid);
+        }else{
+          newStream = await navigator.mediaDevices.getUserMedia(videoConstraintsFull);
+        }
       }
       
       if (videoRef.current) {
@@ -168,9 +188,14 @@ function Camera() {
     let gifHeight = 1080;
 
     if(template === "POLAROID"){
-       gifWidth = 540;
-       gifHeight = 540;
+       gifWidth = 720;
+       gifHeight = 720;
     }
+
+    if(template === "MINIPOLAROID"){
+      gifWidth = 720;
+      gifHeight = 1080;
+   }
     gifshot.createGIF({
       images: photos,
       interval: 0.5,
@@ -217,8 +242,19 @@ function Camera() {
 
         if (cadre !== 0) {
           const cadreImage = new Image();
-          cadreImage.src = cadresPAYSAGE[cadre];
 
+          const cadreImageTemplate = new Image();
+          cadreImageTemplate.src = cadresPAYSAGE[cadre];
+
+          if(template == "POLAROID"){
+            cadreImageTemplate.src = cadresPOLAROID[cadre];
+          }
+
+          if(template == "MINIPOLAROID"){
+            cadreImageTemplate.src = cadresMINIPOLAROID[cadre];
+          }
+
+          cadreImage.src = cadreImageTemplate.src;
           return new Promise((resolve, reject) => {
             cadreImage.onload = () => {
               context.drawImage(cadreImage, 0, 0, videoWidth, videoHeight);
@@ -347,18 +383,25 @@ function Camera() {
     setEnteringEmail(false);
   };
 
-  const switchMode = (mode: string) => {
-    setMode(mode);
+  const switchMode = () => {
+    if(mode === "PICTURE"){
+      setMode("GIF");
+    }else{
+      setMode("PICTURE");
+    }
   };
 
   const switchTemplate = () => {
     console.log("Switching template");
     console.log(template);
-    if(template !== "POLAROID"){
-      setTemplate("POLAROID");
+    const searchTerm = template;
+    const index = templates.findIndex((template) => template === searchTerm);
+    if(index === templates.length-1){
+      setTemplate(templates[0]);
     }else{
-      setTemplate("PAYSAGE");
+      setTemplate(templates[index+1]);
     }
+    
     console.log(template);
     restartCamera();
   };
@@ -426,8 +469,13 @@ function Camera() {
         if(cadreToPut < 0){setCadre(cadresPOLAROID.length-1);}
         else if(cadreToPut >= cadresPOLAROID.length){setCadre(0);}
       }else{
-        if(cadreToPut < 0){setCadre(cadresPAYSAGE.length-1);}
-        else if(cadreToPut >= cadresPAYSAGE.length){setCadre(0);}
+        if(template === "MINIPOLAROID"){
+          if(cadreToPut < 0){setCadre(cadresMINIPOLAROID.length-1);}
+          else if(cadreToPut >= cadresMINIPOLAROID.length){setCadre(0);}
+        }else{
+          if(cadreToPut < 0){setCadre(cadresPAYSAGE.length-1);}
+          else if(cadreToPut >= cadresPAYSAGE.length){setCadre(0);}
+        }
       }
     }
   };
@@ -448,12 +496,18 @@ function Camera() {
     return extractedText;
   }
 
+  const handleCopiesUpdated = (newCopies: string) => {
+    setPrintError(null);
+    console.log(`Nombre de copies mis à jour : ${newCopies}`);
+  };
+
   return (
     <div className="camera-container">
       <div className="camera-left" onClick={textShown ? captureMedia : undefined}>
         <video ref={videoRef} autoPlay playsInline className="video-stream" />
         {cadre !== 0 && template=="PAYSAGE" && (<div className='captured-image-cadre-container'><img className="captured-image-cadre" style={{aspectRatio: videoRef.current?.videoWidth!+"/"+videoRef.current?.videoHeight!}} src={cadresPAYSAGE[cadre]} alt="Captured" /></div>)}
         {cadre !== 0 && template=="POLAROID" && (<div className='captured-image-cadre-container'><img className="captured-image-cadre" style={{aspectRatio: videoRef.current?.videoWidth!+"/"+videoRef.current?.videoHeight!}} src={cadresPOLAROID[cadre]} alt="Captured" /></div>)}
+        {cadre !== 0 && template=="MINIPOLAROID" && (<div className='captured-image-cadre-container'><img className="captured-image-cadre" style={{aspectRatio: videoRef.current?.videoWidth!+"/"+videoRef.current?.videoHeight!}} src={cadresMINIPOLAROID[cadre]} alt="Captured" /></div>)}
         {textShown && (
           <div className="overlay-text-left">
             <p style={{margin: 0, textWrap: "nowrap"}}>Appuies pour prendre une photo</p>
@@ -530,9 +584,7 @@ function Camera() {
       {!showSavingOptions && showMenu && (
         <div className="camera-buttons">
           <div className={`camera-button template`} onClick={() => switchTemplate()}>{template}</div>
-          <div className={`camera-button ${mode === 'PICTURE' ? 'active' : 'inactive'}`} onClick={() => switchMode("PICTURE")}>IMAGE</div>
-          <div className={`camera-button right ${mode === 'GIF' ? 'active' : 'inactive'}`} onClick={() => switchMode("GIF")}>IMAGE ANIMÉE</div>
-
+          <div className={`camera-button mode`} onClick={() => switchMode()}>{mode}</div>
           <div className="camera-button navigation" onClick={() => putCadre(cadre - 1)}>&lt;</div>
           {template==="PAYSAGE" && (
             <div className={`camera-button ${extractTextFromPath(cadresPAYSAGE[cadre]) !== "Aucun cadre" ? 'active' : 'inactive'}`} onClick={() => putCadre(-5)}>
@@ -543,13 +595,18 @@ function Camera() {
             <div className={`camera-button ${extractTextFromPath(cadresPOLAROID[cadre]) !== "Aucun cadre" ? 'active' : 'inactive'}`} onClick={() => putCadre(-5)}>
               {extractTextFromPath(cadresPOLAROID[cadre])}
             </div>
-          )} 
+          )}
+          {template==="MINIPOLAROID" && (
+            <div className={`camera-button ${extractTextFromPath(cadresMINIPOLAROID[cadre]) !== "Aucun cadre" ? 'active' : 'inactive'}`} onClick={() => putCadre(-5)}>
+              {extractTextFromPath(cadresMINIPOLAROID[cadre])}
+            </div>
+          )}  
           <div className="camera-button navigation" onClick={() => putCadre(cadre + 1)}>&gt;</div>
         </div>
       )}
 
       <div className="settings">
-        <Settings />
+        <Settings onCopiesUpdated={handleCopiesUpdated} />
       </div>
 
       {loading && (

@@ -371,6 +371,11 @@ body {
   /* Couleur de fond active avec opacité */
 }
 
+.camera-buttons .mode {
+  background-color: rgba(0, 0, 255, 0.8);
+  /* Couleur de fond active avec opacité */
+}
+
 
 .camera-buttons .inactive {
   background-color: rgba(128, 128, 128, 0.3);

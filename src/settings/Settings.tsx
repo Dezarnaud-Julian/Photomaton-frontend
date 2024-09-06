@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-function Settings() {
+function Settings({ onCopiesUpdated }: { onCopiesUpdated: (copies: string) => void }) {
   const [showPad, setShowPad] = useState(false);
   const [code, setCode] = useState('');
   const [isCodeValid, setIsCodeValid] = useState(false);
@@ -8,7 +8,7 @@ function Settings() {
   const backendAdress = process.env.REACT_APP_BACKEND_ADRESS ?? 'http://127.0.0.1:3001'
 
   const handleClick = () => {
-    setShowPad(true);
+    setShowPad(!showPad);
   };
 
   const handleInput = (digit: string | number) => {
@@ -50,6 +50,7 @@ function Settings() {
       if (response.ok) {
         console.log('Nombre de copies envoyé avec succès:', result);
         alert('Nombre de copies envoyé avec succès!');
+        onCopiesUpdated(copies);
         setShowPad(false);
         setIsCodeValid(false);
         setCode('');
