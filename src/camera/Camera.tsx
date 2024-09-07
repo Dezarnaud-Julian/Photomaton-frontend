@@ -7,6 +7,8 @@ import HappyBirthday from '../cadres/PAYSAGE/HappyBirthday.png';
 import HappyBirthday2 from '../cadres/PAYSAGE/HappyBirthday2.png';
 import Moustaches from '../cadres/PAYSAGE/Moustaches.png';
 import Matous from '../cadres/POLAROID/MATOUS.png';
+import MatousBAS from '../cadres/POLAROID/MAMA.png';
+import POLAROIDBASE from '../cadres/POLAROIDBASE.png';
 import Settings from '../settings/Settings';
 
 import Keyboard, { KeyboardLayoutObject } from 'react-simple-keyboard';
@@ -21,8 +23,10 @@ function Camera() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
   const [cadre, setCadre] = useState<number>(0);
+  const [cadrePOLA, setCadrePOLA] = useState<number>(0);
   const [cadresPAYSAGE, setCadresPAYSAGE] = useState<string[]>([]);
   const [cadresPOLAROID, setCadresPOLAROID] = useState<string[]>([]);
+  const [cadresPOLAROIDBAS, setCadresPOLAROIDBAS] = useState<string[]>([]);
   const [cadresMINIPOLAROID, setCadresMINIPOLAROID] = useState<string[]>([]);
   const [mode, setMode] = useState<string>("PICTURE");
   const [capturedPhoto, setCapturedPhoto] = useState<string | null>(null);
@@ -73,6 +77,7 @@ function Camera() {
     setTemplates(["POLAROID","PAYSAGE","MINIPOLAROID"])
     setCadresPAYSAGE(["Aucun cadre", cadre_or, HappyBirthday, HappyBirthday2, VS, Moustaches]);
     setCadresPOLAROID(["Aucun cadre", Matous]);
+    setCadresPOLAROIDBAS(["Aucun cadre", MatousBAS]);
     setCadresMINIPOLAROID(["Aucun cadre"]);
 
     setCadre(0);
@@ -412,22 +417,31 @@ function Camera() {
         setLoading(true);
         setPrintError(null); // Réinitialiser l'erreur avant chaque impression
         try {
+          const cadreValue = cadrePOLA === 0 
+            ? "NULL" 
+            : cadresPOLAROIDBAS[cadrePOLA].split('/')[3].split('.')[0];
+  
           const response = await fetch(`${backendAdress}/print`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ filePath: photoPath, copies: printCopies, template: template }),
+            body: JSON.stringify({ 
+              filePath: photoPath, 
+              copies: printCopies, 
+              template: template, 
+              cadre: cadreValue // Utilisation de la valeur de cadre
+            }),
           });
   
           if (!response.ok) {
             const errorData = await response.json().catch(() => null); // En cas d'erreur de parsing JSON
             const errorMessage = errorData && errorData.message ? errorData.message : `Erreur lors de l'impression: ${response.statusText}`;
             throw new Error(errorMessage);
-        }
+          }
   
           console.log('Photo sent for printing');
-        } catch (error : any) {
+        } catch (error: any) {
           setPrintError(error.message);
           console.error('Error printing photo:', error);
         } finally {
@@ -439,8 +453,7 @@ function Camera() {
     } else {
       console.error('No photo blob to print');
     }
-  };
-  
+  };  
 
   const onKeyboardChange = (input:string) => {
     console.log("Input changed", input);
@@ -478,6 +491,32 @@ function Camera() {
         }
       }
     }
+  };
+
+  const putCadrePOLA = async (cadreToPut : number) => {
+    console.log(cadreToPut);
+    if(cadreToPut < 0 || cadreToPut > cadresPOLAROIDBAS.length){
+      if(cadrePOLA === 0){
+        setCadrePOLA(1);
+      }else{
+        setCadrePOLA(0);
+      }
+    }else{
+      if(cadrePOLA === cadreToPut){
+        setCadrePOLA(0);
+      }else{
+        setCadrePOLA(cadreToPut);
+      }
+      if(template === "POLAROID"){
+        if(cadreToPut < 0){setCadrePOLA(cadresPOLAROIDBAS.length-1);}
+        else if(cadreToPut >= cadresPOLAROID.length){setCadrePOLA(0);}
+      }
+      // }else{
+      //     if(cadreToPut < 0){setCadrePOLA(cadresMINIPOLAROIDBAS.length-1);}
+      //     else if(cadreToPut >= cadresMINIPOLAROID.length){setCadrePOLA(0);}
+      // }
+    }
+    console.log(cadrePOLA);
   };
 
   const putCopies = async (copies : number) => {
@@ -533,11 +572,19 @@ function Camera() {
               <div onClick={handleCancel} className="overlay-text-keep-cancel">❌</div>
             </div>
           )}
-          <img className="captured-image" src={capturedPhoto} alt="Captured" />
+          <img className={`captured-image ${template === 'POLAROID' && showSavingOptions ? 'video-streamPOLA' : ''}`}  src={capturedPhoto} alt="Captured" />
+          {template==="POLAROID" && (
+            <img src={POLAROIDBASE} alt="Polaroid Base" className="captured-image-POLA" />
+          )}
         </div>
       )}
+
+      {showSavingOptions && mode === 'PICTURE' && printError !== 'LU' && cadrePOLA !== 0 && template=="POLAROID" && (<img className="captured-image-cadre-BAS" src={cadresPOLAROIDBAS[cadrePOLA]} alt="Captured" />)}
+
   
       {showSavingOptions && (
+
+        
         <div className="form-buttons">
           <div style={{
               display: "flex",
@@ -558,8 +605,11 @@ function Camera() {
           
             {/* <div className={`form-button active`} onClick={handleSendEmail}>ENVOYER</div> */}
 
+
             {mode === 'PICTURE' && printError !== 'LU' &&(
               <div className="form-impr">
+                <div onClick={() => putCadrePOLA(cadre - 1)} className="form-button navigation left">&lt;</div>
+                <div onClick={() => putCadrePOLA(cadre + 1)} className="form-button navigation right">&gt;</div>
                 <div onClick={() => putCopies(printCopies - 1)} className="form-button navigation">&lt;</div>
                 <div onClick={() => putCopies(0)} className="form-button copies">
                   {"Copies:"+printCopies.toString()}
@@ -571,13 +621,13 @@ function Camera() {
           
             <div className={`form-button red`} onClick={handleCancel}>RETOUR</div>
           </div>
-          {enteringEmail && <div style={{ width: "100%"}}>
+          {/* {enteringEmail && <div style={{ width: "100%"}}>
             <Keyboard
               onChange={onKeyboardChange}
               onKeyPress={onKeyPress}
               layout={layout}
             />
-          </div>}     
+          </div>}      */}
         </div>      
       )}
   

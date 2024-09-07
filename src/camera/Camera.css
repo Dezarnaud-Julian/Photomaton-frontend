@@ -196,6 +196,7 @@ body {
   border-radius: 10px;
   background: #0003;
   /* backdrop-filter: blur(5px); */
+  z-index: 99999999;
 }
 
 .touch-anim {
@@ -449,6 +450,7 @@ body {
   /* Aligner les boutons à gauche */
   align-items: center;
   width: 50vw;
+  z-index: 2;
 }
 
 .form-buttons .form-button {
@@ -591,4 +593,55 @@ body {
   right: 10px; /* Ajustez si nécessaire */
   z-index: 1000; /* Assurez-vous que l'icône est au-dessus des autres éléments */
   font-size: 2rem; /* Taille de l'icône (facultatif) */
+}
+
+/*POLAROID CENTRAL*/
+.captured-image-POLA {
+  position: absolute;
+  top: 0;
+  height: 100vh;
+  left: 50%; /* Place le point de départ au centre */
+  transform: translateX(-50%); /* Décale de moitié pour centrer l'élément */
+  z-index: -5000; /* Image en-dessous de la vidéo */
+}
+
+.video-streamPOLA {
+  width: 100vw;
+  height: 65vh;
+  transform: translateY(-20%);
+  object-fit: contain;
+}
+
+.video-streamPOLACADRE {
+  width: 100vw;
+  height: 65vh;
+  transform: translateY(-20%);
+  object-fit: contain;
+  z-index: 99999;
+}
+
+
+/* SELECT CADRE POLA*/
+.form-buttons .navigation.left {
+  background-color: rgba(38, 0, 128, 0.9);
+  width: 50px;
+  position: absolute;
+  left: 0;
+  transform: translateY(-500%) translateX(300%); 
+  top: 50%;
+}
+
+.form-buttons .navigation.right {
+  background-color: rgba(38, 0, 128, 0.9);
+  width: 50px;
+  position: absolute;
+  left: 0;
+  transform: translateY(-500%) translateX(1150%); 
+  top: 50%;
+}
+
+.captured-image-cadre-BAS {
+  height: 100vh;
+  object-fit: contain;
+  z-index: 0; 
 }
