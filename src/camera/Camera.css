@@ -8,7 +8,7 @@ h1,
 h2,
 h3,
 h4 {
-   /*cursor: none;*/
+   cursor: none;
 }
 
 body {
@@ -368,13 +368,22 @@ body {
 }
 
 .camera-buttons .template {
-  background-color: rgba(128, 0, 128, 0.9);
+  background-color: rgba(0, 0, 255, 0.8);
   /* Couleur de fond active avec opacité */
 }
 
 .camera-buttons .mode {
   background-color: rgba(0, 0, 255, 0.8);
+  margin-left: 10vw;
+  margin-right: 10vw;
+
   /* Couleur de fond active avec opacité */
+}
+
+.sauv {
+  font-size: 2rem;
+  margin-right: 5vw;
+  color: #333;
 }
 
 
@@ -486,8 +495,15 @@ body {
 
 .form-buttons .red {
   background-color: rgba(255, 0, 0, 0.8);
+  margin-right: 10vw;
   /* Couleur de fond rouge avec opacité */
 }
+
+.form-buttons .imp {
+  margin-left: 10vw;
+  /* Couleur de fond rouge avec opacité */
+}
+
 
 .copies-control {
   display: flex;
@@ -627,7 +643,7 @@ body {
   width: 50px;
   position: absolute;
   left: 0;
-  transform: translateY(-500%) translateX(300%); 
+  transform: translateY(-900%) translateX(300%); 
   top: 50%;
 }
 
@@ -636,7 +652,7 @@ body {
   width: 50px;
   position: absolute;
   left: 0;
-  transform: translateY(-500%) translateX(1150%); 
+  transform: translateY(-900%) translateX(1900%); 
   top: 50%;
 }
 

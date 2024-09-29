@@ -396,15 +396,21 @@ function Camera() {
     }
   };
 
-  const switchTemplate = () => {
+  const switchTemplate = (number:number) => {
     console.log("Switching template");
     console.log(template);
     const searchTerm = template;
-    const index = templates.findIndex((template) => template === searchTerm);
-    if(index === templates.length-1){
+    let index = templates.findIndex((template) => template === searchTerm);
+
+    index = index + number
+    if(index === templates.length){
       setTemplate(templates[0]);
     }else{
-      setTemplate(templates[index+1]);
+      if(index === -1){
+        setTemplate(templates[templates.length-1]);
+      }else{
+        setTemplate(templates[index]);
+      }    
     }
     
     console.log(template);
@@ -520,8 +526,8 @@ function Camera() {
   };
 
   const putCopies = async (copies : number) => {
-      if(copies < 0){setPrintCopies(0)}
-      else if(copies > 6){setPrintCopies(5)}
+      if(copies < 1){setPrintCopies(1)}
+      else if(copies > 6){setPrintCopies(6)}
       else {setPrintCopies(copies)}
   };
 
@@ -591,8 +597,12 @@ function Camera() {
               justifyContent: "flex-start",
               alignItems: "center"
           }}>
+        
+        <div className={`form-button red`} onClick={handleCancel}>RETOUR</div>
 
-            SAUVEGARDÉ !
+        <div className="sauv">
+          SAUVEGARDÉ !
+        </div>
             {/* <input
               className={`${mode === 'PICTURE' ? 'email-input-short' : 'email-input-long'}`}
               type="email"
@@ -605,21 +615,24 @@ function Camera() {
           
             {/* <div className={`form-button active`} onClick={handleSendEmail}>ENVOYER</div> */}
 
+            {mode === 'PICTURE' && printError !== 'LU' && template === 'POLAROID' &&(
+              <div>
+              <div onClick={() => putCadrePOLA(cadre - 1)} className="form-button navigation left">&lt;</div>
+              <div onClick={() => putCadrePOLA(cadre + 1)} className="form-button navigation right">&gt;</div>
+              </div>
+            )}
 
             {mode === 'PICTURE' && printError !== 'LU' &&(
               <div className="form-impr">
-                <div onClick={() => putCadrePOLA(cadre - 1)} className="form-button navigation left">&lt;</div>
-                <div onClick={() => putCadrePOLA(cadre + 1)} className="form-button navigation right">&gt;</div>
                 <div onClick={() => putCopies(printCopies - 1)} className="form-button navigation">&lt;</div>
                 <div onClick={() => putCopies(0)} className="form-button copies">
                   {"Copies:"+printCopies.toString()}
                 </div>
                 <div onClick={() => putCopies(printCopies + 1)} className="form-button navigation">&gt;</div>
-                <div className={`form-button ${printCopies !== 0 ? 'active' : 'inactive'}`} onClick={handlePrint}>IMPRIMER</div>
+                <div className={`form-button imp ${printCopies !== 0 ? 'active' : 'inactive'}`} onClick={handlePrint}>IMPRIMER</div>
               </div>
             )} 
           
-            <div className={`form-button red`} onClick={handleCancel}>RETOUR</div>
           </div>
           {/* {enteringEmail && <div style={{ width: "100%"}}>
             <Keyboard
@@ -633,8 +646,13 @@ function Camera() {
   
       {!showSavingOptions && showMenu && (
         <div className="camera-buttons">
-          <div className={`camera-button template`} onClick={() => switchTemplate()}>{template}</div>
+
+          <div className="camera-button navigation" onClick={() => switchTemplate(-1)}>&lt;</div>
+          <div className={`camera-button template`}>{template}</div>
+          <div className="camera-button navigation" onClick={() => switchTemplate(+1)}>&gt;</div>
+
           <div className={`camera-button mode`} onClick={() => switchMode()}>{mode}</div>
+
           <div className="camera-button navigation" onClick={() => putCadre(cadre - 1)}>&lt;</div>
           {template==="PAYSAGE" && (
             <div className={`camera-button ${extractTextFromPath(cadresPAYSAGE[cadre]) !== "Aucun cadre" ? 'active' : 'inactive'}`} onClick={() => putCadre(-5)}>
