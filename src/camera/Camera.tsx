@@ -79,31 +79,19 @@ function Camera() {
 
     setCadre(0);
     try {
-      /*const initialStream = await navigator.mediaDevices.getUserMedia({ video: true });
-      const videoTrack = initialStream.getVideoTracks()[0];
-      const capabilities = videoTrack.getCapabilities();
-      videoTrack.stop();
-  
-      if (capabilities.width && capabilities.height && capabilities.width.max && capabilities.height.max) {
-        const maxHeight = capabilities.height.max;
-        const maxWidth = maxHeight * (videoConstraints.video.width.ideal/videoConstraints.video.height.ideal);
-  
-        videoConstraints = {
-          video: {
-            width: { ideal: maxWidth, min: maxWidth, max: maxWidth },
-            height: { ideal: maxHeight, min: maxHeight, max: maxHeight },
-            facingMode: 'user',
-          },
-        };
-      }*/
-      console.log(template);
+      console.log("START CAMERA")
+      // const initialStream = await navigator.mediaDevices.getUserMedia({ video: true });
+      // const videoTrack = initialStream.getVideoTracks()[0];
+      // const capabilities = videoTrack.getCapabilities();
+      // videoTrack.stop();
+      // console.log(capabilities);
+
       let newStream;
       if(template === "POLAROID"){
         newStream = await navigator.mediaDevices.getUserMedia(videoConstraints4X6);
       }
       else{
         if(template === "MINIPOLAROID"){
-          console.log("MINIIIIIIIIIII")
           newStream = await navigator.mediaDevices.getUserMedia(videoConstraintsMiniPolaroid);
         }else{
           newStream = await navigator.mediaDevices.getUserMedia(videoConstraintsFull);
@@ -126,22 +114,23 @@ function Camera() {
     }
   };
 
-  const restartCamera = async () => {
+  const restartCamera = async (template : string) => {
     if (stream) {
+      console.log(template);
       const videoTrack = stream.getVideoTracks()[0]; // Obtenir la piste vidéo actuelle
-  
+      console.log(videoTrack);
       let constraints;
       if (template === "POLAROID") {
         constraints = videoConstraints4X6;
       } else if (template === "MINIPOLAROID") {
         constraints = videoConstraintsMiniPolaroid;
       } else {
+        console.log("DARON")
         constraints = videoConstraintsFull;
       }
   
       try {
-        await videoTrack.applyConstraints(constraints.video); // Appliquer les nouvelles contraintes
-        console.log("Les nouvelles contraintes ont été appliquées sans redémarrer la caméra.");
+        await videoTrack.applyConstraints(constraints.video);
       } catch (err) {
         console.error("Erreur lors de l'application des nouvelles contraintes :", err);
       }
@@ -182,9 +171,9 @@ function Camera() {
   useEffect(() => {
     startCamera();
     return () => {
-      restartCamera();
+      stopCamera();
     };
-  }, [template]);
+  }, []);
 
   const capture = async () => {
     if (mode === "PICTURE") {
@@ -414,23 +403,23 @@ function Camera() {
 
   const switchTemplate = (number:number) => {
     console.log("Switching template");
-    console.log(template);
     const searchTerm = template;
     let index = templates.findIndex((template) => template === searchTerm);
 
     index = index + number
     if(index === templates.length){
       setTemplate(templates[0]);
+      restartCamera(templates[0]);
+
     }else{
       if(index === -1){
         setTemplate(templates[templates.length-1]);
+        restartCamera(templates[templates.length-1]);
       }else{
         setTemplate(templates[index]);
+        restartCamera(templates[index]);
       }    
     }
-    
-    console.log(template);
-    restartCamera();
   };
 
   const handlePrint = async () => {
