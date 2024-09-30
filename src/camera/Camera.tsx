@@ -44,31 +44,28 @@ function Camera() {
   const [enteringEmail, setEnteringEmail] = useState(false);
   const [templates, setTemplates] = useState<string[]>([]);
   const [template, setTemplate] = useState("POLAROID");
+  
 
   let videoConstraintsFull = {
     video: {
-      width: { ideal: 1614/2, min: 1614/2, max: 1614/2 },
-      height: { ideal: 1080/2, min: 1080/2, max: 1080/2 },
-      // width: { ideal: 1614, min: 1614, max: 1614 },
-      // height: { ideal: 1080, min: 1080, max: 1080 },
+      width: { ideal: 3228, min: 3228, max: 3228 },
+      height: { ideal: 2160, min: 2160, max: 2160 }, 
       facingMode: 'user',
     },
   };
 
   let videoConstraints4X6 = {
     video: {
-      width: { ideal: 720, min: 720, max: 720 },
-      height: { ideal: 720, min: 720, max: 720 },
+      width: { ideal: 2160, min: 2160, max: 2160 },
+      height: { ideal: 2160, min: 2160, max: 2160 },
       facingMode: 'user',
     },
   };
 
   let videoConstraintsMiniPolaroid = {
     video: {
-      // width: { ideal: 720, min: 720, max: 720 },
-      // height: { ideal: 1080, min: 1080, max: 1080 },
-      width: { ideal: 720/2, min: 720/2, max: 720/2 },
-      height: { ideal: 1080/2, min: 1080/2, max: 1080/2 },
+      width: { ideal: 1400, min: 1400, max: 1400 },
+      height: { ideal: 2160, min: 2160, max: 2160 },
       facingMode: 'user',
     },
   };
@@ -129,10 +126,28 @@ function Camera() {
     }
   };
 
-  const restartCamera = () => {
-    stopCamera();
-    startCamera();
+  const restartCamera = async () => {
+    if (stream) {
+      const videoTrack = stream.getVideoTracks()[0]; // Obtenir la piste vidéo actuelle
+  
+      let constraints;
+      if (template === "POLAROID") {
+        constraints = videoConstraints4X6;
+      } else if (template === "MINIPOLAROID") {
+        constraints = videoConstraintsMiniPolaroid;
+      } else {
+        constraints = videoConstraintsFull;
+      }
+  
+      try {
+        await videoTrack.applyConstraints(constraints.video); // Appliquer les nouvelles contraintes
+        console.log("Les nouvelles contraintes ont été appliquées sans redémarrer la caméra.");
+      } catch (err) {
+        console.error("Erreur lors de l'application des nouvelles contraintes :", err);
+      }
+    }
   };
+  
 
   const startCountdown = async (secondes: number) => {
     setTextShown(false);
@@ -167,7 +182,7 @@ function Camera() {
   useEffect(() => {
     startCamera();
     return () => {
-      stopCamera();
+      restartCamera();
     };
   }, [template]);
 
@@ -193,13 +208,13 @@ function Camera() {
     let gifHeight = 1080;
 
     if(template === "POLAROID"){
-       gifWidth = 720;
-       gifHeight = 720;
+       gifWidth = 2160;
+       gifHeight = 2160;
     }
 
     if(template === "MINIPOLAROID"){
-      gifWidth = 720;
-      gifHeight = 1080;
+      gifWidth = 1400;
+      gifHeight = 2160;
    }
     gifshot.createGIF({
       images: photos,
@@ -309,6 +324,7 @@ function Camera() {
   const handleSave = async () => {
     if (photoBlob) {
       setPhotoPath(await savePhoto());
+      console.log("PHOTO PATH",photoPath)
       setShowSavingOptions(true);
     } else {
       console.error('No photo blob to upload');

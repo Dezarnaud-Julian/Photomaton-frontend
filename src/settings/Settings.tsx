@@ -1,14 +1,23 @@
 import React, { useState } from 'react';
+import para from '../para.png';
 
 function Settings({ onCopiesUpdated }: { onCopiesUpdated: (copies: string) => void }) {
   const [showPad, setShowPad] = useState(false);
+  const [counter, setCounter] = useState(0);
   const [code, setCode] = useState('');
   const [isCodeValid, setIsCodeValid] = useState(false);
   const [copies, setCopies] = useState('');
   const backendAdress = process.env.REACT_APP_BACKEND_ADRESS ?? 'http://127.0.0.1:3001'
+  
 
   const handleClick = () => {
-    setShowPad(!showPad);
+    setCounter(counter+1);
+    if(counter===3){
+      setShowPad(!showPad);
+      setCounter(0);
+    }else{
+      setShowPad(false);
+    }
   };
 
   const handleInput = (digit: string | number) => {
@@ -67,9 +76,13 @@ function Settings({ onCopiesUpdated }: { onCopiesUpdated: (copies: string) => vo
 
   return (
     <div>
-      <div className="settings" onClick={handleClick}>
-        ⚙️
-      </div>
+      <img 
+        src= {para}
+        alt="Description de l'image" 
+        className="settings" 
+        onClick={handleClick} 
+      />
+
 
       {showPad && (
         <div className="num-pad-overlay">
