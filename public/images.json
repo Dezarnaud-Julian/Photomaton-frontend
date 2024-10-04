@@ -1,0 +1,9 @@
+{
+  "filtres": {
+    "paysage": [
+      { "name": "4L Trophy", "url": "4L.png"},
+      { "name": "Crown", "url": "crowd.png"}
+    ],
+    "polaroid": []
+  }
+}
