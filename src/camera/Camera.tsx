@@ -6,8 +6,8 @@ import VS from '../cadres/PAYSAGE/VS.png';
 import HappyBirthday from '../cadres/PAYSAGE/HappyBirthday.png';
 import HappyBirthday2 from '../cadres/PAYSAGE/HappyBirthday2.png';
 import Moustaches from '../cadres/PAYSAGE/Moustaches.png';
-import Matous from '../cadres/POLAROID/MATOUS.png';
 import MatousBAS from '../cadres/POLAROID/MAMA.png';
+import Matous from '../filtres/polaroid/MATOUS.png';
 import POLAROIDBASE from '../cadres/POLAROIDBASE.png';
 import Settings from '../settings/Settings';
 
@@ -22,8 +22,8 @@ function Camera() {
   const [cadre, setCadre] = useState<number>(0);
   const [cadrePOLA, setCadrePOLA] = useState<number>(0);
   const [cadresPAYSAGE, setCadresPAYSAGE] = useState<string[]>([]);
+  const [filtresPOLAROID, setFiltresPOLAROID] = useState<string[]>([]);
   const [cadresPOLAROID, setCadresPOLAROID] = useState<string[]>([]);
-  const [cadresPOLAROIDBAS, setCadresPOLAROIDBAS] = useState<string[]>([]);
   const [cadresMINIPOLAROID, setCadresMINIPOLAROID] = useState<string[]>([]);
   const [mode, setMode] = useState<string>("PICTURE");
   const [capturedPhoto, setCapturedPhoto] = useState<string | null>(null);
@@ -60,8 +60,8 @@ function Camera() {
   const startCamera = async () => {
     setTemplates(["POLAROID","PAYSAGE","MINIPOLAROID"])
     setCadresPAYSAGE(["Aucun cadre", cadre_or, HappyBirthday, HappyBirthday2, VS, Moustaches]);
-    setCadresPOLAROID(["Aucun cadre", Matous]);
-    setCadresPOLAROIDBAS(["Aucun cadre", MatousBAS]);
+    setFiltresPOLAROID(["Aucun filtre", Matous]);
+    setCadresPOLAROID(["Aucun cadre", MatousBAS]);
     setCadresMINIPOLAROID(["Aucun cadre"]);
 
     setCadre(0);
@@ -108,15 +108,11 @@ function Camera() {
         setCountdown((prevCount) => {
           if (prevCount === 1) {
             clearInterval(interval);
-            if (overlayRef.current) {
-              overlayRef.current.classList.add('active');
-            }
+            if (overlayRef.current) overlayRef.current.classList.add('active');
             setTimeout(() => {
-              if (overlayRef.current) {
-                overlayRef.current.classList.remove('active');
-              }
+              if (overlayRef.current) overlayRef.current.classList.remove('active');
               resolve();
-            }, 1000);
+            }, 500);
           }
           return prevCount - 1;
         });
@@ -238,7 +234,7 @@ function Camera() {
 
                 // Sélection de l'image du cadre en fonction du template
                 if (template === "POLAROID") {
-                    cadreImage.src = cadresPOLAROID[cadre];
+                    cadreImage.src = filtresPOLAROID[cadre];
                 } else if (template === "MINIPOLAROID") {
                     cadreImage.src = cadresMINIPOLAROID[cadre];
                 } else {
@@ -415,7 +411,7 @@ function Camera() {
         try {
           const cadreValue = cadrePOLA === 0 
             ? "NULL" 
-            : cadresPOLAROIDBAS[cadrePOLA].split('/')[3].split('.')[0];
+            : cadresPOLAROID[cadrePOLA].split('/')[3].split('.')[0];
   
           const response = await fetch(`${backendAdress}/print`, {
             method: 'POST',
@@ -475,8 +471,8 @@ function Camera() {
         setCadre(cadreToPut);
       }
       if(template === "POLAROID"){
-        if(cadreToPut < 0){setCadre(cadresPOLAROID.length-1);}
-        else if(cadreToPut >= cadresPOLAROID.length){setCadre(0);}
+        if(cadreToPut < 0){setCadre(filtresPOLAROID.length-1);}
+        else if(cadreToPut >= filtresPOLAROID.length){setCadre(0);}
       }else{
         if(template === "MINIPOLAROID"){
           if(cadreToPut < 0){setCadre(cadresMINIPOLAROID.length-1);}
@@ -491,7 +487,7 @@ function Camera() {
 
   const putCadrePOLA = async (cadreToPut : number) => {
     console.log(cadreToPut);
-    if(cadreToPut < 0 || cadreToPut > cadresPOLAROIDBAS.length){
+    if(cadreToPut < 0 || cadreToPut > cadresPOLAROID.length){
       if(cadrePOLA === 0){
         setCadrePOLA(1);
       }else{
@@ -504,8 +500,8 @@ function Camera() {
         setCadrePOLA(cadreToPut);
       }
       if(template === "POLAROID"){
-        if(cadreToPut < 0){setCadrePOLA(cadresPOLAROIDBAS.length-1);}
-        else if(cadreToPut >= cadresPOLAROID.length){setCadrePOLA(0);}
+        if(cadreToPut < 0){setCadrePOLA(cadresPOLAROID.length-1);}
+        else if(cadreToPut >= filtresPOLAROID.length){setCadrePOLA(0);}
       }
       // }else{
       //     if(cadreToPut < 0){setCadrePOLA(cadresMINIPOLAROIDBAS.length-1);}
@@ -557,7 +553,7 @@ function Camera() {
         }}
       />
         {cadre !== 0 && template=="PAYSAGE" && (<div className='captured-image-cadre-container'><img className="captured-image-cadre" style={{aspectRatio: videoRef.current?.videoWidth!+"/"+videoRef.current?.videoHeight!}} src={cadresPAYSAGE[cadre]} alt="Captured" /></div>)}
-        {cadre !== 0 && template=="POLAROID" && (<div className='captured-image-cadre-container'><img className="captured-image-cadre" style={{aspectRatio: videoRef.current?.videoWidth!+"/"+videoRef.current?.videoHeight!}} src={cadresPOLAROID[cadre]} alt="Captured" /></div>)}
+        {cadre !== 0 && template=="POLAROID" && (<div className='captured-image-cadre-container'><img className="captured-image-cadre" style={{aspectRatio: videoRef.current?.videoWidth!+"/"+videoRef.current?.videoHeight!}} src={filtresPOLAROID[cadre]} alt="Captured" /></div>)}
         {cadre !== 0 && template=="MINIPOLAROID" && (<div className='captured-image-cadre-container'><img className="captured-image-cadre" style={{aspectRatio: videoRef.current?.videoWidth!+"/"+videoRef.current?.videoHeight!}} src={cadresMINIPOLAROID[cadre]} alt="Captured" /></div>)}
         {textShown && (
           <div className="overlay-text-left">
@@ -570,7 +566,7 @@ function Camera() {
         <div ref={overlayRef} className="white-overlay"></div>
         {countdown > 0 && (
           <div className="countdown-display">
-            {countdown+1}
+            {countdown}
           </div>
         )}
       </div>
@@ -591,7 +587,7 @@ function Camera() {
         </div>
       )}
 
-      {showSavingOptions && mode === 'PICTURE' && printError !== 'LU' && cadrePOLA !== 0 && template=="POLAROID" && (<img className="captured-image-cadre-BAS" src={cadresPOLAROIDBAS[cadrePOLA]} alt="Captured" />)}
+      {showSavingOptions && mode === 'PICTURE' && printError !== 'LU' && cadrePOLA !== 0 && template=="POLAROID" && (<img className="captured-image-cadre-BAS" src={cadresPOLAROID[cadrePOLA]} alt="Captured" />)}
 
   
       {showSavingOptions && (
@@ -666,8 +662,8 @@ function Camera() {
             </div>
           )} 
           {template==="POLAROID" && (
-            <div className={`camera-button ${extractTextFromPath(cadresPOLAROID[cadre]) !== "Aucun cadre" ? 'active' : 'inactive'}`} onClick={() => putCadre(-5)}>
-              {extractTextFromPath(cadresPOLAROID[cadre])}
+            <div className={`camera-button ${extractTextFromPath(filtresPOLAROID[cadre]) !== "Aucun cadre" ? 'active' : 'inactive'}`} onClick={() => putCadre(-5)}>
+              {extractTextFromPath(filtresPOLAROID[cadre])}
             </div>
           )}
           {template==="MINIPOLAROID" && (
