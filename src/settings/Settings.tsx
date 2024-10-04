@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
 import para from '../para.png';
+import "./Settings.css"
+
+const CODE = "2518";
 
 function Settings({ onCopiesUpdated }: { onCopiesUpdated: (copies: string) => void }) {
   const [showPad, setShowPad] = useState(false);
@@ -37,7 +40,7 @@ function Settings({ onCopiesUpdated }: { onCopiesUpdated: (copies: string) => vo
   };
 
   const handleSubmitCode = () => {
-    if (code === '2518') {
+    if (code === CODE) {
       setIsCodeValid(true); // Le code est correct, demander maintenant le nombre de copies
     } else {
       setCode('');
@@ -74,6 +77,26 @@ function Settings({ onCopiesUpdated }: { onCopiesUpdated: (copies: string) => vo
     }
   };
 
+  const handleRebootMachine = async () => {
+    // Envoyer le nombre de copies au backend
+    try {
+        const response = await fetch(`${backendAdress}/reboot`, { method: 'POST'});
+    } catch (error) {
+      console.error('Erreur réseau:', error);
+      alert('Erreur réseau'+ error);
+    }
+  };
+
+  const handleShutdownMachine = async () => {
+    // Envoyer le nombre de copies au backend
+    try {
+        const response = await fetch(`${backendAdress}/shutdown`, { method: 'POST'});
+    } catch (error) {
+      console.error('Erreur réseau:', error);
+      alert('Erreur réseau'+ error);
+    }
+  };
+
   return (
     <div>
       <img 
@@ -89,10 +112,13 @@ function Settings({ onCopiesUpdated }: { onCopiesUpdated: (copies: string) => vo
           <div className="num-pad">
             {!isCodeValid ? (
               <>
+                Paramètres
+                <button onClick={()=>{setShowPad(false)}}>X</button>
                 <input 
                   type="password" 
                   className="code-input" 
                   value={code} 
+                  placeholder='code'
                   readOnly 
                 />
                 <div className="num-buttons">
@@ -107,6 +133,11 @@ function Settings({ onCopiesUpdated }: { onCopiesUpdated: (copies: string) => vo
               </>
             ) : (
               <>
+                Paramètres
+                <button onClick={()=>{setShowPad(false)}} className='close-btn'>X</button>
+                <button onClick={() => { window.location.reload() }}>Restart app</button>
+                <button onClick={handleShutdownMachine}>Shutdown</button>
+                <button onClick={handleRebootMachine}>Reboot</button>
                 <input 
                   type="number" 
                   className="copies-input" 

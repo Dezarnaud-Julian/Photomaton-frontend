@@ -11,9 +11,6 @@ import MatousBAS from '../cadres/POLAROID/MAMA.png';
 import POLAROIDBASE from '../cadres/POLAROIDBASE.png';
 import Settings from '../settings/Settings';
 
-import Keyboard, { KeyboardLayoutObject } from 'react-simple-keyboard';
-import 'react-simple-keyboard/build/css/index.css';
-import { layout } from '../keyboard-layouts/french';
 const backendAdress = process.env.REACT_APP_BACKEND_ADRESS ?? 'http://127.0.0.1:3001'
 function Camera() {
   // État pour le texte de chargement
@@ -45,27 +42,17 @@ function Camera() {
   const [templates, setTemplates] = useState<string[]>([]);
   const [template, setTemplate] = useState("POLAROID");
   
-
+  let videoConstraintsStart = {
+    video: {
+      width: 500,
+      height: 500,
+      facingMode: 'user',
+    },
+  };
   let videoConstraintsFull = {
     video: {
-      width: { ideal: 3228, min: 3228, max: 3228 },
-      height: { ideal: 2160, min: 2160, max: 2160 }, 
-      facingMode: 'user',
-    },
-  };
-
-  let videoConstraints4X6 = {
-    video: {
-      width: { ideal: 2160, min: 2160, max: 2160 },
-      height: { ideal: 2160, min: 2160, max: 2160 },
-      facingMode: 'user',
-    },
-  };
-
-  let videoConstraintsMiniPolaroid = {
-    video: {
-      width: { ideal: 1400, min: 1400, max: 1400 },
-      height: { ideal: 2160, min: 2160, max: 2160 },
+      width: 3228,
+      height: 2160,
       facingMode: 'user',
     },
   };
@@ -80,24 +67,16 @@ function Camera() {
     setCadre(0);
     try {
       console.log("START CAMERA")
-      // const initialStream = await navigator.mediaDevices.getUserMedia({ video: true });
-      // const videoTrack = initialStream.getVideoTracks()[0];
-      // const capabilities = videoTrack.getCapabilities();
-      // videoTrack.stop();
-      // console.log(capabilities);
+      let basicStream = await navigator.mediaDevices.getUserMedia(videoConstraintsStart);
+      if (videoRef.current) {
+        videoRef.current.srcObject = basicStream;
+        setStream(basicStream);
+      }
+      const videoTrack = basicStream.getVideoTracks()[0];
+      videoTrack.stop();
 
-      let newStream;
-      if(template === "POLAROID"){
-        newStream = await navigator.mediaDevices.getUserMedia(videoConstraints4X6);
-      }
-      else{
-        if(template === "MINIPOLAROID"){
-          newStream = await navigator.mediaDevices.getUserMedia(videoConstraintsMiniPolaroid);
-        }else{
-          newStream = await navigator.mediaDevices.getUserMedia(videoConstraintsFull);
-        }
-      }
-      
+      let newStream = await navigator.mediaDevices.getUserMedia(videoConstraintsFull);
+
       if (videoRef.current) {
         videoRef.current.srcObject = newStream;
         setStream(newStream);
@@ -115,26 +94,8 @@ function Camera() {
   };
 
   const restartCamera = async (template : string) => {
-    if (stream) {
-      console.log(template);
-      const videoTrack = stream.getVideoTracks()[0]; // Obtenir la piste vidéo actuelle
-      console.log(videoTrack);
-      let constraints;
-      if (template === "POLAROID") {
-        constraints = videoConstraints4X6;
-      } else if (template === "MINIPOLAROID") {
-        constraints = videoConstraintsMiniPolaroid;
-      } else {
-        console.log("DARON")
-        constraints = videoConstraintsFull;
-      }
-  
-      try {
-        await videoTrack.applyConstraints(constraints.video);
-      } catch (err) {
-        console.error("Erreur lors de l'application des nouvelles contraintes :", err);
-      }
-    }
+      stopCamera();
+      startCamera();
   };
   
 
@@ -236,79 +197,107 @@ function Camera() {
   const capturePhoto = async () => {
     if (canvasRef.current && videoRef.current) {
       const context = canvasRef.current.getContext('2d');
-      if (context) {
+    if (context) {
         const { videoWidth, videoHeight } = videoRef.current;
-        canvasRef.current.width = videoWidth;
-        canvasRef.current.height = videoHeight;
+
+        let canvasWidth = videoWidth;
+        let canvasHeight = videoHeight;
+        if (template === "POLAROID") {
+            canvasWidth = 2160;
+            canvasHeight = 2160;
+        } else if (template === "MINIPOLAROID") {
+            canvasWidth = 1400;
+            canvasHeight = 2160;
+        } else if (template === "PAYSAGE") {
+            canvasWidth = 3228;
+            canvasHeight = 2160;
+        }
+
+        canvasRef.current.width = canvasWidth;
+        canvasRef.current.height = canvasHeight;
+
         context.save();
 
-        context.translate(videoWidth, 0);
-        context.scale(-1, 1);
+        // Calculate the scale to maintain aspect ratio
+        const scale = Math.max(canvasWidth / videoWidth, canvasHeight / videoHeight);
+        const drawWidth = videoWidth * scale;
+        const drawHeight = videoHeight * scale;
 
-        context.drawImage(videoRef.current, 0, 0, videoWidth, videoHeight);
+        // Calculate the offsets to center the video
+        const offsetX = (canvasWidth - drawWidth) / 2;
+        const offsetY = (canvasHeight - drawHeight) / 2;
 
+        // Draw the video on the canvas, cropping as needed
+        context.drawImage(videoRef.current, offsetX, offsetY, drawWidth, drawHeight);
+        
         context.restore();
 
-        if (cadre !== 0) {
-          const cadreImage = new Image();
+            // Gestion des cadres
+            if (cadre !== 0) {
+                const cadreImage = new Image();
 
-          const cadreImageTemplate = new Image();
-          cadreImageTemplate.src = cadresPAYSAGE[cadre];
-
-          if(template == "POLAROID"){
-            cadreImageTemplate.src = cadresPOLAROID[cadre];
-          }
-
-          if(template == "MINIPOLAROID"){
-            cadreImageTemplate.src = cadresMINIPOLAROID[cadre];
-          }
-
-          cadreImage.src = cadreImageTemplate.src;
-          return new Promise((resolve, reject) => {
-            cadreImage.onload = () => {
-              context.drawImage(cadreImage, 0, 0, videoWidth, videoHeight);
-              canvasRef.current!.toBlob((blob) => {
-                if (blob) {
-                  const url = URL.createObjectURL(blob);
-                  setCapturedPhoto(url);
-                  setPhotoBlob(blob);
-                  resolve(url);
+                // Sélection de l'image du cadre en fonction du template
+                if (template === "POLAROID") {
+                    cadreImage.src = cadresPOLAROID[cadre];
+                } else if (template === "MINIPOLAROID") {
+                    cadreImage.src = cadresMINIPOLAROID[cadre];
                 } else {
-                  console.error('Failed to capture image');
-                  reject(new Error('Failed to capture image'));
+                    cadreImage.src = cadresPAYSAGE[cadre];
                 }
-              }, 'image/jpeg');
-            };
 
-            cadreImage.onerror = () => {
-              console.error('Failed to load the frame image');
-              reject(new Error('Failed to load the frame image'));
-            };
-          });
-        } else {
-          return new Promise((resolve, reject) => {
-            if (canvasRef.current) {
-              canvasRef.current.toBlob((blob) => {
-                if (blob) {
-                  const url = URL.createObjectURL(blob);
-                  setCapturedPhoto(url);
-                  setPhotoBlob(blob);
-                  resolve(url);
-                } else {
-                  console.error('Failed to capture image');
-                  reject(new Error('Failed to capture image'));
-                }
-              }, 'image/jpeg', 1.0);
+                return new Promise((resolve, reject) => {
+                    cadreImage.onload = () => {
+                        // Vérification de canvasRef.current avant d'utiliser ses méthodes
+                        if (canvasRef.current) {
+                            // Dessiner le cadre par-dessus l'image capturée
+                            context.drawImage(cadreImage, 0, 0, canvasRef.current.width, canvasRef.current.height);
+                            canvasRef.current.toBlob((blob) => {
+                                if (blob) {
+                                    const url = URL.createObjectURL(blob);
+                                    setCapturedPhoto(url);
+                                    setPhotoBlob(blob);
+                                    resolve(url);
+                                } else {
+                                    console.error('Failed to capture image');
+                                    reject(new Error('Failed to capture image'));
+                                }
+                            }, 'image/jpeg');
+                        } else {
+                            reject(new Error('Canvas reference is null'));
+                        }
+                    };
+
+                    cadreImage.onerror = () => {
+                        console.error('Failed to load the frame image');
+                        reject(new Error('Failed to load the frame image'));
+                    };
+                });
             } else {
-              reject(new Error('Canvas element not found'));
+                // Sans cadre
+                return new Promise((resolve, reject) => {
+                    if (canvasRef.current) {
+                        canvasRef.current.toBlob((blob) => {
+                            if (blob) {
+                                const url = URL.createObjectURL(blob);
+                                setCapturedPhoto(url);
+                                setPhotoBlob(blob);
+                                resolve(url);
+                            } else {
+                                console.error('Failed to capture image');
+                                reject(new Error('Failed to capture image'));
+                            }
+                        }, 'image/jpeg', 1.0);
+                    } else {
+                        reject(new Error('Canvas reference is null'));
+                    }
+                });
             }
-          });
         }
-      }
     } else {
-      return Promise.reject(new Error('Canvas or video element not found'));
+        return Promise.reject(new Error('Canvas or video element not found'));
     }
-  };  
+};
+
 
   const handleSave = async () => {
     if (photoBlob) {
@@ -409,15 +398,11 @@ function Camera() {
     index = index + number
     if(index === templates.length){
       setTemplate(templates[0]);
-      restartCamera(templates[0]);
-
     }else{
       if(index === -1){
         setTemplate(templates[templates.length-1]);
-        restartCamera(templates[templates.length-1]);
       }else{
         setTemplate(templates[index]);
-        restartCamera(templates[index]);
       }    
     }
   };
@@ -554,7 +539,23 @@ function Camera() {
   return (
     <div className="camera-container">
       <div className="camera-left" onClick={textShown ? captureMedia : undefined}>
-        <video ref={videoRef} autoPlay playsInline className="video-stream" />
+      <video
+        ref={videoRef}
+        autoPlay
+        playsInline
+        className="video-stream"
+        style={{
+          width: template === "POLAROID" ? '100vh' :
+                template === "MINIPOLAROID" ? '720px' :
+                template === "PAYSAGE" ? '1614px' : '100%',
+          height: '100%', // Maintain full height of the container
+          objectFit: 'cover', // Ensures the video fills the container and crops excess
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+        }}
+      />
         {cadre !== 0 && template=="PAYSAGE" && (<div className='captured-image-cadre-container'><img className="captured-image-cadre" style={{aspectRatio: videoRef.current?.videoWidth!+"/"+videoRef.current?.videoHeight!}} src={cadresPAYSAGE[cadre]} alt="Captured" /></div>)}
         {cadre !== 0 && template=="POLAROID" && (<div className='captured-image-cadre-container'><img className="captured-image-cadre" style={{aspectRatio: videoRef.current?.videoWidth!+"/"+videoRef.current?.videoHeight!}} src={cadresPOLAROID[cadre]} alt="Captured" /></div>)}
         {cadre !== 0 && template=="MINIPOLAROID" && (<div className='captured-image-cadre-container'><img className="captured-image-cadre" style={{aspectRatio: videoRef.current?.videoWidth!+"/"+videoRef.current?.videoHeight!}} src={cadresMINIPOLAROID[cadre]} alt="Captured" /></div>)}

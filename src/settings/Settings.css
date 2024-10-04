@@ -9,6 +9,7 @@
     justify-content: center;
     align-items: center;
     z-index: 1001;
+    pointer-events: all;
   }
   
   .num-pad {
@@ -34,9 +35,9 @@
     justify-content: center;
   }
   
-  .num-buttons button {
+  .num-pad button {
     margin: 5px;
-    padding: 10px 20px;
+    padding: 50px 50px;
     font-size: 1.5rem;
     border: none;
     background-color: #007bff;
@@ -45,8 +46,17 @@
     cursor: pointer;
     transition: background-color 0.3s;
   }
+
+  .num-pad input {
+    margin: 5px;
+    padding: 50px 50px;
+    font-size: 1.5rem;
+    color: black;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
   
   .num-buttons button:hover {
     background-color: #0056b3;
   }
-  

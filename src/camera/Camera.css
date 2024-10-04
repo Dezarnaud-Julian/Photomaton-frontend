@@ -8,7 +8,7 @@ h1,
 h2,
 h3,
 h4 {
-   /* cursor: none; */
+   cursor: none;
 }
 
 body {
@@ -35,26 +35,18 @@ body {
 .camera-left-picture,
 .camera-left {
   width: 100vw;
-  /* Laissez de l'espace pour la nouvelle colonne à droite */
   height: 100vh;
   display: flex;
   justify-content: flex-start;
-  /* Utilisez flex-start pour aligner à gauche */
   align-items: center;
   position: fixed;
-  /* Utilisez 'fixed' pour fixer l'élément à la vue */
   background-color: white;
   overflow: hidden;
   top: 0;
-  /* Fixer en haut */
   left: 0;
-  /* Fixer à gauche */
   margin: 0;
-  /* S'assurer qu'il n'y a pas de marge */
   padding: 0;
-  /* S'assurer qu'il n'y a pas de padding */
   box-sizing: border-box;
-  /* Inclure le padding et la bordure dans les dimensions totales */
 }
 
 .camera-left-picture {
@@ -161,12 +153,11 @@ body {
 }
 
 
-.video-stream {
+/* .video-stream {
   width: 100vw;
   height: 100vh;
-  transform: scaleX(-1);
   object-fit: contain;
-}
+} */
 
 .captured-image-cadre {
   height: 100vh;
