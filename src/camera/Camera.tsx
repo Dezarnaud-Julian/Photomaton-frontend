@@ -679,10 +679,6 @@ function Camera() {
         </div>
       )}
 
-      <div className="settings">
-        <Settings onCopiesUpdated={handleCopiesUpdated} />
-      </div>
-
       {loading && (
         <div className="loading-overlay">
           <div className="loading-text">Patientez</div>
@@ -698,6 +694,10 @@ function Camera() {
           </div>
         </div>
       )}
+
+      <div className="settings">
+        <Settings onCopiesUpdated={handleCopiesUpdated} />
+      </div>
 
     </div>
   );
