@@ -1,16 +1,59 @@
 import React, { useRef, useEffect, useState } from 'react';
 import './Camera.css';
 import gifshot from 'gifshot';
-import cadre_or from '../cadres/PAYSAGE/or.png';
-import VS from '../cadres/PAYSAGE/VS.png';
-import HappyBirthday from '../cadres/PAYSAGE/HappyBirthday.png';
-import HappyBirthday2 from '../cadres/PAYSAGE/HappyBirthday2.png';
-import Moustaches from '../cadres/PAYSAGE/Moustaches.png';
-import MatousBAS from '../cadres/POLAROID/MAMA.png';
-import Matous from '../filtres/polaroid/MATOUS.png';
 import POLAROIDBASE from '../cadres/POLAROIDBASE.png';
 import Settings from '../settings/Settings';
 
+import cadre_or from '../filtres/paysage/or.png';
+import VS from '../filtres/paysage/VS.png';
+import HappyBirthday from '../filtres/paysage/HappyBirthday.png';
+import HappyBirthday2 from '../filtres/paysage/HappyBirthday2.png';
+import Moustaches from '../filtres/paysage/Moustaches.png';
+import MatousBAS from '../cadres/polaroid/MATOUS.png';
+import CadreTest from '../cadres/polaroid/CADRE.png';
+import Matous from '../filtres/polaroid/matous.png';
+import OctoberRose from "../filtres/paysage/Rose.png"
+
+const debugConfig = {
+  canPrint: true,
+  templates: ["PAYSAGE", "POLAROID", "MINIPOLAROID"],
+  cameraModes: ["PICTURE", "GIF"],
+  cadres: {
+    polaroid: [MatousBAS],
+    paysage: []
+  },
+  filtres: {
+    polaroid: [],
+    paysage: [OctoberRose, Moustaches]
+  }
+}
+const octobreRoseConfig = {
+  canPrint: false,
+  templates: ["PAYSAGE"],
+  cameraModes: ["PICTURE", "GIF"],
+  cadres: {
+    polaroid: [MatousBAS],
+    paysage: []
+  },
+  filtres: {
+    polaroid: [],
+    paysage: ["Aucun filtre", OctoberRose]
+  }
+}
+const mariageConfig = {
+  canPrint: true,
+  templates: ["PAYSAGE", "POLAROID"],
+  cameraModes: ["PICTURE", "GIF"],
+  cadres: {
+    polaroid: [CadreTest, MatousBAS],
+    paysage: []
+  },
+  filtres: {
+    polaroid: [],
+    paysage: ["Aucun filtre", Moustaches]
+  }
+}
+const config = mariageConfig;
 const backendAdress = process.env.REACT_APP_BACKEND_ADRESS ?? 'http://127.0.0.1:3001'
 function Camera() {
   // État pour le texte de chargement
@@ -19,13 +62,15 @@ function Camera() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
-  const [cadre, setCadre] = useState<number>(0);
-  const [cadrePOLA, setCadrePOLA] = useState<number>(0);
-  const [cadresPAYSAGE, setCadresPAYSAGE] = useState<string[]>([]);
-  const [filtresPOLAROID, setFiltresPOLAROID] = useState<string[]>([]);
-  const [cadresPOLAROID, setCadresPOLAROID] = useState<string[]>([]);
-  const [cadresMINIPOLAROID, setCadresMINIPOLAROID] = useState<string[]>([]);
-  const [mode, setMode] = useState<string>("PICTURE");
+  const [filter, setFilter] = useState<number>(0);
+  const [cadrePOLA, setCadre] = useState<number>(0);
+
+  const [filtresPAYSAGE, setFiltresPAYSAGE] = useState<string[]>(config.filtres.paysage);
+  const [filtresPOLAROID, setFiltresPOLAROID] = useState<string[]>(["Aucun filtre", ...config.filtres.polaroid]);
+  const [filtresMINIPOLAROID, setFiltresMINIPOLAROID] = useState<string[]>(["Aucun filtre"]);
+  const [cadresPOLAROID, setCadresPOLAROID] = useState<string[]>(["Aucun cadre", ...config.cadres.polaroid]);
+  const [modes, setModes] = useState<string[]>(config.cameraModes);
+  const [mode, setMode] = useState<string>(config.cameraModes[0]);
   const [capturedPhoto, setCapturedPhoto] = useState<string | null>(null);
   const [photoBlob, setPhotoBlob] = useState<Blob | null>(null);
   const [showSavingOptions, setShowSavingOptions] = useState(false);
@@ -39,9 +84,9 @@ function Camera() {
   const [gifFinished, setGifFinished] = useState(true);
   const [showMenu, setShowMenu] = useState(true);
   const [enteringEmail, setEnteringEmail] = useState(false);
-  const [templates, setTemplates] = useState<string[]>([]);
-  const [template, setTemplate] = useState("POLAROID");
-  
+  const [templates, setTemplates] = useState<string[]>(config.templates);
+  const [template, setTemplate] = useState(config.templates[0]);
+
   let videoConstraintsStart = {
     video: {
       width: 500,
@@ -56,15 +101,9 @@ function Camera() {
       facingMode: 'user',
     },
   };
-  
-  const startCamera = async () => {
-    setTemplates(["POLAROID","PAYSAGE","MINIPOLAROID"])
-    setCadresPAYSAGE(["Aucun cadre", cadre_or, HappyBirthday, HappyBirthday2, VS, Moustaches]);
-    setFiltresPOLAROID(["Aucun filtre", Matous]);
-    setCadresPOLAROID(["Aucun cadre", MatousBAS]);
-    setCadresMINIPOLAROID(["Aucun cadre"]);
 
-    setCadre(0);
+  const startCamera = async () => {
+    setFilter(0);
     try {
       console.log("START CAMERA")
       let basicStream = await navigator.mediaDevices.getUserMedia(videoConstraintsStart);
@@ -84,7 +123,7 @@ function Camera() {
     } catch (err) {
       console.error("Error accessing camera: ", err);
     }
-  };  
+  };
 
   const stopCamera = () => {
     if (stream) {
@@ -93,16 +132,16 @@ function Camera() {
     }
   };
 
-  const restartCamera = async (template : string) => {
-      stopCamera();
-      startCamera();
+  const restartCamera = async (template: string) => {
+    stopCamera();
+    startCamera();
   };
-  
+
 
   const startCountdown = async (secondes: number) => {
     setTextShown(false);
     setCountdown(secondes);
-  
+
     return new Promise<void>((resolve) => {
       const interval = setInterval(() => {
         setCountdown((prevCount) => {
@@ -153,15 +192,15 @@ function Camera() {
     let gifWidth = 1614;
     let gifHeight = 1080;
 
-    if(template === "POLAROID"){
-       gifWidth = 2160;
-       gifHeight = 2160;
+    if (template === "POLAROID") {
+      gifWidth = 2160;
+      gifHeight = 2160;
     }
 
-    if(template === "MINIPOLAROID"){
+    if (template === "MINIPOLAROID") {
       gifWidth = 1400;
       gifHeight = 2160;
-   }
+    }
     gifshot.createGIF({
       images: photos,
       interval: 0.5,
@@ -193,20 +232,20 @@ function Camera() {
   const capturePhoto = async () => {
     if (canvasRef.current && videoRef.current) {
       const context = canvasRef.current.getContext('2d');
-    if (context) {
+      if (context) {
         const { videoWidth, videoHeight } = videoRef.current;
 
         let canvasWidth = videoWidth;
         let canvasHeight = videoHeight;
         if (template === "POLAROID") {
-            canvasWidth = 2160;
-            canvasHeight = 2160;
+          canvasWidth = 2160;
+          canvasHeight = 2160;
         } else if (template === "MINIPOLAROID") {
-            canvasWidth = 1400;
-            canvasHeight = 2160;
+          canvasWidth = 1400;
+          canvasHeight = 2160;
         } else if (template === "PAYSAGE") {
-            canvasWidth = 3228;
-            canvasHeight = 2160;
+          canvasWidth = 3228;
+          canvasHeight = 2160;
         }
 
         canvasRef.current.width = canvasWidth;
@@ -225,80 +264,80 @@ function Camera() {
 
         // Draw the video on the canvas, cropping as needed
         context.drawImage(videoRef.current, offsetX, offsetY, drawWidth, drawHeight);
-        
+
         context.restore();
 
-            // Gestion des cadres
-            if (cadre !== 0) {
-                const cadreImage = new Image();
+        // Gestion des cadres
+        if (filter !== 0) {
+          const cadreImage = new Image();
 
-                // Sélection de l'image du cadre en fonction du template
-                if (template === "POLAROID") {
-                    cadreImage.src = filtresPOLAROID[cadre];
-                } else if (template === "MINIPOLAROID") {
-                    cadreImage.src = cadresMINIPOLAROID[cadre];
+          // Sélection de l'image du cadre en fonction du template
+          if (template === "POLAROID") {
+            cadreImage.src = filtresPOLAROID[filter];
+          } else if (template === "MINIPOLAROID") {
+            cadreImage.src = filtresMINIPOLAROID[filter];
+          } else {
+            cadreImage.src = filtresPAYSAGE[filter];
+          }
+
+          return new Promise((resolve, reject) => {
+            cadreImage.onload = () => {
+              // Vérification de canvasRef.current avant d'utiliser ses méthodes
+              if (canvasRef.current) {
+                // Dessiner le cadre par-dessus l'image capturée
+                context.drawImage(cadreImage, 0, 0, canvasRef.current.width, canvasRef.current.height);
+                canvasRef.current.toBlob((blob) => {
+                  if (blob) {
+                    const url = URL.createObjectURL(blob);
+                    setCapturedPhoto(url);
+                    setPhotoBlob(blob);
+                    resolve(url);
+                  } else {
+                    console.error('Failed to capture image');
+                    reject(new Error('Failed to capture image'));
+                  }
+                }, 'image/jpeg');
+              } else {
+                reject(new Error('Canvas reference is null'));
+              }
+            };
+
+            cadreImage.onerror = () => {
+              console.error('Failed to load the frame image');
+              reject(new Error('Failed to load the frame image'));
+            };
+          });
+        } else {
+          // Sans cadre
+          return new Promise((resolve, reject) => {
+            if (canvasRef.current) {
+              canvasRef.current.toBlob((blob) => {
+                if (blob) {
+                  const url = URL.createObjectURL(blob);
+                  setCapturedPhoto(url);
+                  setPhotoBlob(blob);
+                  resolve(url);
                 } else {
-                    cadreImage.src = cadresPAYSAGE[cadre];
+                  console.error('Failed to capture image');
+                  reject(new Error('Failed to capture image'));
                 }
-
-                return new Promise((resolve, reject) => {
-                    cadreImage.onload = () => {
-                        // Vérification de canvasRef.current avant d'utiliser ses méthodes
-                        if (canvasRef.current) {
-                            // Dessiner le cadre par-dessus l'image capturée
-                            context.drawImage(cadreImage, 0, 0, canvasRef.current.width, canvasRef.current.height);
-                            canvasRef.current.toBlob((blob) => {
-                                if (blob) {
-                                    const url = URL.createObjectURL(blob);
-                                    setCapturedPhoto(url);
-                                    setPhotoBlob(blob);
-                                    resolve(url);
-                                } else {
-                                    console.error('Failed to capture image');
-                                    reject(new Error('Failed to capture image'));
-                                }
-                            }, 'image/jpeg');
-                        } else {
-                            reject(new Error('Canvas reference is null'));
-                        }
-                    };
-
-                    cadreImage.onerror = () => {
-                        console.error('Failed to load the frame image');
-                        reject(new Error('Failed to load the frame image'));
-                    };
-                });
+              }, 'image/jpeg', 1.0);
             } else {
-                // Sans cadre
-                return new Promise((resolve, reject) => {
-                    if (canvasRef.current) {
-                        canvasRef.current.toBlob((blob) => {
-                            if (blob) {
-                                const url = URL.createObjectURL(blob);
-                                setCapturedPhoto(url);
-                                setPhotoBlob(blob);
-                                resolve(url);
-                            } else {
-                                console.error('Failed to capture image');
-                                reject(new Error('Failed to capture image'));
-                            }
-                        }, 'image/jpeg', 1.0);
-                    } else {
-                        reject(new Error('Canvas reference is null'));
-                    }
-                });
+              reject(new Error('Canvas reference is null'));
             }
+          });
         }
+      }
     } else {
-        return Promise.reject(new Error('Canvas or video element not found'));
+      return Promise.reject(new Error('Canvas or video element not found'));
     }
-};
+  };
 
 
   const handleSave = async () => {
     if (photoBlob) {
       setPhotoPath(await savePhoto());
-      console.log("PHOTO PATH",photoPath)
+      console.log("PHOTO PATH", photoPath)
       setShowSavingOptions(true);
     } else {
       console.error('No photo blob to upload');
@@ -378,28 +417,37 @@ function Camera() {
     setEnteringEmail(false);
   };
 
-  const switchMode = () => {
-    if(mode === "PICTURE"){
-      setMode("GIF");
-    }else{
-      setMode("PICTURE");
+  const switchMode = (number: number) => {
+    console.log("Switching mode");
+    const searchTerm = mode;
+    let index = modes.findIndex((mode) => mode === searchTerm);
+
+    index = index + number
+    if (index === modes.length) {
+      setMode(modes[0]);
+    } else {
+      if (index === -1) {
+        setMode(modes[modes.length - 1]);
+      } else {
+        setMode(modes[index]);
+      }
     }
   };
 
-  const switchTemplate = (number:number) => {
+  const switchTemplate = (number: number) => {
     console.log("Switching template");
     const searchTerm = template;
     let index = templates.findIndex((template) => template === searchTerm);
 
     index = index + number
-    if(index === templates.length){
+    if (index === templates.length) {
       setTemplate(templates[0]);
-    }else{
-      if(index === -1){
-        setTemplate(templates[templates.length-1]);
-      }else{
+    } else {
+      if (index === -1) {
+        setTemplate(templates[templates.length - 1]);
+      } else {
         setTemplate(templates[index]);
-      }    
+      }
     }
   };
 
@@ -409,29 +457,30 @@ function Camera() {
         setLoading(true);
         setPrintError(null); // Réinitialiser l'erreur avant chaque impression
         try {
-          const cadreValue = cadrePOLA === 0 
-            ? "NULL" 
+          const cadreValue = cadrePOLA === 0
+            ? "NULL"
             : cadresPOLAROID[cadrePOLA].split('/')[3].split('.')[0];
-  
+
+          console.log(cadreValue)
           const response = await fetch(`${backendAdress}/print`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ 
-              filePath: photoPath, 
-              copies: printCopies, 
-              template: template, 
+            body: JSON.stringify({
+              filePath: photoPath,
+              copies: printCopies,
+              template: template,
               cadre: cadreValue // Utilisation de la valeur de cadre
             }),
           });
-  
+
           if (!response.ok) {
             const errorData = await response.json().catch(() => null); // En cas d'erreur de parsing JSON
             const errorMessage = errorData && errorData.message ? errorData.message : `Erreur lors de l'impression: ${response.statusText}`;
             throw new Error(errorMessage);
           }
-  
+
           console.log('Photo sent for printing');
         } catch (error: any) {
           setPrintError(error.message);
@@ -445,80 +494,65 @@ function Camera() {
     } else {
       console.error('No photo blob to print');
     }
-  };  
+  };
 
-  const onKeyboardChange = (input:string) => {
+  const onKeyboardChange = (input: string) => {
     console.log("Input changed", input);
     setEmail(input)
   }
 
-  const onKeyPress = (button:string) => {
+  const onKeyPress = (button: string) => {
     console.log("Button pressed", button);
-    if(button==="{enter}") setEnteringEmail(false)
+    if (button === "{enter}") setEnteringEmail(false)
   }
 
-  const putCadre = async (cadreToPut : number) => {
-    if(cadreToPut === -5){
-      if(cadre === 0){
-        setCadre(1);
-      }else{
-        setCadre(0);
+  const putFilter = async (filterIndex: number) => {
+    if (filterIndex === -5) {
+      if (filter === 0) {
+        setFilter(1);
+      } else {
+        setFilter(0);
       }
-    }else{
-      if(cadre === cadreToPut){
-        setCadre(0);
-      }else{
-        setCadre(cadreToPut);
+    } else {
+      if (filter === filterIndex) {
+        setFilter(0);
+      } else {
+        setFilter(filterIndex);
       }
-      if(template === "POLAROID"){
-        if(cadreToPut < 0){setCadre(filtresPOLAROID.length-1);}
-        else if(cadreToPut >= filtresPOLAROID.length){setCadre(0);}
-      }else{
-        if(template === "MINIPOLAROID"){
-          if(cadreToPut < 0){setCadre(cadresMINIPOLAROID.length-1);}
-          else if(cadreToPut >= cadresMINIPOLAROID.length){setCadre(0);}
-        }else{
-          if(cadreToPut < 0){setCadre(cadresPAYSAGE.length-1);}
-          else if(cadreToPut >= cadresPAYSAGE.length){setCadre(0);}
+      if (template === "POLAROID") {
+        if (filterIndex < 0) { setFilter(filtresPOLAROID.length - 1); }
+        else if (filterIndex >= filtresPOLAROID.length) { setFilter(0); }
+      } else {
+        if (template === "MINIPOLAROID") {
+          if (filterIndex < 0) { setFilter(filtresMINIPOLAROID.length - 1); }
+          else if (filterIndex >= filtresMINIPOLAROID.length) { setFilter(0); }
+        } else {
+          if (filterIndex < 0) { setFilter(filtresPAYSAGE.length - 1); }
+          else if (filterIndex >= filtresPAYSAGE.length) { setFilter(0); }
         }
       }
     }
   };
 
-  const putCadrePOLA = async (cadreToPut : number) => {
-    console.log(cadreToPut);
-    if(cadreToPut < 0 || cadreToPut > cadresPOLAROID.length){
-      if(cadrePOLA === 0){
-        setCadrePOLA(1);
-      }else{
-        setCadrePOLA(0);
-      }
-    }else{
-      if(cadrePOLA === cadreToPut){
-        setCadrePOLA(0);
-      }else{
-        setCadrePOLA(cadreToPut);
-      }
-      if(template === "POLAROID"){
-        if(cadreToPut < 0){setCadrePOLA(cadresPOLAROID.length-1);}
-        else if(cadreToPut >= filtresPOLAROID.length){setCadrePOLA(0);}
-      }
-      // }else{
-      //     if(cadreToPut < 0){setCadrePOLA(cadresMINIPOLAROIDBAS.length-1);}
-      //     else if(cadreToPut >= cadresMINIPOLAROID.length){setCadrePOLA(0);}
-      // }
+  const switchCadre = async (cadreIndex: number) => {
+    console.log(cadreIndex);
+    let newIndex = cadreIndex;
+    if (newIndex < 0) {
+      newIndex = cadresPOLAROID.length - 1;
+    } else if (cadreIndex >= cadresPOLAROID.length) {
+      newIndex = 0;
     }
-    console.log(cadrePOLA);
+    if (template === "POLAROID") setCadre(newIndex);
   };
 
-  const putCopies = async (copies : number) => {
-      if(copies < 1){setPrintCopies(1)}
-      else if(copies > 6){setPrintCopies(6)}
-      else {setPrintCopies(copies)}
+  const putCopies = async (copies: number) => {
+    if (copies < 1) { setPrintCopies(1) }
+    else if (copies > 6) { setPrintCopies(6) }
+    else { setPrintCopies(copies) }
   };
 
-  function extractTextFromPath(path:string) {
-    if(path === "Frame : None" || path === undefined){
+  function extractTextFromPath(path: string) {
+    if (path === "Frame : None" || path === undefined) {
       return "Frame : None";
     }
     const startIndex = path.indexOf("/static/media/") + "/static/media/".length;
@@ -529,37 +563,37 @@ function Camera() {
 
   const handleCopiesUpdated = (newCopies: string) => {
     setPrintError(null);
-    console.log(`Nombre de copies mis à jour : ${newCopies}`);
+    console.log(`Nombre de copies mises à jour : ${newCopies}`);
   };
 
   return (
     <div className="camera-container">
       <div className="camera-left" onClick={textShown ? captureMedia : undefined}>
-      <video
-        ref={videoRef}
-        autoPlay
-        playsInline
-        className="video-stream"
-        style={{
-          width: template === "POLAROID" ? '100vh' :
-                template === "MINIPOLAROID" ? '720px' :
+        <video
+          ref={videoRef}
+          autoPlay
+          playsInline
+          className="video-stream"
+          style={{
+            width: template === "POLAROID" ? '100vh' :
+              template === "MINIPOLAROID" ? '720px' :
                 template === "PAYSAGE" ? '1614px' : '100%',
-          height: '100%', // Maintain full height of the container
-          objectFit: 'cover', // Ensures the video fills the container and crops excess
-          position: 'absolute',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-        }}
-      />
-        {cadre !== 0 && template=="PAYSAGE" && (<div className='captured-image-cadre-container'><img className="captured-image-cadre" style={{aspectRatio: videoRef.current?.videoWidth!+"/"+videoRef.current?.videoHeight!}} src={cadresPAYSAGE[cadre]} alt="Captured" /></div>)}
-        {cadre !== 0 && template=="POLAROID" && (<div className='captured-image-cadre-container'><img className="captured-image-cadre" style={{aspectRatio: videoRef.current?.videoWidth!+"/"+videoRef.current?.videoHeight!}} src={filtresPOLAROID[cadre]} alt="Captured" /></div>)}
-        {cadre !== 0 && template=="MINIPOLAROID" && (<div className='captured-image-cadre-container'><img className="captured-image-cadre" style={{aspectRatio: videoRef.current?.videoWidth!+"/"+videoRef.current?.videoHeight!}} src={cadresMINIPOLAROID[cadre]} alt="Captured" /></div>)}
+            height: '100%', // Maintain full height of the container
+            objectFit: 'cover', // Ensures the video fills the container and crops excess
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+          }}
+        />
+        {filter !== 0 && template == "PAYSAGE" && (<div className='captured-image-cadre-container'><img className="captured-image-cadre" style={{ aspectRatio: videoRef.current?.videoWidth! + "/" + videoRef.current?.videoHeight! }} src={filtresPAYSAGE[filter]} alt="Captured" /></div>)}
+        {filter !== 0 && template == "POLAROID" && (<div className='captured-image-cadre-container'><img className="captured-image-cadre" style={{ aspectRatio: videoRef.current?.videoWidth! + "/" + videoRef.current?.videoHeight! }} src={filtresPOLAROID[filter]} alt="Captured" /></div>)}
+        {filter !== 0 && template == "MINIPOLAROID" && (<div className='captured-image-cadre-container'><img className="captured-image-cadre" style={{ aspectRatio: videoRef.current?.videoWidth! + "/" + videoRef.current?.videoHeight! }} src={filtresMINIPOLAROID[filter]} alt="Captured" /></div>)}
         {textShown && (
           <div className="overlay-text-left">
-            <p style={{margin: 0, textWrap: "nowrap"}}>Appuies pour prendre une photo</p>
-            <p style={{margin: 0}} className='photo-anim'></p>
-            <p style={{fontSize: "15vh", margin: 0, height: 0}} className='touch-anim'>👆</p>
+            <p style={{ margin: 0, textWrap: "nowrap" }}>Appuies pour prendre une photo</p>
+            <p style={{ margin: 0 }} className='photo-anim'></p>
+            <p style={{ fontSize: "15vh", margin: 0, height: 0 }} className='touch-anim'>👆</p>
           </div>
         )}
         <canvas ref={canvasRef} className="hidden"></canvas>
@@ -570,7 +604,7 @@ function Camera() {
           </div>
         )}
       </div>
-  
+
       {capturedPhoto && (
         <div className={gifFinished ? "camera-left" : "camera-left-picture"}>
           {!showSavingOptions && gifFinished && (
@@ -580,31 +614,29 @@ function Camera() {
               <div onClick={handleCancel} className="overlay-text-keep-cancel">❌</div>
             </div>
           )}
-          <img className={`captured-image ${template === 'POLAROID' && showSavingOptions ? 'video-streamPOLA' : ''}`}  src={capturedPhoto} alt="Captured" />
-          {template==="POLAROID" && (
+          <img className={`captured-image ${template === 'POLAROID' && showSavingOptions ? 'video-streamPOLA' : ''}`} src={capturedPhoto} alt="Captured" />
+
+          {template === "POLAROID" && (
             <img src={POLAROIDBASE} alt="Polaroid Base" className="captured-image-POLA" />
           )}
         </div>
       )}
 
-      {showSavingOptions && mode === 'PICTURE' && printError !== 'LU' && cadrePOLA !== 0 && template=="POLAROID" && (<img className="captured-image-cadre-BAS" src={cadresPOLAROID[cadrePOLA]} alt="Captured" />)}
+      {showSavingOptions && mode === 'PICTURE' && printError !== 'LU' && cadrePOLA !== 0 && template == "POLAROID" && (<img className="captured-image-cadre-BAS" src={cadresPOLAROID[cadrePOLA]} alt="Captured" />)}
 
-  
       {showSavingOptions && (
-
-        
         <div className="form-buttons">
           <div style={{
-              display: "flex",
-              justifyContent: "flex-start",
-              alignItems: "center"
+            display: "flex",
+            justifyContent: "flex-start",
+            alignItems: "center"
           }}>
-        
-        <div className={`form-button red`} onClick={handleCancel}>RETOUR</div>
 
-        <div className="sauv">
-          SAUVEGARDÉ !
-        </div>
+            <div className={`form-button red`} onClick={handleCancel}>RETOUR</div>
+
+            <div className="sauv">
+              SAUVEGARDÉ 💾✅
+            </div>
             {/* <input
               className={`${mode === 'PICTURE' ? 'email-input-short' : 'email-input-long'}`}
               type="email"
@@ -614,27 +646,27 @@ function Camera() {
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Entres ton adresse email"
             /> */}
-          
+
             {/* <div className={`form-button active`} onClick={handleSendEmail}>ENVOYER</div> */}
 
-            {mode === 'PICTURE' && printError !== 'LU' && template === 'POLAROID' &&(
+            {mode === 'PICTURE' && printError !== 'LU' && template === 'POLAROID' && (
               <div>
-              <div onClick={() => putCadrePOLA(cadre - 1)} className="form-button navigation left">&lt;</div>
-              <div onClick={() => putCadrePOLA(cadre + 1)} className="form-button navigation right">&gt;</div>
+                <div onClick={() => switchCadre(cadrePOLA - 1)} className="form-button navigation left">&lt;</div>
+                <div onClick={() => switchCadre(cadrePOLA + 1)} className="form-button navigation right">&gt;</div>
               </div>
             )}
 
-            {mode === 'PICTURE' && printError !== 'LU' &&(
+            {config.canPrint && mode === 'PICTURE' && printError !== 'LU' && (
               <div className="form-impr">
                 <div onClick={() => putCopies(printCopies - 1)} className="form-button navigation">&lt;</div>
                 <div onClick={() => putCopies(0)} className="form-button copies">
-                  {"Copies:"+printCopies.toString()}
+                  {"Copies : " + printCopies.toString()}
                 </div>
                 <div onClick={() => putCopies(printCopies + 1)} className="form-button navigation">&gt;</div>
                 <div className={`form-button imp ${printCopies !== 0 ? 'active' : 'inactive'}`} onClick={handlePrint}>IMPRIMER</div>
               </div>
-            )} 
-          
+            )}
+
           </div>
           {/* {enteringEmail && <div style={{ width: "100%"}}>
             <Keyboard
@@ -643,35 +675,36 @@ function Camera() {
               layout={layout}
             />
           </div>}      */}
-        </div>      
+        </div>
       )}
-  
+
       {!showSavingOptions && showMenu && (
         <div className="camera-buttons">
+          {templates.length > 1 && <><div className="camera-button navigation" onClick={() => switchTemplate(-1)}>&lt;</div>
+            <div className={`camera-button template`}>{template}</div>
+            <div className="camera-button navigation" onClick={() => switchTemplate(+1)}>&gt;</div></>}
 
-          <div className="camera-button navigation" onClick={() => switchTemplate(-1)}>&lt;</div>
-          <div className={`camera-button template`}>{template}</div>
-          <div className="camera-button navigation" onClick={() => switchTemplate(+1)}>&gt;</div>
+          {modes.length > 1 && <><div className="camera-button navigation" onClick={() => switchMode(-1)}>&lt;</div>
+            <div className={`camera-button mode`}>{mode}</div>
+            <div className="camera-button navigation" onClick={() => switchMode(+1)}>&gt;</div></>}
 
-          <div className={`camera-button mode`} onClick={() => switchMode()}>{mode}</div>
-
-          <div className="camera-button navigation" onClick={() => putCadre(cadre - 1)}>&lt;</div>
-          {template==="PAYSAGE" && (
-            <div className={`camera-button ${extractTextFromPath(cadresPAYSAGE[cadre]) !== "Aucun cadre" ? 'active' : 'inactive'}`} onClick={() => putCadre(-5)}>
-              {extractTextFromPath(cadresPAYSAGE[cadre])}
-            </div>
-          )} 
-          {template==="POLAROID" && (
-            <div className={`camera-button ${extractTextFromPath(filtresPOLAROID[cadre]) !== "Aucun cadre" ? 'active' : 'inactive'}`} onClick={() => putCadre(-5)}>
-              {extractTextFromPath(filtresPOLAROID[cadre])}
+          <div className="camera-button navigation" onClick={() => putFilter(filter - 1)}>&lt;</div>
+          {template === "PAYSAGE" && (
+            <div className={`camera-button ${extractTextFromPath(filtresPAYSAGE[filter]) !== "Aucun cadre" ? 'active' : 'inactive'}`} onClick={() => putFilter(-5)}>
+              {extractTextFromPath(filtresPAYSAGE[filter])}
             </div>
           )}
-          {template==="MINIPOLAROID" && (
-            <div className={`camera-button ${extractTextFromPath(cadresMINIPOLAROID[cadre]) !== "Aucun cadre" ? 'active' : 'inactive'}`} onClick={() => putCadre(-5)}>
-              {extractTextFromPath(cadresMINIPOLAROID[cadre])}
+          {template === "POLAROID" && (
+            <div className={`camera-button ${extractTextFromPath(filtresPOLAROID[filter]) !== "Aucun cadre" ? 'active' : 'inactive'}`} onClick={() => putFilter(-5)}>
+              {extractTextFromPath(filtresPOLAROID[filter])}
             </div>
-          )}  
-          <div className="camera-button navigation" onClick={() => putCadre(cadre + 1)}>&gt;</div>
+          )}
+          {template === "MINIPOLAROID" && (
+            <div className={`camera-button ${extractTextFromPath(filtresMINIPOLAROID[filter]) !== "Aucun cadre" ? 'active' : 'inactive'}`} onClick={() => putFilter(-5)}>
+              {extractTextFromPath(filtresMINIPOLAROID[filter])}
+            </div>
+          )}
+          <div className="camera-button navigation" onClick={() => putFilter(filter + 1)}>&gt;</div>
         </div>
       )}
 
@@ -682,7 +715,7 @@ function Camera() {
         </div>
       )}
 
-      {printError && printError!== 'LU' && (
+      {printError && printError !== 'LU' && (
         <div className="print-error-overlay">
           <div className="print-error-content">
             <div className="print-error-text">{printError}</div>

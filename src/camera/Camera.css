@@ -8,7 +8,7 @@ h1,
 h2,
 h3,
 h4 {
-   cursor: none;
+  cursor: none;
 }
 
 body {
@@ -330,6 +330,7 @@ body {
   bottom: 0;
   left: 0;
   width: 100vw;
+  overflow: hidden;
   /* background: #0003; */
   /* backdrop-filter: blur(5px); */
 }
@@ -374,7 +375,7 @@ body {
 .sauv {
   font-size: 2rem;
   margin-right: 5vw;
-  color: #333;
+  color: white;
 }
 
 
@@ -596,10 +597,14 @@ body {
 
 .settings {
   position: fixed;
-  top: 10px; /* Ajustez si nécessaire */
-  right: 10px; /* Ajustez si nécessaire */
-  z-index: 1000; /* Assurez-vous que l'icône est au-dessus des autres éléments */
-  font-size: 2rem; /* Taille de l'icône (facultatif) */
+  top: 10px;
+  /* Ajustez si nécessaire */
+  right: 10px;
+  /* Ajustez si nécessaire */
+  z-index: 1000;
+  /* Assurez-vous que l'icône est au-dessus des autres éléments */
+  font-size: 2rem;
+  /* Taille de l'icône (facultatif) */
 }
 
 /*POLAROID CENTRAL*/
@@ -607,9 +612,12 @@ body {
   position: absolute;
   top: 0;
   height: 100vh;
-  left: 50%; /* Place le point de départ au centre */
-  transform: translateX(-50%); /* Décale de moitié pour centrer l'élément */
-  z-index: -5000; /* Image en-dessous de la vidéo */
+  left: 50%;
+  /* Place le point de départ au centre */
+  transform: translateX(-50%);
+  /* Décale de moitié pour centrer l'élément */
+  z-index: -5000;
+  /* Image en-dessous de la vidéo */
 }
 
 .video-streamPOLA {
@@ -634,7 +642,7 @@ body {
   width: 50px;
   position: absolute;
   left: 0;
-  transform: translateY(-900%) translateX(300%); 
+  transform: translateY(-900%) translateX(300%);
   top: 50%;
 }
 
@@ -643,12 +651,12 @@ body {
   width: 50px;
   position: absolute;
   left: 0;
-  transform: translateY(-900%) translateX(1900%); 
+  transform: translateY(-900%) translateX(1900%);
   top: 50%;
 }
 
 .captured-image-cadre-BAS {
   height: 100vh;
   object-fit: contain;
-  z-index: 0; 
+  z-index: 0;
 }
