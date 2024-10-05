@@ -12,7 +12,8 @@ import Moustaches from '../filtres/paysage/Moustaches.png';
 import MatousBAS from '../cadres/polaroid/MATOUS.png';
 import CadreTest from '../cadres/polaroid/CADRE.png';
 import Matous from '../filtres/polaroid/matous.png';
-import OctoberRose from "../filtres/paysage/Rose.png"
+import OctoberRose1 from "../filtres/paysage/rose1.png"
+import OctoberRose2 from "../filtres/paysage/rose2.png"
 import JessEtSeb from "../filtres/paysage/jess&seb.png"
 
 const debugConfig = {
@@ -25,7 +26,8 @@ const debugConfig = {
   },
   filtres: {
     polaroid: [],
-    paysage: [OctoberRose, Moustaches]
+    paysage: [OctoberRose1, Moustaches],
+    defaultPaysageFilter: 1
   }
 }
 const octobreRoseConfig = {
@@ -38,20 +40,22 @@ const octobreRoseConfig = {
   },
   filtres: {
     polaroid: [],
-    paysage: ["Aucun filtre", OctoberRose]
+    paysage: ["Aucun filtre", OctoberRose1, OctoberRose2],
+    defaultPaysageFilter: 1
   }
 }
 const mariageConfig = {
   canPrint: true,
-  templates: ["PAYSAGE", "POLAROID"],
-  cameraModes: ["PICTURE", "GIF"],
+  templates: ["PAYSAGE"],
+  cameraModes: ["PICTURE"],
   cadres: {
     polaroid: [],
     paysage: []
   },
   filtres: {
     polaroid: [],
-    paysage: ["Aucun filtre", Moustaches, JessEtSeb]
+    paysage: ["Aucun filtre", JessEtSeb, Moustaches],
+    defaultPaysageFilter: 1
   }
 }
 const config = mariageConfig;
@@ -63,13 +67,13 @@ function Camera() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
-  const [filter, setFilter] = useState<number>(0);
+  const [filter, setFilter] = useState<number>(config.filtres.defaultPaysageFilter);
   const [cadrePOLA, setCadre] = useState<number>(0);
 
   const [filtresPAYSAGE, setFiltresPAYSAGE] = useState<string[]>(config.filtres.paysage);
-  const [filtresPOLAROID, setFiltresPOLAROID] = useState<string[]>(["Aucun filtre", ...config.filtres.polaroid]);
+  const [filtresPOLAROID, setFiltresPOLAROID] = useState<string[]>(config.filtres.polaroid);
   const [filtresMINIPOLAROID, setFiltresMINIPOLAROID] = useState<string[]>(["Aucun filtre"]);
-  const [cadresPOLAROID, setCadresPOLAROID] = useState<string[]>(["Aucun cadre", ...config.cadres.polaroid]);
+  const [cadresPOLAROID, setCadresPOLAROID] = useState<string[]>(config.cadres.polaroid);
   const [modes, setModes] = useState<string[]>(config.cameraModes);
   const [mode, setMode] = useState<string>(config.cameraModes[0]);
   const [capturedPhoto, setCapturedPhoto] = useState<string | null>(null);
@@ -104,7 +108,6 @@ function Camera() {
   };
 
   const startCamera = async () => {
-    setFilter(0);
     try {
       console.log("START CAMERA")
       let basicStream = await navigator.mediaDevices.getUserMedia(videoConstraintsStart);
@@ -587,9 +590,9 @@ function Camera() {
             transform: 'translate(-50%, -50%)',
           }}
         />
-        {filter !== 0 && template == "PAYSAGE" && (<div className='captured-image-cadre-container'><img className="captured-image-cadre" style={{ aspectRatio: videoRef.current?.videoWidth! + "/" + videoRef.current?.videoHeight! }} src={filtresPAYSAGE[filter]} alt="Captured" /></div>)}
-        {filter !== 0 && template == "POLAROID" && (<div className='captured-image-cadre-container'><img className="captured-image-cadre" style={{ aspectRatio: videoRef.current?.videoWidth! + "/" + videoRef.current?.videoHeight! }} src={filtresPOLAROID[filter]} alt="Captured" /></div>)}
-        {filter !== 0 && template == "MINIPOLAROID" && (<div className='captured-image-cadre-container'><img className="captured-image-cadre" style={{ aspectRatio: videoRef.current?.videoWidth! + "/" + videoRef.current?.videoHeight! }} src={filtresMINIPOLAROID[filter]} alt="Captured" /></div>)}
+        {template == "PAYSAGE" && (<div className='captured-image-cadre-container'><img className="captured-image-cadre" style={{ aspectRatio: videoRef.current?.videoWidth! + "/" + videoRef.current?.videoHeight! }} src={filtresPAYSAGE[filter]} alt="Captured" /></div>)}
+        {template == "POLAROID" && (<div className='captured-image-cadre-container'><img className="captured-image-cadre" style={{ aspectRatio: videoRef.current?.videoWidth! + "/" + videoRef.current?.videoHeight! }} src={filtresPOLAROID[filter]} alt="Captured" /></div>)}
+        {template == "MINIPOLAROID" && (<div className='captured-image-cadre-container'><img className="captured-image-cadre" style={{ aspectRatio: videoRef.current?.videoWidth! + "/" + videoRef.current?.videoHeight! }} src={filtresMINIPOLAROID[filter]} alt="Captured" /></div>)}
         {textShown && (
           <div className="overlay-text-left">
             <p style={{ margin: 0, textWrap: "nowrap" }}>Appuies pour prendre une photo</p>
