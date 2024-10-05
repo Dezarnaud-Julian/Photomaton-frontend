@@ -13,6 +13,7 @@ import MatousBAS from '../cadres/polaroid/MATOUS.png';
 import CadreTest from '../cadres/polaroid/CADRE.png';
 import Matous from '../filtres/polaroid/matous.png';
 import OctoberRose from "../filtres/paysage/Rose.png"
+import JessEtSeb from "../filtres/paysage/jess&seb.png"
 
 const debugConfig = {
   canPrint: true,
@@ -45,12 +46,12 @@ const mariageConfig = {
   templates: ["PAYSAGE", "POLAROID"],
   cameraModes: ["PICTURE", "GIF"],
   cadres: {
-    polaroid: [CadreTest, MatousBAS],
+    polaroid: [],
     paysage: []
   },
   filtres: {
     polaroid: [],
-    paysage: ["Aucun filtre", Moustaches]
+    paysage: ["Aucun filtre", Moustaches, JessEtSeb]
   }
 }
 const config = mariageConfig;
@@ -684,27 +685,35 @@ function Camera() {
             <div className={`camera-button template`}>{template}</div>
             <div className="camera-button navigation" onClick={() => switchTemplate(+1)}>&gt;</div></>}
 
-          {modes.length > 1 && <><div className="camera-button navigation" onClick={() => switchMode(-1)}>&lt;</div>
+          {modes.length > 1 && <div style={{ display: "flex", width: "auto", backgroundColor: 'transparent' }}>
+            <div className="camera-button navigation" onClick={() => switchMode(-1)}>&lt;</div>
             <div className={`camera-button mode`}>{mode}</div>
-            <div className="camera-button navigation" onClick={() => switchMode(+1)}>&gt;</div></>}
+            <div className="camera-button navigation" onClick={() => switchMode(+1)}>&gt;</div>
+          </div>}
 
-          <div className="camera-button navigation" onClick={() => putFilter(filter - 1)}>&lt;</div>
-          {template === "PAYSAGE" && (
-            <div className={`camera-button ${extractTextFromPath(filtresPAYSAGE[filter]) !== "Aucun cadre" ? 'active' : 'inactive'}`} onClick={() => putFilter(-5)}>
-              {extractTextFromPath(filtresPAYSAGE[filter])}
-            </div>
+          {template === "PAYSAGE" && filtresPAYSAGE.length > 1 && (
+            <>
+              <div className="camera-button navigation" onClick={() => putFilter(filter - 1)}>&lt;</div>
+              <div className={`camera-button ${extractTextFromPath(filtresPAYSAGE[filter]) !== "Aucun cadre" ? 'active' : 'inactive'}`}>
+                {extractTextFromPath(filtresPAYSAGE[filter])}
+              </div>
+              <div className="camera-button navigation" onClick={() => putFilter(filter + 1)}>&gt;</div>
+            </>
           )}
-          {template === "POLAROID" && (
-            <div className={`camera-button ${extractTextFromPath(filtresPOLAROID[filter]) !== "Aucun cadre" ? 'active' : 'inactive'}`} onClick={() => putFilter(-5)}>
-              {extractTextFromPath(filtresPOLAROID[filter])}
-            </div>
+          {template === "POLAROID" && filtresPOLAROID.length > 1 && (
+            <>
+              <div className="camera-button navigation" onClick={() => putFilter(filter - 1)}>&lt;</div>
+              <div className={`camera-button ${extractTextFromPath(filtresPOLAROID[filter]) !== "Aucun cadre" ? 'active' : 'inactive'}`}>
+                {extractTextFromPath(filtresPOLAROID[filter])}
+              </div>
+              <div className="camera-button navigation" onClick={() => putFilter(filter + 1)}>&gt;</div>
+            </>
           )}
           {template === "MINIPOLAROID" && (
-            <div className={`camera-button ${extractTextFromPath(filtresMINIPOLAROID[filter]) !== "Aucun cadre" ? 'active' : 'inactive'}`} onClick={() => putFilter(-5)}>
+            <div className={`camera-button ${extractTextFromPath(filtresMINIPOLAROID[filter]) !== "Aucun cadre" ? 'active' : 'inactive'}`}>
               {extractTextFromPath(filtresMINIPOLAROID[filter])}
             </div>
           )}
-          <div className="camera-button navigation" onClick={() => putFilter(filter + 1)}>&gt;</div>
         </div>
       )}
 
