@@ -1,12 +1,11 @@
-import React, { useState } from 'react';
-import para from '../para.png';
+import { useState } from 'react';
 import "./Settings.css"
 
 const CODE = "2518";
 
 function Settings({ onCopiesUpdated }: { onCopiesUpdated: (copies: string) => void }) {
   const [showPad, setShowPad] = useState(false);
-  const [counter, setCounter] = useState(0);
+  const [clickCounter, setClickCounter] = useState(0);
   const [code, setCode] = useState('');
   const [isCodeValid, setIsCodeValid] = useState(false);
   const [copies, setCopies] = useState('');
@@ -14,10 +13,10 @@ function Settings({ onCopiesUpdated }: { onCopiesUpdated: (copies: string) => vo
   
 
   const handleClick = () => {
-    setCounter(counter+1);
-    if(counter===3){
+    setClickCounter(clickCounter+1);
+    if(clickCounter===3){
       setShowPad(!showPad);
-      setCounter(0);
+      setClickCounter(0);
     }else{
       setShowPad(false);
     }
@@ -97,12 +96,16 @@ function Settings({ onCopiesUpdated }: { onCopiesUpdated: (copies: string) => vo
     }
   };
 
+  const closeSettings = () => {
+    setShowPad(false);
+    setIsCodeValid(false);
+    setCode("")
+  }
+
   return (
-    <div>
-      <img 
-        src= {para}
-        alt="Description de l'image" 
-        className="settings" 
+    <div className='settings'>
+      <div 
+        className="settings-btn" 
         onClick={handleClick} 
       />
 
@@ -113,7 +116,7 @@ function Settings({ onCopiesUpdated }: { onCopiesUpdated: (copies: string) => vo
             {!isCodeValid ? (
               <>
                 Paramètres
-                <button onClick={()=>{setShowPad(false)}}>X</button>
+                <button onClick={closeSettings}>X</button>
                 <input 
                   type="password" 
                   className="code-input" 
@@ -134,7 +137,7 @@ function Settings({ onCopiesUpdated }: { onCopiesUpdated: (copies: string) => vo
             ) : (
               <>
                 Paramètres
-                <button onClick={()=>{setShowPad(false)}} className='close-btn'>X</button>
+                <button onClick={closeSettings} className='close-btn'>X</button>
                 <button onClick={() => { window.location.reload() }}>Restart app</button>
                 <button onClick={handleShutdownMachine}>Shutdown</button>
                 <button onClick={handleRebootMachine}>Reboot</button>
