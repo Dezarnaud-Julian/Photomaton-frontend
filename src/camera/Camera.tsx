@@ -1,65 +1,83 @@
-import React, { useRef, useEffect, useState } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import './Camera.css';
 import gifshot from 'gifshot';
 import POLAROIDBASE from '../cadres/POLAROIDBASE.png';
 import Settings from '../settings/Settings';
 
-import cadre_or from '../filtres/paysage/or.png';
-import VS from '../filtres/paysage/VS.png';
-import HappyBirthday from '../filtres/paysage/HappyBirthday.png';
-import HappyBirthday2 from '../filtres/paysage/HappyBirthday2.png';
-import Moustaches from '../filtres/paysage/Moustaches.png';
-import MatousBAS from '../cadres/polaroid/MATOUS.png';
-import CadreTest from '../cadres/polaroid/CADRE.png';
-import Matous from '../filtres/polaroid/matous.png';
-import OctoberRose1 from "../filtres/paysage/rose1.png"
-import OctoberRose2 from "../filtres/paysage/rose2.png"
-import JessEtSeb from "../filtres/paysage/jess&seb.png"
-
-const debugConfig = {
-  canPrint: true,
-  templates: ["PAYSAGE", "POLAROID", "MINIPOLAROID"],
-  cameraModes: ["PICTURE", "GIF"],
-  cadres: {
-    polaroid: [MatousBAS],
-    paysage: []
-  },
-  filtres: {
-    polaroid: [],
-    paysage: [OctoberRose1, Moustaches],
-    defaultPaysageFilter: 1
-  }
-}
-const octobreRoseConfig = {
-  canPrint: false,
-  templates: ["PAYSAGE"],
-  cameraModes: ["PICTURE", "GIF"],
-  cadres: {
-    polaroid: [MatousBAS],
-    paysage: []
-  },
-  filtres: {
-    polaroid: [],
-    paysage: ["Aucun filtre", OctoberRose1, OctoberRose2],
-    defaultPaysageFilter: 1
-  }
-}
-const mariageConfig = {
-  canPrint: true,
-  templates: ["PAYSAGE"],
-  cameraModes: ["PICTURE"],
-  cadres: {
-    polaroid: [],
-    paysage: []
-  },
-  filtres: {
-    polaroid: [],
-    paysage: ["Aucun filtre", JessEtSeb, Moustaches],
-    defaultPaysageFilter: 1
-  }
-}
-const config = mariageConfig;
 const backendAdress = process.env.REACT_APP_BACKEND_ADRESS ?? 'http://127.0.0.1:3001'
+const imagesAdressBase = backendAdress + "/images";
+const debugConfig : Config = {
+  canPrint: true,
+  format: ["PAYSAGE", "POLAROID", "MINIPOLAROID"],
+  cameraModes: ["PICTURE", "GIF"],
+  frames: {
+    polaroid: [imagesAdressBase+"/frames/polaroid/matous.png"],
+    landscape: []
+  },
+  filters: {
+    polaroid: [imagesAdressBase+"/filters/polaroid/matous.png"],
+    landscape: [imagesAdressBase+"/filters/landscape/rose1.png", imagesAdressBase+"/filters/landscape/Moustaches.png"],
+    defaultLandscapeFilter: 1
+  }
+}
+// const octobreRoseConfig = {
+//   canPrint: false,
+//   templates: ["PAYSAGE"],
+//   cameraModes: ["PICTURE", "GIF"],
+//   cadres: {
+//     polaroid: [MatousBAS],
+//     paysage: []
+//   },
+//   filtres: {
+//     polaroid: [],
+//     paysage: ["Aucun filtre", OctoberRose1, OctoberRose2],
+//     defaultPaysageFilter: 1
+//   }
+// }
+// const mariageConfig = {
+//   canPrint: true,
+//   templates: ["PAYSAGE"],
+//   cameraModes: ["PICTURE"],
+//   cadres: {
+//     polaroid: [],
+//     paysage: []
+//   },
+//   filtres: {
+//     polaroid: [],
+//     paysage: ["Aucun filtre", JessEtSeb, Moustaches],
+//     defaultPaysageFilter: 1
+//   }
+// }
+type Config  = {
+  canPrint: boolean,
+  format: string[],
+  cameraModes: string[],
+  frames: {
+    polaroid: string[],
+    landscape: string[]
+  },
+  filters: {
+    polaroid: string[],
+    landscape: string[],
+    defaultLandscapeFilter: number
+  }
+}
+const config: Config = debugConfig;
+  
+const emptyConfig : Config = {
+  canPrint: false,
+  format: ["PAYSAGE"],
+  cameraModes: ["PICTURE"],
+  frames: {
+    polaroid: [],
+    landscape: []
+  },
+  filters: {
+    polaroid: [],
+    landscape: [],
+    defaultLandscapeFilter: 0
+  }
+} as Config;
 function Camera() {
   // État pour le texte de chargement
   const [loading, setLoading] = useState(false);
@@ -67,13 +85,13 @@ function Camera() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
-  const [filter, setFilter] = useState<number>(config.filtres.defaultPaysageFilter);
-  const [cadrePOLA, setCadre] = useState<number>(0);
+  const [filter, setFilter] = useState<number>(config.filters.defaultLandscapeFilter);
+  const [framePolaroid, setFramePolaroid] = useState<number>(0);
 
-  const [filtresPAYSAGE, setFiltresPAYSAGE] = useState<string[]>(config.filtres.paysage);
-  const [filtresPOLAROID, setFiltresPOLAROID] = useState<string[]>(config.filtres.polaroid);
+  const [filtresPAYSAGE, setFiltresPAYSAGE] = useState<string[]>(config.filters.landscape);
+  const [filtresPOLAROID, setFiltresPOLAROID] = useState<string[]>(config.filters.polaroid);
   const [filtresMINIPOLAROID, setFiltresMINIPOLAROID] = useState<string[]>(["Aucun filtre"]);
-  const [cadresPOLAROID, setCadresPOLAROID] = useState<string[]>(config.cadres.polaroid);
+  const [cadresPOLAROID, setCadresPOLAROID] = useState<string[]>(config.frames.polaroid);
   const [modes, setModes] = useState<string[]>(config.cameraModes);
   const [mode, setMode] = useState<string>(config.cameraModes[0]);
   const [capturedPhoto, setCapturedPhoto] = useState<string | null>(null);
@@ -89,8 +107,8 @@ function Camera() {
   const [gifFinished, setGifFinished] = useState(true);
   const [showMenu, setShowMenu] = useState(true);
   const [enteringEmail, setEnteringEmail] = useState(false);
-  const [templates, setTemplates] = useState<string[]>(config.templates);
-  const [template, setTemplate] = useState(config.templates[0]);
+  const [templates, setTemplates] = useState<string[]>(config.format);
+  const [template, setTemplate] = useState(config.format[0]);
 
   let videoConstraintsStart = {
     video: {
@@ -101,7 +119,7 @@ function Camera() {
   };
   let videoConstraintsFull = {
     video: {
-      width: 3228,
+      width: 3840,
       height: 2160,
       facingMode: 'user',
     },
@@ -461,9 +479,9 @@ function Camera() {
         setLoading(true);
         setPrintError(null); // Réinitialiser l'erreur avant chaque impression
         try {
-          const cadreValue = cadrePOLA === 0
+          const cadreValue = framePolaroid === 0
             ? "NULL"
-            : cadresPOLAROID[cadrePOLA].split('/')[3].split('.')[0];
+            : cadresPOLAROID[framePolaroid].split('/')[3].split('.')[0];
 
           console.log(cadreValue)
           const response = await fetch(`${backendAdress}/print`, {
@@ -546,7 +564,7 @@ function Camera() {
     } else if (cadreIndex >= cadresPOLAROID.length) {
       newIndex = 0;
     }
-    if (template === "POLAROID") setCadre(newIndex);
+    if (template === "POLAROID") setFramePolaroid(newIndex);
   };
 
   const putCopies = async (copies: number) => {
@@ -579,15 +597,12 @@ function Camera() {
           playsInline
           className="video-stream"
           style={{
-            width: template === "POLAROID" ? '100vh' :
-              template === "MINIPOLAROID" ? '720px' :
-                template === "PAYSAGE" ? '1614px' : '100%',
             height: '100%', // Maintain full height of the container
-            objectFit: 'cover', // Ensures the video fills the container and crops excess
+            width: '100%', // Maintain full height of the container
+            objectFit: 'contain', // Ensures the video fills the container and crops excess
             position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
+            top: '0',
+            left: '0',
           }}
         />
         {template == "PAYSAGE" && (<div className='captured-image-cadre-container'><img className="captured-image-cadre" style={{ aspectRatio: videoRef.current?.videoWidth! + "/" + videoRef.current?.videoHeight! }} src={filtresPAYSAGE[filter]} alt="Captured" /></div>)}
@@ -626,7 +641,7 @@ function Camera() {
         </div>
       )}
 
-      {showSavingOptions && mode === 'PICTURE' && printError !== 'LU' && cadrePOLA !== 0 && template == "POLAROID" && (<img className="captured-image-cadre-BAS" src={cadresPOLAROID[cadrePOLA]} alt="Captured" />)}
+      {showSavingOptions && mode === 'PICTURE' && printError !== 'LU' && framePolaroid !== 0 && template == "POLAROID" && (<img className="captured-image-cadre-BAS" src={cadresPOLAROID[framePolaroid]} alt="Captured" />)}
 
       {showSavingOptions && (
         <div className="form-buttons">
@@ -655,8 +670,8 @@ function Camera() {
 
             {mode === 'PICTURE' && printError !== 'LU' && template === 'POLAROID' && (
               <div>
-                <div onClick={() => switchCadre(cadrePOLA - 1)} className="form-button navigation left">&lt;</div>
-                <div onClick={() => switchCadre(cadrePOLA + 1)} className="form-button navigation right">&gt;</div>
+                <div onClick={() => switchCadre(framePolaroid - 1)} className="form-button navigation left">&lt;</div>
+                <div onClick={() => switchCadre(framePolaroid + 1)} className="form-button navigation right">&gt;</div>
               </div>
             )}
 
@@ -736,9 +751,7 @@ function Camera() {
         </div>
       )}
 
-      <div className="settings">
-        <Settings onCopiesUpdated={handleCopiesUpdated} />
-      </div>
+      <Settings onCopiesUpdated={handleCopiesUpdated} />
 
     </div>
   );

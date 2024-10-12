@@ -593,18 +593,6 @@ body {
   background: #0056b3;
 }
 
-.settings {
-  position: fixed;
-  top: 10px;
-  /* Ajustez si nécessaire */
-  right: 10px;
-  /* Ajustez si nécessaire */
-  z-index: 1000;
-  /* Assurez-vous que l'icône est au-dessus des autres éléments */
-  font-size: 2rem;
-  /* Taille de l'icône (facultatif) */
-}
-
 /*POLAROID CENTRAL*/
 .captured-image-POLA {
   position: absolute;
