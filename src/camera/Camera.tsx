@@ -284,6 +284,7 @@ function Camera() {
           const frameImage = new Image();
 
           frameImage.src = currentSelectedFilter.url;
+          frameImage.crossOrigin = "anonymous"; // do that to avoid "Tainted canvas" error when executing toBlob on canvas 
           return new Promise((resolve, reject) => {
             frameImage.onload = () => {
               // Vérification de canvasRef.current avant d'utiliser ses méthodes
