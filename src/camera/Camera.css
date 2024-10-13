@@ -50,7 +50,7 @@ body {
 }
 
 .camera-left-picture {
-  opacity: 0.20;
+  opacity: 0.2;
 }
 
 .porte-column {
@@ -152,7 +152,6 @@ body {
   justify-content: center;
 }
 
-
 /* .video-stream {
   width: 100vw;
   height: 100vh;
@@ -196,7 +195,7 @@ body {
 
 @keyframes touch {
   0% {
-    transform: translateY(-20px) translateX(20px) rotate(0deg) scale(0.8)
+    transform: translateY(-20px) translateX(20px) rotate(0deg) scale(0.8);
   }
 
   20% {
@@ -221,20 +220,62 @@ body {
   0% {
     transform: rotate(0deg) scale(1);
     filter: brightness(1);
-    content: "📷"
+    content: "📷";
   }
 
   80% {
     transform: rotate(0deg) scale(1);
     filter: brightness(1);
-    content: "📷"
+    content: "📷";
   }
 
   100% {
     transform: rotate(0deg) scale(1.5);
     filter: brightness(2);
-    content: "📸"
+    content: "📸";
   }
+}
+
+.scan-anim {
+  animation: scan-point 1s ease-in-out infinite alternate;
+}
+
+@keyframes scan-point {
+  0% {
+    transform: translateY(-20px) rotate(0deg) scale(1);
+  }
+
+  100% {
+    transform: translateY(40px) rotate(30deg) scale(0.8);
+  }
+}
+
+.qrcode-page {
+  padding: 15px;
+  gap: 20px;
+  box-sizing: border-box;
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  justify-content: start;
+  align-items: start;
+  flex-direction: column;
+}
+
+.qrcode-box {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  width: 270px;
+}
+
+.qrcode-box > h1 {
+  color: white;
+  text-shadow: 2px 4px 3px rgba(0, 0, 0, 0.3);
 }
 
 .countdown-display {
@@ -302,8 +343,6 @@ body {
   height: 100vh;
   object-fit: contain;
 }
-
-
 
 .save-button,
 .cancel-button {
@@ -376,7 +415,6 @@ body {
   color: white;
 }
 
-
 .camera-buttons .inactive {
   background-color: rgba(128, 128, 128, 0.3);
   /* Couleur de fond inactive avec opacité */
@@ -396,7 +434,7 @@ body {
   margin-right: 10px;
   /* Espacement entre les boutons */
   color: white;
-  font-size: 1.0rem;
+  font-size: 1rem;
   padding: 15px;
   /* Padding */
   width: 200px;
@@ -415,7 +453,7 @@ body {
   margin-right: 10px;
   /* Espacement entre les boutons */
   color: white;
-  font-size: 2.0rem;
+  font-size: 2rem;
   padding: 15px;
   /* Padding */
   width: 500px;
@@ -493,7 +531,6 @@ body {
   margin-left: 10vw;
   /* Couleur de fond rouge avec opacité */
 }
-
 
 .copies-control {
   display: flex;
@@ -620,7 +657,6 @@ body {
   object-fit: contain;
   z-index: 99999;
 }
-
 
 /* SELECT CADRE POLA*/
 .form-buttons .navigation.left {

@@ -3,11 +3,16 @@ import './Camera.css';
 import gifshot from 'gifshot';
 import POLAROIDBASE from '../frames/POLAROIDBASE.png';
 import Settings from '../settings/Settings';
+import QRCode from 'react-qr-code';
 
 const backendAdress = process.env.REACT_APP_BACKEND_ADRESS ?? 'http://127.0.0.1:3001'
 const imagesAdressBase = backendAdress + "/images";
 const debugConfig: Config = {
   canPrint: true,
+  qrCodePage: {
+    url: "https://www.instagram.com/baguette_et_reblochon/",
+    text: "📱 Récupères ta photo en suivant notre page !"
+  },
   format: ["PAYSAGE", "POLAROID", "MINIPOLAROID"],
   cameraModes: ["PICTURE", "GIF"],
   frames: {
@@ -27,6 +32,10 @@ type Image = {
 }
 type Config = {
   canPrint: boolean,
+  qrCodePage?: {
+    url: string,
+    text: string
+  },
   format: string[],
   cameraModes: string[],
   frames: {
@@ -632,6 +641,23 @@ function Camera() {
           {format === "POLAROID" && (
             <img src={POLAROIDBASE} alt="Polaroid Base" className="captured-image-POLA" />
           )}
+        </div>
+      )}
+
+      {showSavingOptions && config.qrCodePage && (
+        <div className='qrcode-page'>
+          <div className='qrcode-box'>
+            <div style={{ height: "auto", width: 250, alignSelf: "flex-start" }}>
+              <QRCode
+                size={256}
+                style={{ height: "auto", maxWidth: "100%", width: "100%" }}
+                value={config.qrCodePage.url}
+                viewBox={`0 0 256 256`}
+              />
+            </div>
+            <h1 style={{ fontSize: 100, margin: 0 }} className='scan-anim'>☝️</h1>
+            <h1>{config.qrCodePage?.text}</h1>
+          </div>
         </div>
       )}
 
