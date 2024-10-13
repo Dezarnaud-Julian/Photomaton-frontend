@@ -611,7 +611,7 @@ function Camera() {
             left: '0',
           }}
         />
-        <div className='captured-image-filter-container'><img className="captured-image-filter" style={{ aspectRatio: videoRef.current?.videoWidth! + "/" + videoRef.current?.videoHeight! }} src={currentSelectedFilter.url} alt="Captured" /></div>
+        {currentSelectedFilter.url && <div className='captured-image-filter-container'><img className="captured-image-filter" style={{ aspectRatio: videoRef.current?.videoWidth! + "/" + videoRef.current?.videoHeight! }} src={currentSelectedFilter.url} alt="Captured" /></div>}
         {textShown && (
           <div className="overlay-text-left">
             <p style={{ margin: 0, textWrap: "nowrap" }}>Appuies pour prendre une photo</p>
