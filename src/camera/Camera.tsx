@@ -603,12 +603,11 @@ function Camera() {
           playsInline
           className="video-stream"
           style={{
-            height: '100%', // Maintain full height of the container
-            width: '100%', // Maintain full height of the container
-            objectFit: 'contain', // Ensures the video fills the container and crops excess
-            position: 'absolute',
-            top: '0',
-            left: '0',
+            height: '100%',
+            width: format === "POLAROID" ? '100vh' :
+              format === "MINIPOLAROID" ? '720px' :
+                format === "PAYSAGE" ? '1614px' : '100%',
+            objectFit: 'cover',
           }}
         />
         {currentSelectedFilter.url && <div className='captured-image-filter-container'><img className="captured-image-filter" style={{ aspectRatio: videoRef.current?.videoWidth! + "/" + videoRef.current?.videoHeight! }} src={currentSelectedFilter.url} alt="Captured" /></div>}
