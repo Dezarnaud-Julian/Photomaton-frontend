@@ -159,13 +159,13 @@ body {
   object-fit: contain;
 } */
 
-.captured-image-cadre {
+.captured-image-filter {
   height: 100vh;
   object-fit: contain;
   /* border: 2px solid red; */
 }
 
-.captured-image-cadre-container {
+.captured-image-filter-container {
   width: 100vw;
   height: 100vh;
   position: absolute;
@@ -359,7 +359,7 @@ body {
   /* Couleur de fond active avec opacité */
 }
 
-.camera-buttons .template {
+.camera-buttons .format {
   background-color: rgba(0, 0, 255, 0.8);
   /* Couleur de fond active avec opacité */
 }
@@ -641,7 +641,7 @@ body {
   top: 50%;
 }
 
-.captured-image-cadre-BAS {
+.captured-image-filter-BAS {
   height: 100vh;
   object-fit: contain;
   z-index: 0;

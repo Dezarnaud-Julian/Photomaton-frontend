@@ -2,7 +2,7 @@ import React, { useRef, useEffect } from 'react';
 import './Acceuil.css';
 import { useNavigate } from 'react-router-dom';
 
-function Acceuil() {
+function Accueil() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const navigate = useNavigate();
 
@@ -33,4 +33,4 @@ function Acceuil() {
   );
 }
 
-export default Acceuil;
+export default Accueil;

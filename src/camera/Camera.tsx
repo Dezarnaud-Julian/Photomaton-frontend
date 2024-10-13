@@ -1,78 +1,59 @@
 import { useRef, useEffect, useState } from 'react';
 import './Camera.css';
 import gifshot from 'gifshot';
-import POLAROIDBASE from '../cadres/POLAROIDBASE.png';
+import POLAROIDBASE from '../frames/POLAROIDBASE.png';
 import Settings from '../settings/Settings';
 
 const backendAdress = process.env.REACT_APP_BACKEND_ADRESS ?? 'http://127.0.0.1:3001'
 const imagesAdressBase = backendAdress + "/images";
-const debugConfig : Config = {
+const debugConfig: Config = {
   canPrint: true,
   format: ["PAYSAGE", "POLAROID", "MINIPOLAROID"],
   cameraModes: ["PICTURE", "GIF"],
   frames: {
-    polaroid: [imagesAdressBase+"/frames/polaroid/matous.png"],
-    landscape: []
+    miniPolaroid: [{ name: "Aucun frame", url: "" }],
+    polaroid: [{ name: "Aucun frame", url: "" }, { name: "matous", url: imagesAdressBase + "/frames/polaroid/matous.png" }],
+    landscape: [{ name: "Aucun frame", url: "" }]
   },
   filters: {
-    polaroid: [imagesAdressBase+"/filters/polaroid/matous.png"],
-    landscape: [imagesAdressBase+"/filters/landscape/rose1.png", imagesAdressBase+"/filters/landscape/Moustaches.png"],
+    miniPolaroid: [{ name: "Aucun filter", url: "" }],
+    polaroid: [{ name: "Aucun filter", url: "" }, { name: "matous", url: imagesAdressBase + "/filters/polaroid/matous.png" }],
+    landscape: [{ name: "Aucun filter", url: "" }, { name: "rose 1", url: imagesAdressBase + "/filters/landscape/rose1.png" }, { name: "moustaches", url: imagesAdressBase + "/filters/landscape/Moustaches.png" }],
     defaultLandscapeFilter: 1
   }
 }
-// const octobreRoseConfig = {
-//   canPrint: false,
-//   templates: ["PAYSAGE"],
-//   cameraModes: ["PICTURE", "GIF"],
-//   cadres: {
-//     polaroid: [MatousBAS],
-//     paysage: []
-//   },
-//   filtres: {
-//     polaroid: [],
-//     paysage: ["Aucun filtre", OctoberRose1, OctoberRose2],
-//     defaultPaysageFilter: 1
-//   }
-// }
-// const mariageConfig = {
-//   canPrint: true,
-//   templates: ["PAYSAGE"],
-//   cameraModes: ["PICTURE"],
-//   cadres: {
-//     polaroid: [],
-//     paysage: []
-//   },
-//   filtres: {
-//     polaroid: [],
-//     paysage: ["Aucun filtre", JessEtSeb, Moustaches],
-//     defaultPaysageFilter: 1
-//   }
-// }
-type Config  = {
+type Image = {
+  name: string, url: string
+}
+type Config = {
   canPrint: boolean,
   format: string[],
   cameraModes: string[],
   frames: {
-    polaroid: string[],
-    landscape: string[]
+    miniPolaroid: Image[],
+    polaroid: Image[],
+    landscape: Image[]
   },
   filters: {
-    polaroid: string[],
-    landscape: string[],
+    miniPolaroid: Image[],
+    polaroid: Image[],
+    landscape: Image[],
     defaultLandscapeFilter: number
   }
 }
 const config: Config = debugConfig;
-  
-const emptyConfig : Config = {
+
+const emptyConfig: Config = {
   canPrint: false,
   format: ["PAYSAGE"],
   cameraModes: ["PICTURE"],
   frames: {
+    miniPolaroid: [],
     polaroid: [],
     landscape: []
   },
   filters: {
+    miniPolaroid: [],
     polaroid: [],
     landscape: [],
     defaultLandscapeFilter: 0
@@ -88,12 +69,14 @@ function Camera() {
   const [filter, setFilter] = useState<number>(config.filters.defaultLandscapeFilter);
   const [framePolaroid, setFramePolaroid] = useState<number>(0);
 
-  const [filtresPAYSAGE, setFiltresPAYSAGE] = useState<string[]>(config.filters.landscape);
-  const [filtresPOLAROID, setFiltresPOLAROID] = useState<string[]>(config.filters.polaroid);
-  const [filtresMINIPOLAROID, setFiltresMINIPOLAROID] = useState<string[]>(["Aucun filtre"]);
-  const [cadresPOLAROID, setCadresPOLAROID] = useState<string[]>(config.frames.polaroid);
+  const [filtersPAYSAGE, setFiltersPAYSAGE] = useState<Image[]>(config.filters.landscape);
+  const [filtersPOLAROID, setFiltersPOLAROID] = useState<Image[]>(config.filters.polaroid);
+  const [filtersMINIPOLAROID, setFiltersMINIPOLAROID] = useState<Image[]>(config.filters.miniPolaroid);
+  const [framesPOLAROID, setFramesPOLAROID] = useState<Image[]>(config.frames.polaroid);
+
   const [modes, setModes] = useState<string[]>(config.cameraModes);
   const [mode, setMode] = useState<string>(config.cameraModes[0]);
+
   const [capturedPhoto, setCapturedPhoto] = useState<string | null>(null);
   const [photoBlob, setPhotoBlob] = useState<Blob | null>(null);
   const [showSavingOptions, setShowSavingOptions] = useState(false);
@@ -107,8 +90,8 @@ function Camera() {
   const [gifFinished, setGifFinished] = useState(true);
   const [showMenu, setShowMenu] = useState(true);
   const [enteringEmail, setEnteringEmail] = useState(false);
-  const [templates, setTemplates] = useState<string[]>(config.format);
-  const [template, setTemplate] = useState(config.format[0]);
+  const [formats, setFormats] = useState<string[]>(config.format);
+  const [format, setFormat] = useState(config.format[0]);
 
   let videoConstraintsStart = {
     video: {
@@ -137,7 +120,6 @@ function Camera() {
       videoTrack.stop();
 
       let newStream = await navigator.mediaDevices.getUserMedia(videoConstraintsFull);
-
       if (videoRef.current) {
         videoRef.current.srcObject = newStream;
         setStream(newStream);
@@ -154,7 +136,7 @@ function Camera() {
     }
   };
 
-  const restartCamera = async (template: string) => {
+  const restartCamera = async () => {
     stopCamera();
     startCamera();
   };
@@ -214,12 +196,12 @@ function Camera() {
     let gifWidth = 1614;
     let gifHeight = 1080;
 
-    if (template === "POLAROID") {
+    if (format === "POLAROID") {
       gifWidth = 2160;
       gifHeight = 2160;
     }
 
-    if (template === "MINIPOLAROID") {
+    if (format === "MINIPOLAROID") {
       gifWidth = 1400;
       gifHeight = 2160;
     }
@@ -259,13 +241,13 @@ function Camera() {
 
         let canvasWidth = videoWidth;
         let canvasHeight = videoHeight;
-        if (template === "POLAROID") {
+        if (format === "POLAROID") {
           canvasWidth = 2160;
           canvasHeight = 2160;
-        } else if (template === "MINIPOLAROID") {
+        } else if (format === "MINIPOLAROID") {
           canvasWidth = 1400;
           canvasHeight = 2160;
-        } else if (template === "PAYSAGE") {
+        } else if (format === "PAYSAGE") {
           canvasWidth = 3228;
           canvasHeight = 2160;
         }
@@ -286,28 +268,19 @@ function Camera() {
 
         // Draw the video on the canvas, cropping as needed
         context.drawImage(videoRef.current, offsetX, offsetY, drawWidth, drawHeight);
-
         context.restore();
 
-        // Gestion des cadres
-        if (filter !== 0) {
-          const cadreImage = new Image();
+        // Gestion des filters
+        if (currentSelectedFilter.url !== "") {
+          const frameImage = new Image();
 
-          // Sélection de l'image du cadre en fonction du template
-          if (template === "POLAROID") {
-            cadreImage.src = filtresPOLAROID[filter];
-          } else if (template === "MINIPOLAROID") {
-            cadreImage.src = filtresMINIPOLAROID[filter];
-          } else {
-            cadreImage.src = filtresPAYSAGE[filter];
-          }
-
+          frameImage.src = currentSelectedFilter.url;
           return new Promise((resolve, reject) => {
-            cadreImage.onload = () => {
+            frameImage.onload = () => {
               // Vérification de canvasRef.current avant d'utiliser ses méthodes
               if (canvasRef.current) {
-                // Dessiner le cadre par-dessus l'image capturée
-                context.drawImage(cadreImage, 0, 0, canvasRef.current.width, canvasRef.current.height);
+                // Dessiner le frame par-dessus l'image capturée
+                context.drawImage(frameImage, 0, 0, canvasRef.current.width, canvasRef.current.height);
                 canvasRef.current.toBlob((blob) => {
                   if (blob) {
                     const url = URL.createObjectURL(blob);
@@ -324,13 +297,13 @@ function Camera() {
               }
             };
 
-            cadreImage.onerror = () => {
+            frameImage.onerror = () => {
               console.error('Failed to load the frame image');
               reject(new Error('Failed to load the frame image'));
             };
           });
         } else {
-          // Sans cadre
+          // Sans frame
           return new Promise((resolve, reject) => {
             if (canvasRef.current) {
               canvasRef.current.toBlob((blob) => {
@@ -359,10 +332,10 @@ function Camera() {
   const handleSave = async () => {
     if (photoBlob) {
       setPhotoPath(await savePhoto());
-      console.log("PHOTO PATH", photoPath)
+      console.log("Photo saved at path :", photoPath)
       setShowSavingOptions(true);
     } else {
-      console.error('No photo blob to upload');
+      console.error('Photo not saved : no photo blob to upload');
     }
   };
 
@@ -456,19 +429,20 @@ function Camera() {
     }
   };
 
-  const switchTemplate = (number: number) => {
-    console.log("Switching template");
-    const searchTerm = template;
-    let index = templates.findIndex((template) => template === searchTerm);
+  const switchFormat = (number: number) => {
+    console.log("Switching format");
+    const searchTerm = format;
+    let index = formats.findIndex((f) => f === searchTerm);
+    setFilter(0); //  reset to empty filter
 
     index = index + number
-    if (index === templates.length) {
-      setTemplate(templates[0]);
+    if (index === formats.length) {
+      setFormat(formats[0]);
     } else {
       if (index === -1) {
-        setTemplate(templates[templates.length - 1]);
+        setFormat(formats[formats.length - 1]);
       } else {
-        setTemplate(templates[index]);
+        setFormat(formats[index]);
       }
     }
   };
@@ -479,11 +453,11 @@ function Camera() {
         setLoading(true);
         setPrintError(null); // Réinitialiser l'erreur avant chaque impression
         try {
-          const cadreValue = framePolaroid === 0
+          const frameValue = framePolaroid === 0
             ? "NULL"
-            : cadresPOLAROID[framePolaroid].split('/')[3].split('.')[0];
+            : framesPOLAROID[framePolaroid].name;
 
-          console.log(cadreValue)
+          console.log(frameValue)
           const response = await fetch(`${backendAdress}/print`, {
             method: 'POST',
             headers: {
@@ -492,8 +466,8 @@ function Camera() {
             body: JSON.stringify({
               filePath: photoPath,
               copies: printCopies,
-              template: template,
-              cadre: cadreValue // Utilisation de la valeur de cadre
+              format: format,
+              frame: frameValue // Utilisation de la valeur de frame
             }),
           });
 
@@ -541,30 +515,30 @@ function Camera() {
       } else {
         setFilter(filterIndex);
       }
-      if (template === "POLAROID") {
-        if (filterIndex < 0) { setFilter(filtresPOLAROID.length - 1); }
-        else if (filterIndex >= filtresPOLAROID.length) { setFilter(0); }
+      if (format === "POLAROID") {
+        if (filterIndex < 0) { setFilter(filtersPOLAROID.length - 1); }
+        else if (filterIndex >= filtersPOLAROID.length) { setFilter(0); }
       } else {
-        if (template === "MINIPOLAROID") {
-          if (filterIndex < 0) { setFilter(filtresMINIPOLAROID.length - 1); }
-          else if (filterIndex >= filtresMINIPOLAROID.length) { setFilter(0); }
+        if (format === "MINIPOLAROID") {
+          if (filterIndex < 0) { setFilter(filtersMINIPOLAROID.length - 1); }
+          else if (filterIndex >= filtersMINIPOLAROID.length) { setFilter(0); }
         } else {
-          if (filterIndex < 0) { setFilter(filtresPAYSAGE.length - 1); }
-          else if (filterIndex >= filtresPAYSAGE.length) { setFilter(0); }
+          if (filterIndex < 0) { setFilter(filtersPAYSAGE.length - 1); }
+          else if (filterIndex >= filtersPAYSAGE.length) { setFilter(0); }
         }
       }
     }
   };
 
-  const switchCadre = async (cadreIndex: number) => {
-    console.log(cadreIndex);
-    let newIndex = cadreIndex;
+  const switchFrame = async (frameIndex: number) => {
+    console.log(frameIndex);
+    let newIndex = frameIndex;
     if (newIndex < 0) {
-      newIndex = cadresPOLAROID.length - 1;
-    } else if (cadreIndex >= cadresPOLAROID.length) {
+      newIndex = framesPOLAROID.length - 1;
+    } else if (frameIndex >= framesPOLAROID.length) {
       newIndex = 0;
     }
-    if (template === "POLAROID") setFramePolaroid(newIndex);
+    if (format === "POLAROID") setFramePolaroid(newIndex);
   };
 
   const putCopies = async (copies: number) => {
@@ -588,6 +562,28 @@ function Camera() {
     console.log(`Nombre de copies mises à jour : ${newCopies}`);
   };
 
+  const multipleFiltersAvailableForThisFormat = (format === "PAYSAGE" && filtersPAYSAGE.length > 1) || (format === "POLAROID" && filtersPOLAROID.length > 1) || (format === "MINIPOLAROID" && filtersMINIPOLAROID.length > 1);
+  const getFilterBankFromFormat = (format: string) => {
+    if (format === "PAYSAGE") return filtersPAYSAGE;
+    else if (format === "POLAROID") return filtersPOLAROID;
+    else if (format === "MINIPOLAROID") return filtersMINIPOLAROID;
+    else {
+      console.warn(`Format ${format} unknown, returning empty filter bank.`);
+      return [{ name: 'Aucun filter', url: "" }]
+    }
+  }
+
+  const getFrameBankFromFormat = (format: string) => {
+    if (format === "PAYSAGE") return [{ name: 'Aucun frame', url: "" }];
+    else if (format === "POLAROID") return framesPOLAROID;
+    else if (format === "MINIPOLAROID") return [{ name: 'Aucun frame', url: "" }];
+    else {
+      console.warn(`Format ${format} unknown, returning empty frame bank.`);
+      return [{ name: 'Aucun frame', url: "" }]
+    }
+  }
+  const currentSelectedFilter = getFilterBankFromFormat(format)[filter];
+  const currentSelectedFrame = getFrameBankFromFormat(format)[framePolaroid];
   return (
     <div className="camera-container">
       <div className="camera-left" onClick={textShown ? captureMedia : undefined}>
@@ -605,9 +601,7 @@ function Camera() {
             left: '0',
           }}
         />
-        {template == "PAYSAGE" && (<div className='captured-image-cadre-container'><img className="captured-image-cadre" style={{ aspectRatio: videoRef.current?.videoWidth! + "/" + videoRef.current?.videoHeight! }} src={filtresPAYSAGE[filter]} alt="Captured" /></div>)}
-        {template == "POLAROID" && (<div className='captured-image-cadre-container'><img className="captured-image-cadre" style={{ aspectRatio: videoRef.current?.videoWidth! + "/" + videoRef.current?.videoHeight! }} src={filtresPOLAROID[filter]} alt="Captured" /></div>)}
-        {template == "MINIPOLAROID" && (<div className='captured-image-cadre-container'><img className="captured-image-cadre" style={{ aspectRatio: videoRef.current?.videoWidth! + "/" + videoRef.current?.videoHeight! }} src={filtresMINIPOLAROID[filter]} alt="Captured" /></div>)}
+        <div className='captured-image-filter-container'><img className="captured-image-filter" style={{ aspectRatio: videoRef.current?.videoWidth! + "/" + videoRef.current?.videoHeight! }} src={currentSelectedFilter.url} alt="Captured" /></div>
         {textShown && (
           <div className="overlay-text-left">
             <p style={{ margin: 0, textWrap: "nowrap" }}>Appuies pour prendre une photo</p>
@@ -633,15 +627,15 @@ function Camera() {
               <div onClick={handleCancel} className="overlay-text-keep-cancel">❌</div>
             </div>
           )}
-          <img className={`captured-image ${template === 'POLAROID' && showSavingOptions ? 'video-streamPOLA' : ''}`} src={capturedPhoto} alt="Captured" />
+          <img className={`captured-image ${format === 'POLAROID' && showSavingOptions ? 'video-streamPOLA' : ''}`} src={capturedPhoto} alt="Captured" />
 
-          {template === "POLAROID" && (
+          {format === "POLAROID" && (
             <img src={POLAROIDBASE} alt="Polaroid Base" className="captured-image-POLA" />
           )}
         </div>
       )}
 
-      {showSavingOptions && mode === 'PICTURE' && printError !== 'LU' && framePolaroid !== 0 && template == "POLAROID" && (<img className="captured-image-cadre-BAS" src={cadresPOLAROID[framePolaroid]} alt="Captured" />)}
+      {showSavingOptions && mode === 'PICTURE' && printError !== 'LU' && framePolaroid !== 0 && format == "POLAROID" && (<img className="captured-image-frame-BAS" src={framesPOLAROID[framePolaroid].url} alt="Captured" />)}
 
       {showSavingOptions && (
         <div className="form-buttons">
@@ -668,10 +662,10 @@ function Camera() {
 
             {/* <div className={`form-button active`} onClick={handleSendEmail}>ENVOYER</div> */}
 
-            {mode === 'PICTURE' && printError !== 'LU' && template === 'POLAROID' && (
+            {mode === 'PICTURE' && printError !== 'LU' && format === 'POLAROID' && (
               <div>
-                <div onClick={() => switchCadre(framePolaroid - 1)} className="form-button navigation left">&lt;</div>
-                <div onClick={() => switchCadre(framePolaroid + 1)} className="form-button navigation right">&gt;</div>
+                <div onClick={() => switchFrame(framePolaroid - 1)} className="form-button navigation left">&lt;</div>
+                <div onClick={() => switchFrame(framePolaroid + 1)} className="form-button navigation right">&gt;</div>
               </div>
             )}
 
@@ -699,9 +693,9 @@ function Camera() {
 
       {!showSavingOptions && showMenu && (
         <div className="camera-buttons">
-          {templates.length > 1 && <><div className="camera-button navigation" onClick={() => switchTemplate(-1)}>&lt;</div>
-            <div className={`camera-button template`}>{template}</div>
-            <div className="camera-button navigation" onClick={() => switchTemplate(+1)}>&gt;</div></>}
+          {formats.length > 1 && <><div className="camera-button navigation" onClick={() => switchFormat(-1)}>&lt;</div>
+            <div className={`camera-button format`}>{format}</div>
+            <div className="camera-button navigation" onClick={() => switchFormat(+1)}>&gt;</div></>}
 
           {modes.length > 1 && <div style={{ display: "flex", width: "auto", backgroundColor: 'transparent' }}>
             <div className="camera-button navigation" onClick={() => switchMode(-1)}>&lt;</div>
@@ -709,28 +703,14 @@ function Camera() {
             <div className="camera-button navigation" onClick={() => switchMode(+1)}>&gt;</div>
           </div>}
 
-          {template === "PAYSAGE" && filtresPAYSAGE.length > 1 && (
+          {multipleFiltersAvailableForThisFormat && (
             <>
               <div className="camera-button navigation" onClick={() => putFilter(filter - 1)}>&lt;</div>
-              <div className={`camera-button ${extractTextFromPath(filtresPAYSAGE[filter]) !== "Aucun cadre" ? 'active' : 'inactive'}`}>
-                {extractTextFromPath(filtresPAYSAGE[filter])}
+              <div className={`camera-button ${currentSelectedFilter.url !== "" ? 'active' : 'inactive'}`}>
+                {currentSelectedFilter.name}
               </div>
               <div className="camera-button navigation" onClick={() => putFilter(filter + 1)}>&gt;</div>
             </>
-          )}
-          {template === "POLAROID" && filtresPOLAROID.length > 1 && (
-            <>
-              <div className="camera-button navigation" onClick={() => putFilter(filter - 1)}>&lt;</div>
-              <div className={`camera-button ${extractTextFromPath(filtresPOLAROID[filter]) !== "Aucun cadre" ? 'active' : 'inactive'}`}>
-                {extractTextFromPath(filtresPOLAROID[filter])}
-              </div>
-              <div className="camera-button navigation" onClick={() => putFilter(filter + 1)}>&gt;</div>
-            </>
-          )}
-          {template === "MINIPOLAROID" && (
-            <div className={`camera-button ${extractTextFromPath(filtresMINIPOLAROID[filter]) !== "Aucun cadre" ? 'active' : 'inactive'}`}>
-              {extractTextFromPath(filtresMINIPOLAROID[filter])}
-            </div>
           )}
         </div>
       )}
