@@ -16,14 +16,14 @@ const debugConfig: Config = {
   format: ["PAYSAGE", "POLAROID", "MINIPOLAROID"],
   cameraModes: ["PICTURE", "GIF"],
   frames: {
-    miniPolaroid: [{ name: "Aucun frame", url: "" }],
-    polaroid: [{ name: "Aucun frame", url: "" }, { name: "matous", url: imagesAdressBase + "/frames/polaroid/matous.png" }],
-    landscape: [{ name: "Aucun frame", url: "" }]
+    miniPolaroid: [{ name: "Aucun cadre", url: "" }],
+    polaroid: [{ name: "Aucun cadre", url: "" }, { name: "matous", url: imagesAdressBase + "/frames/polaroid/matous.png" }],
+    landscape: [{ name: "Aucun cadre", url: "" }]
   },
   filters: {
-    miniPolaroid: [{ name: "Aucun filter", url: "" }],
-    polaroid: [{ name: "Aucun filter", url: "" }, { name: "matous", url: imagesAdressBase + "/filters/polaroid/matous.png" }],
-    landscape: [{ name: "Aucun filter", url: "" }, { name: "rose 1", url: imagesAdressBase + "/filters/landscape/rose1.png" }, { name: "moustaches", url: imagesAdressBase + "/filters/landscape/Moustaches.png" }],
+    miniPolaroid: [{ name: "Aucun filtre", url: "" }],
+    polaroid: [{ name: "Aucun filtre", url: "" }, { name: "matous", url: imagesAdressBase + "/filters/polaroid/matous.png" }],
+    landscape: [{ name: "Aucun filtre", url: "" }, { name: "rose 1", url: imagesAdressBase + "/filters/landscape/rose1.png" }, { name: "moustaches", url: imagesAdressBase + "/filters/landscape/Moustaches.png" }],
     defaultLandscapeFilter: 1
   }
 }
@@ -579,17 +579,17 @@ function Camera() {
     else if (format === "MINIPOLAROID") return filtersMINIPOLAROID;
     else {
       console.warn(`Format ${format} unknown, returning empty filter bank.`);
-      return [{ name: 'Aucun filter', url: "" }]
+      return [{ name: 'Aucun filtre', url: "" }]
     }
   }
 
   const getFrameBankFromFormat = (format: string) => {
-    if (format === "PAYSAGE") return [{ name: 'Aucun frame', url: "" }];
+    if (format === "PAYSAGE") return [{ name: 'Aucun cadre', url: "" }];
     else if (format === "POLAROID") return framesPOLAROID;
-    else if (format === "MINIPOLAROID") return [{ name: 'Aucun frame', url: "" }];
+    else if (format === "MINIPOLAROID") return [{ name: 'Aucun cadre', url: "" }];
     else {
       console.warn(`Format ${format} unknown, returning empty frame bank.`);
-      return [{ name: 'Aucun frame', url: "" }]
+      return [{ name: 'Aucun cadre', url: "" }]
     }
   }
   const currentSelectedFilter = getFilterBankFromFormat(format)[filter];
@@ -719,9 +719,10 @@ function Camera() {
 
       {!showSavingOptions && showMenu && (
         <div className="camera-buttons">
-          {formats.length > 1 && <><div className="camera-button navigation" onClick={() => switchFormat(-1)}>&lt;</div>
+          {formats.length > 1 && <div style={{ display: "flex", width: "auto", backgroundColor: 'transparent' }}><div className="camera-button navigation" onClick={() => switchFormat(-1)}>&lt;</div>
             <div className={`camera-button format`}>{format}</div>
-            <div className="camera-button navigation" onClick={() => switchFormat(+1)}>&gt;</div></>}
+            <div className="camera-button navigation" onClick={() => switchFormat(+1)}>&gt;</div>
+          </div>}
 
           {modes.length > 1 && <div style={{ display: "flex", width: "auto", backgroundColor: 'transparent' }}>
             <div className="camera-button navigation" onClick={() => switchMode(-1)}>&lt;</div>
