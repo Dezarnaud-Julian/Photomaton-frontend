@@ -278,15 +278,45 @@ body {
   text-shadow: 2px 4px 3px rgba(0, 0, 0, 0.3);
 }
 
+@font-face {
+  font-family: "LilitaOne";
+  src: local("LilitaOne"),
+    url(../fonts/LilitaOne-Regular.ttf) format("truetype");
+}
+
 .countdown-display {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -57%);
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: "LilitaOne";
   font-size: 15rem;
   color: white;
   z-index: 1000;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+  animation: appear 1s ease-in-out infinite;
+  -webkit-text-stroke: 2px black;
+}
+
+@keyframes appear {
+  0% {
+    transform: translateY(0px) rotate(-5deg) scale(1);
+    color: transparent;
+  }
+
+  30% {
+    transform: translateY(-50px) rotate(5deg) scale(2);
+    color: #fff;
+  }
+
+  100% {
+    transform: translateY(0) rotate(0deg) scale(1.5);
+    color: transparent;
+  }
 }
 
 .overlay-text-keep {
@@ -323,7 +353,6 @@ body {
 
 .white-overlay {
   position: absolute;
-  /* Change de relative à absolute */
   top: 0;
   left: 0;
   width: 100vw;
