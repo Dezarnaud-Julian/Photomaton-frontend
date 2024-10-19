@@ -17,13 +17,14 @@ const debugConfig: Config = {
   cameraModes: ["PICTURE", "GIF"],
   frames: {
     miniPolaroid: [{ name: "Aucun cadre", url: "" }],
-    polaroid: [{ name: "Aucun cadre", url: "" }, { name: "matous", url: imagesAdressBase + "/frames/polaroid/matous.png" }],
+    // polaroid: [{ name: "Aucun cadre", url: "" }, { name: "matous", url: imagesAdressBase + "/frames/polaroid/matous.png" }],
+    polaroid: [{ name: "Aucun cadre", url: "" }],
     landscape: [{ name: "Aucun cadre", url: "" }]
   },
   filters: {
     miniPolaroid: [{ name: "Aucun filtre", url: "" }],
-    polaroid: [{ name: "Aucun filtre", url: "" }, { name: "matous", url: imagesAdressBase + "/filters/polaroid/matous.png" }],
-    landscape: [{ name: "Aucun filtre", url: "" }, { name: "rose 1", url: imagesAdressBase + "/filters/landscape/rose1.png" }, { name: "moustaches", url: imagesAdressBase + "/filters/landscape/Moustaches.png" }],
+    polaroid: [{ name: "Aucun filtre", url: "" }, { name: "4L TROPHY", url: imagesAdressBase + "/filters/polaroid/B&RP.png" }],
+    landscape: [{ name: "Aucun filtre", url: "" }, { name: "B&R", url: imagesAdressBase + "/filters/landscape/B&R.png" },{ name: "4L", url: imagesAdressBase + "/filters/landscape/4L.png" } ,{ name: "moustaches", url: imagesAdressBase + "/filters/landscape/Moustaches.png" }],
     defaultLandscapeFilter: 1
   }
 }
@@ -655,10 +656,10 @@ function Camera() {
                 viewBox={`0 0 256 256`}
               />
             </div>
-            <h1 style={{ fontSize: 100, margin: 0 }} className='scan-anim'>☝️</h1>
-            <h1>{config.qrCodePage?.text}</h1>
+            <h1 style={{ fontSize: 100, margin: 0, color: "black" }} className='scan-anim'>☝️</h1>
+            <h1 style={{ color: "black" }}>{config.qrCodePage?.text}</h1>
           </div>
-        </div>
+        </div>      
       )}
 
       {showSavingOptions && mode === 'PICTURE' && printError !== 'LU' && framePolaroid !== 0 && format == "POLAROID" && (<img className="captured-image-frame-BAS" src={framesPOLAROID[framePolaroid].url} alt="Captured" />)}
@@ -687,13 +688,13 @@ function Camera() {
             /> */}
 
             {/* <div className={`form-button active`} onClick={handleSendEmail}>ENVOYER</div> */}
-
-            {mode === 'PICTURE' && printError !== 'LU' && format === 'POLAROID' && (
+            
+            {/* {mode === 'PICTURE' && printError !== 'LU' && format === 'POLAROID' && (
               <div>
                 <div onClick={() => switchFrame(framePolaroid - 1)} className="form-button navigation left">&lt;</div>
                 <div onClick={() => switchFrame(framePolaroid + 1)} className="form-button navigation right">&gt;</div>
               </div>
-            )}
+            )} */}
 
             {config.canPrint && mode === 'PICTURE' && printError !== 'LU' && (
               <div className="form-impr">

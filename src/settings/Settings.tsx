@@ -102,6 +102,21 @@ function Settings({ onCopiesUpdated }: { onCopiesUpdated: (copies: string) => vo
     setCode("")
   }
 
+  const handleQuitApplication = async () => {
+    try {
+      const response = await fetch(`${backendAdress}/quit`, { method: 'POST' });
+      if (response.ok) {
+        alert('L\'application va se fermer.');
+      } else {
+        console.error('Erreur lors de la fermeture de l\'application');
+        alert('Erreur lors de la fermeture de l\'application');
+      }
+    } catch (error) {
+      console.error('Erreur réseau:', error);
+      alert('Erreur réseau' + error);
+    }
+  };  
+
   return (
     <div className='settings'>
       <div 
@@ -141,6 +156,7 @@ function Settings({ onCopiesUpdated }: { onCopiesUpdated: (copies: string) => vo
                 <button onClick={() => { window.location.reload() }}>Restart app</button>
                 <button onClick={handleShutdownMachine}>Shutdown</button>
                 <button onClick={handleRebootMachine}>Reboot</button>
+                <button onClick={handleQuitApplication}>Quitter l'application</button>
                 <input 
                   type="number" 
                   className="copies-input" 
