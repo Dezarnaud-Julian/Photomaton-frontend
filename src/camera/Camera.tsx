@@ -24,7 +24,7 @@ const debugConfig: Config = {
   filters: {
     miniPolaroid: [{ name: "Aucun filtre", url: "" }],
     polaroid: [{ name: "Aucun filtre", url: "" }, { name: "4L TROPHY", url: imagesAdressBase + "/filters/polaroid/B&RP.png" }],
-    landscape: [{ name: "Aucun filtre", url: "" }, { name: "B&R", url: imagesAdressBase + "/filters/landscape/B&R.png" },{ name: "4L", url: imagesAdressBase + "/filters/landscape/4L.png" } ,{ name: "moustaches", url: imagesAdressBase + "/filters/landscape/Moustaches.png" }],
+    landscape: [{ name: "Aucun filtre", url: "" },{ name: "Barbe", url: imagesAdressBase + "/filters/landscape/Barbe.png" }, { name: "Gravette", url: imagesAdressBase + "/filters/landscape/Gravette.png" }, { name: "Garoupe", url: imagesAdressBase + "/filters/landscape/Garoupe.png" }, { name: "Ondes", url: imagesAdressBase + "/filters/landscape/Ondes.png" },  { name: "B&R", url: imagesAdressBase + "/filters/landscape/B&R.png" },{ name: "4L", url: imagesAdressBase + "/filters/landscape/4L.png" } ,{ name: "moustaches", url: imagesAdressBase + "/filters/landscape/Moustaches.png" }],
     defaultLandscapeFilter: 1
   }
 }
@@ -614,7 +614,7 @@ function Camera() {
         {currentSelectedFilter.url && <div className='captured-image-filter-container'><img className="captured-image-filter" style={{ aspectRatio: videoRef.current?.videoWidth! + "/" + videoRef.current?.videoHeight! }} src={currentSelectedFilter.url} alt="Captured" /></div>}
         {textShown && (
           <div className="overlay-text-left">
-            <p style={{ margin: 0, textWrap: "nowrap" }}>Appuies pour prendre une photo</p>
+            <p style={{ margin: 0, textWrap: "nowrap" }}>Appuie pour prendre une photo</p>
             <p style={{ margin: 0 }} className='photo-anim'></p>
             <p style={{ fontSize: "15vh", margin: 0, height: 0 }} className='touch-anim'>👆</p>
           </div>
