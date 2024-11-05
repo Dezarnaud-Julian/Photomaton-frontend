@@ -1,49 +1,72 @@
 import { useEffect, useRef, useState } from "react";
 import "./QrReader.css";
 import QrScanner from "qr-scanner";
-import QrScannerImage from './scann.png'
+import QrScannerImage from './scann.png';
 
-const QrReader = () => {
+interface QrReaderProps {
+    handlePrint: () => void;
+}
+
+const QrReader: React.FC<QrReaderProps> = (props) => {
     // QR States
+    const {handlePrint } = props;
     const scanner = useRef<QrScanner>();
     const videoEl = useRef<HTMLVideoElement>(null);
     const qrBoxEl = useRef<HTMLDivElement>(null);
     const [qrOn, setQrOn] = useState<boolean>(true);
+    const backendAdress = process.env.REACT_APP_BACKEND_ADRESS ?? 'http://127.0.0.1:3001'
+
 
     // Result
     const [scannedResult, setScannedResult] = useState<string | undefined>("");
 
-    // Success
-    const onScanSuccess = (result: QrScanner.ScanResult) => {
-        // 🖨 Print the "result" to browser console.
-        console.log(result);
-        // ✅ Handle success.
-        // 😎 You can do whatever you want with the scanned result.
-        setScannedResult(result?.data);
+   // Dans le composant enfant qui gère le scan
+    const onScanSuccess = async (result: QrScanner.ScanResult) => {
+        console.log('Scan result:', result);
+        try {
+            const response = await fetch(`${backendAdress}/checkCode`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ code: result.data }),
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to check code');
+            }
+
+            const data = await response.json();
+            setScannedResult(data.message);
+            console.log('Backend response message:', data.message);
+
+            // Vérifiez si le message est "IMPRESSION" et appelez handlePrint
+            if (data.message === "IMPRESSION") {
+                props.handlePrint(); // Appelez handlePrint via les props
+            }
+        } catch (error) {
+            console.error('Error checking code:', error);
+        }
     };
+
+
+    
 
     // Fail
     const onScanFail = (err: string | Error) => {
-        // 🖨 Print the "err" to browser console.
         console.log(err);
     };
 
     useEffect(() => {
         if (videoEl?.current && !scanner.current) {
-            // 👉 Instantiate the QR Scanner
             scanner.current = new QrScanner(videoEl?.current, onScanSuccess, {
                 onDecodeError: onScanFail,
-                // 📷 This is the camera facing mode. In mobile devices, "environment" means back camera and "user" means front camera.
                 preferredCamera: "environment",
-                // 🖼 This will help us position our "QrFrame.svg" so that user can only scan when qr code is put in between our QrFrame.svg.
                 highlightScanRegion: true,
-                // 🔥 This will produce a yellow (default color) outline around the qr code that we scan, showing a proof that our qr-scanner is scanning that qr code.
                 highlightCodeOutline: true,
-                // 📦 A custom div which will pair with "highlightScanRegion" option above 👆. This gives us full control over our scan region.
                 overlay: qrBoxEl?.current || undefined,
             });
 
-            // 🚀 Start QR Scanner
             scanner?.current
                 ?.start()
                 .then(() => setQrOn(true))
@@ -52,8 +75,6 @@ const QrReader = () => {
                 });
         }
 
-        // 🧹 Clean up on unmount.
-        // 🚨 This removes the QR Scanner from rendering and using camera when it is closed or removed from the UI.
         return () => {
             if (!videoEl?.current) {
                 scanner?.current?.stop();
@@ -61,7 +82,6 @@ const QrReader = () => {
         };
     }, []);
 
-    // ❌ If "camera" is not allowed in browser permissions, show an alert.
     useEffect(() => {
         if (!qrOn)
             alert(
@@ -71,7 +91,6 @@ const QrReader = () => {
 
     return (
         <div className="qr-reader">
-            {/* QR */}
             <video ref={videoEl}></video>
             <div ref={qrBoxEl} className="qr-box">
                 {!videoEl?.current && (
@@ -85,7 +104,6 @@ const QrReader = () => {
                 )}
             </div>
 
-            {/* Show Data Result if scan is success */}
             {scannedResult && (
                 <p
                     style={{

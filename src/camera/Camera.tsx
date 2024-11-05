@@ -15,6 +15,10 @@ const debugConfig: Config = {
     url: "https://www.instagram.com/baguette_et_reblochon/",
     text: "📱 Récupères ta photo en suivant notre page !"
   },
+  retrieveCodePage: {
+    url: "https://webportal-zhnj.onrender.com/?pass=62c112a0-b252-4a99-8850-28ec289bad29",
+    text: "📱 Récupères ta photo en suivant notre page !"
+  },
   format: ["PAYSAGE", "POLAROID", "MINIPOLAROID"],
   cameraModes: ["PICTURE", "GIF"],
   frames: {
@@ -36,6 +40,10 @@ type Image = {
 type Config = {
   canPrint: boolean,
   qrCodePage?: {
+    url: string,
+    text: string
+  },
+  retrieveCodePage?: {
     url: string,
     text: string
   },
@@ -681,7 +689,7 @@ function Camera() {
         </div>      
       )}
 
-      {showSavingOptions && config.qrCodePrint && popUpOn &&(
+      {showSavingOptions && config.qrCodePrint && popUpOn && config.retrieveCodePage &&(
        <div className="popup">
         <div className='qrcode-page-scann'>
           {qrStep === 'display' ? (
@@ -691,7 +699,7 @@ function Camera() {
                 <QRCode
                   size={256}
                   style={{ height: "auto", maxWidth: "100%", width: "100%" }}
-                  value="PRINT"
+                  value={config.retrieveCodePage.url}
                   viewBox={`0 0 256 256`}
                 />
                 <div className="qr-buttons-row">
@@ -703,7 +711,7 @@ function Camera() {
           ) : (
             <>
               <div className="qr-reader-header">Scanner le QR code obtenu !</div>
-              <QrReader />
+              <QrReader handlePrint={handlePrint} />
               <button className="qr-buttons-close" onClick={() => { setPopUpOn(false); setQrStep('display'); }}> Fermer </button>
             </>
           )}
