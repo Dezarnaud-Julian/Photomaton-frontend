@@ -10,14 +10,14 @@ function Settings({ onCopiesUpdated }: { onCopiesUpdated: (copies: string) => vo
   const [isCodeValid, setIsCodeValid] = useState(false);
   const [copies, setCopies] = useState('');
   const backendAdress = process.env.REACT_APP_BACKEND_ADRESS ?? 'http://127.0.0.1:3001'
-  
+
 
   const handleClick = () => {
-    setClickCounter(clickCounter+1);
-    if(clickCounter===3){
+    setClickCounter(clickCounter + 1);
+    if (clickCounter === 3) {
       setShowPad(!showPad);
       setClickCounter(0);
-    }else{
+    } else {
       setShowPad(false);
     }
   };
@@ -49,8 +49,8 @@ function Settings({ onCopiesUpdated }: { onCopiesUpdated: (copies: string) => vo
   const handleSubmitCopies = async () => {
     // Envoyer le nombre de copies au backend
     try {
-        const response = await fetch(`${backendAdress}/updateCopies`, {
-            method: 'POST',
+      const response = await fetch(`${backendAdress}/updateCopies`, {
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
@@ -79,20 +79,20 @@ function Settings({ onCopiesUpdated }: { onCopiesUpdated: (copies: string) => vo
   const handleRebootMachine = async () => {
     // Envoyer le nombre de copies au backend
     try {
-        const response = await fetch(`${backendAdress}/reboot`, { method: 'POST'});
+      const response = await fetch(`${backendAdress}/reboot`, { method: 'POST' });
     } catch (error) {
       console.error('Erreur réseau:', error);
-      alert('Erreur réseau'+ error);
+      alert('Erreur réseau' + error);
     }
   };
 
   const handleShutdownMachine = async () => {
     // Envoyer le nombre de copies au backend
     try {
-        const response = await fetch(`${backendAdress}/shutdown`, { method: 'POST'});
+      const response = await fetch(`${backendAdress}/shutdown`, { method: 'POST' });
     } catch (error) {
       console.error('Erreur réseau:', error);
-      alert('Erreur réseau'+ error);
+      alert('Erreur réseau' + error);
     }
   };
 
@@ -119,9 +119,9 @@ function Settings({ onCopiesUpdated }: { onCopiesUpdated: (copies: string) => vo
 
   return (
     <div className='settings'>
-      <div 
-        className="settings-btn" 
-        onClick={handleClick} 
+      <div
+        className="settings-btn"
+        onClick={handleClick}
       />
 
 
@@ -131,38 +131,41 @@ function Settings({ onCopiesUpdated }: { onCopiesUpdated: (copies: string) => vo
             {!isCodeValid ? (
               <>
                 Paramètres
-                <button onClick={closeSettings}>X</button>
-                <input 
-                  type="password" 
-                  className="code-input" 
-                  value={code} 
+                <button onClick={closeSettings} className='close-btn'>X</button>
+                <input
+                  type="password"
+                  className="code-input"
+                  value={code}
                   placeholder='code'
-                  readOnly 
+                  readOnly
                 />
                 <div className="num-buttons">
-                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 0].map((digit) => (
+                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 0].map((digit, index) => (
                     <button key={digit} onClick={() => handleInput(digit)}>
                       {digit}
                     </button>
                   ))}
-                  <button onClick={handleDelete}>Effacer</button>
-                  <button onClick={handleSubmitCode}>Valider</button>
+                  <button onClick={handleDelete}>Del</button>
+                  <button onClick={handleSubmitCode}>OK</button>
                 </div>
               </>
             ) : (
               <>
                 Paramètres
                 <button onClick={closeSettings} className='close-btn'>X</button>
-                <button onClick={() => { window.location.reload() }}>Restart app</button>
-                <button onClick={handleShutdownMachine}>Shutdown</button>
-                <button onClick={handleRebootMachine}>Reboot</button>
-                <button onClick={handleQuitApplication}>Quitter l'application</button>
-                <input 
-                  type="number" 
-                  className="copies-input" 
-                  value={copies} 
-                  placeholder="Nombre de copies" 
-                  readOnly 
+                <div className='horizontal'>
+                  <button onClick={() => { window.location.reload() }}>Restart app</button>
+                  <button onClick={() => { window.close() }}>Close app</button>
+                  <button onClick={handleShutdownMachine}>Shutdown</button>
+                  <button onClick={handleRebootMachine}>Reboot</button>
+                  {/* <button onClick={handleQuitApplication}>Quitter l'application</button> */}
+                </div>
+                <input
+                  type="number"
+                  className="copies-input"
+                  value={copies}
+                  placeholder="Nombre de copies"
+                  readOnly
                 />
                 <div className="num-buttons">
                   {[1, 2, 3, 4, 5, 6, 7, 8, 9, 0].map((digit) => (
@@ -170,8 +173,8 @@ function Settings({ onCopiesUpdated }: { onCopiesUpdated: (copies: string) => vo
                       {digit}
                     </button>
                   ))}
-                  <button onClick={handleDelete}>Effacer</button>
-                  <button onClick={handleSubmitCopies}>Envoyer</button>
+                  <button onClick={handleDelete}>Del</button>
+                  <button onClick={handleSubmitCopies}>OK</button>
                 </div>
               </>
             )}
