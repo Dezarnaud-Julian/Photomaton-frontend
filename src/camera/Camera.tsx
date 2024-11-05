@@ -4,10 +4,12 @@ import gifshot from 'gifshot';
 import POLAROIDBASE from '../frames/POLAROIDBASE.png';
 import Settings from '../settings/Settings';
 import QRCode from 'react-qr-code';
+import QrReader from '../QrReader/QrReader';
 
 const backendAdress = process.env.REACT_APP_BACKEND_ADRESS ?? 'http://127.0.0.1:3001'
 const imagesAdressBase = backendAdress + "/images";
 const debugConfig: Config = {
+  qrCodePrint : true,
   canPrint: true,
   qrCodePage: {
     url: "https://www.instagram.com/baguette_et_reblochon/",
@@ -37,6 +39,7 @@ type Config = {
     url: string,
     text: string
   },
+  qrCodePrint: boolean,
   format: string[],
   cameraModes: string[],
   frames: {
@@ -55,6 +58,7 @@ const config: Config = debugConfig;
 
 const emptyConfig: Config = {
   canPrint: false,
+  qrCodePrint : true,
   format: ["PAYSAGE"],
   cameraModes: ["PICTURE"],
   frames: {
@@ -102,6 +106,11 @@ function Camera() {
   const [enteringEmail, setEnteringEmail] = useState(false);
   const [formats, setFormats] = useState<string[]>(config.format);
   const [format, setFormat] = useState(config.format[0]);
+
+  const [popUpOn, setPopUpOn] = useState(false);
+  const [qrStep, setQrStep] = useState('display'); // 'display' pour afficher le QR code, 'scan' pour le lecteur
+
+
 
   let videoConstraintsStart = {
     video: {
@@ -421,6 +430,8 @@ function Camera() {
     setEmail('');
     setShowMenu(true);
     setEnteringEmail(false);
+    setPopUpOn(false);
+    setQrStep('display');
   };
 
   const switchMode = (number: number) => {
@@ -500,6 +511,14 @@ function Camera() {
       }
     } else {
       console.error('No photo blob to print');
+    }
+  };
+
+  const handlePrintClick = () => {
+    if (config.qrCodePrint) {
+      setPopUpOn(true);
+    } else {
+      handlePrint();
     }
   };
 
@@ -645,7 +664,7 @@ function Camera() {
         </div>
       )}
 
-      {showSavingOptions && config.qrCodePage && (
+      {showSavingOptions && config.qrCodePage && !config.qrCodePrint && (
         <div className='qrcode-page'>
           <div className='qrcode-box'>
             <div style={{ height: "auto", width: 250, alignSelf: "flex-start" }}>
@@ -660,6 +679,36 @@ function Camera() {
             <h1 style={{ color: "black" }}>{config.qrCodePage?.text}</h1>
           </div>
         </div>      
+      )}
+
+      {showSavingOptions && config.qrCodePrint && popUpOn &&(
+       <div className="popup">
+        <div className='qrcode-page-scann'>
+          {qrStep === 'display' ? (
+            <>
+              <div className="qrcode-header">Imprimez votre photo gratuitement en scannant ce QR code !</div>
+              <div className='qrcode-box-scann'>
+                <QRCode
+                  size={256}
+                  style={{ height: "auto", maxWidth: "100%", width: "100%" }}
+                  value="PRINT"
+                  viewBox={`0 0 256 256`}
+                />
+                <div className="qr-buttons-row">
+                  <button className="qr-buttons-close" onClick={() => { setPopUpOn(false); setQrStep('display'); }}> Fermer </button>
+                  <button className="qr-buttons" onClick={() => setQrStep('scan')}>J'ai mon code !</button>
+                </div>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="qr-reader-header">Scanner le QR code obtenu !</div>
+              <QrReader />
+              <button className="qr-buttons-close" onClick={() => { setPopUpOn(false); setQrStep('display'); }}> Fermer </button>
+            </>
+          )}
+        </div>
+      </div>       
       )}
 
       {showSavingOptions && mode === 'PICTURE' && printError !== 'LU' && framePolaroid !== 0 && format == "POLAROID" && (<img className="captured-image-frame-BAS" src={framesPOLAROID[framePolaroid].url} alt="Captured" />)}
@@ -698,12 +747,23 @@ function Camera() {
 
             {config.canPrint && mode === 'PICTURE' && printError !== 'LU' && (
               <div className="form-impr">
-                <div onClick={() => putCopies(printCopies - 1)} className="form-button navigation">&lt;</div>
-                <div onClick={() => putCopies(0)} className="form-button copies">
-                  {"Copies : " + printCopies.toString()}
-                </div>
-                <div onClick={() => putCopies(printCopies + 1)} className="form-button navigation">&gt;</div>
-                <div className={`form-button imp ${printCopies !== 0 ? 'active' : 'inactive'}`} onClick={handlePrint}>IMPRIMER</div>
+                {!config.qrCodePrint && (
+                  <>
+                    <div onClick={() => putCopies(printCopies - 1)} className="form-button navigation">&lt;</div>
+                    <div onClick={() => putCopies(0)} className="form-button copies">
+                      {"Copies : " + printCopies.toString()}
+                    </div>
+                    <div onClick={() => putCopies(printCopies + 1)} className="form-button navigation">&gt;</div>
+                  </>
+                )}
+                {config.qrCodePrint && (
+                  <>
+                    <div className="form-button copies">
+                      {"Copies : " + 1}
+                    </div>
+                  </>
+                )}
+                <div className={`form-button imp ${printCopies !== 0 ? 'active' : 'inactive'}`} onClick={handlePrintClick}>IMPRIMER</div>
               </div>
             )}
 
