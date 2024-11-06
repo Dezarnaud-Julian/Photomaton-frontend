@@ -4,7 +4,7 @@ import gifshot from 'gifshot';
 import POLAROIDBASE from '../frames/POLAROIDBASE.png';
 import Settings from '../settings/Settings';
 import QRCode from 'react-qr-code';
-import QrReader from '../QrReader/QrReader';
+import QrReaderComponent from '../QrReader/QrReader';
 
 const backendAdress = process.env.REACT_APP_BACKEND_ADRESS ?? 'http://127.0.0.1:3001'
 const imagesAdressBase = backendAdress + "/images";
@@ -477,6 +477,13 @@ function Camera() {
     }
   };
 
+  const handlePrintQrCode = async () => {
+    setPopUpOn(false); 
+    setQrStep('display');
+    handlePrint();
+  }
+
+
   const handlePrint = async () => {
     if (photoBlob) {
       if (photoPath) {
@@ -711,7 +718,7 @@ function Camera() {
           ) : (
             <>
               <div className="qr-reader-header">Scanner le QR code obtenu !</div>
-              <QrReader handlePrint={handlePrint} />
+              <QrReaderComponent handlePrintQrCode={handlePrintQrCode} />
               <button className="qr-buttons-close" onClick={() => { setPopUpOn(false); setQrStep('display'); }}> Fermer </button>
             </>
           )}
