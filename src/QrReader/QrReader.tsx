@@ -1,10 +1,13 @@
 import { useState } from "react";
 import "./QrReader.css";
+import targetScan from "./scann.png"
 import Html5QrcodePlugin from "./Html5QrcodePlugin";
+import { relative } from "path";
 
 const QrReaderComponent = (props: { handlePrintQrCode: () => void }) => {
   const backendAdress = process.env.REACT_APP_BACKEND_ADRESS ?? 'http://127.0.0.1:3001'
   const [scannedResult, setScannedResult] = useState<string | undefined>("");
+  const [error, setError] = useState<string | undefined>("");
 
   // Dans le composant enfant qui gère le scan
   const onNewScanResult = async (decodedText: string, decodedResult: any) => {
@@ -38,15 +41,23 @@ const QrReaderComponent = (props: { handlePrintQrCode: () => void }) => {
 
   return (
     <>
-      <Html5QrcodePlugin
-        fps={10}
-        qrbox={250}
-        disableFlip={false}
-        qrCodeSuccessCallback={onNewScanResult}
-      />
+      <div style={{ position: 'relative' }}>
+        <Html5QrcodePlugin
+          fps={1}
+          qrbox={500}
+          disableFlip={false}
+          qrCodeSuccessCallback={onNewScanResult}
+          qrCodeErrorCallback={(err: any) => {
+            setError(err)
+          }}
+        />
+        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", position: "absolute", left: 0, top: 0, width: "100%", height: "100%" }}>
+          <img src={targetScan} style={{ height: "80%" }}></img>
+        </div>
+      </div>
       {scannedResult && (
         <p className="qr-result">
-          Scan éffectué : {scannedResult}
+          Scan effectué : {scannedResult}
         </p>
       )}
     </>

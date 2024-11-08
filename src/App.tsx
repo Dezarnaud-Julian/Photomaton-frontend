@@ -1,6 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'; // Import necessary components from react-router-dom
 import './App.css';
-import Accueil from './accueil/Accueil';
 import Camera from './camera/Camera';
 
 function App() {
