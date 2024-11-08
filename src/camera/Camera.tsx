@@ -143,6 +143,9 @@ function Camera() {
   const [popUpOn, setPopUpOn] = useState(false);
   const [qrStep, setQrStep] = useState('display'); // 'display' pour afficher le QR code, 'scan' pour le lecteur
 
+  const [focusDistance, setFocusDistance] = useState<number>(337);
+
+
 
 
   let videoConstraintsStart = {
@@ -162,20 +165,96 @@ function Camera() {
 
   const startCamera = async () => {
     try {
-      console.log("START CAMERA")
+      console.log("START CAMERA");
+  
+      // Récupérer le flux de la caméra avec les contraintes initiales
       let basicStream = await navigator.mediaDevices.getUserMedia(videoConstraintsStart);
       if (videoRef.current) {
         videoRef.current.srcObject = basicStream;
         setStream(basicStream);
       }
+  
       const videoTrack = basicStream.getVideoTracks()[0];
+  
+      // Appliquer le mode focus manuel avec une distance de mise au point spécifique
+      const currentConstraints = videoTrack.getConstraints();
+      const newConstraints = {
+        ...currentConstraints,
+        advanced: [
+          {
+            ...currentConstraints.advanced?.[0], // Si l'advanced existe, on le modifie
+            focusMode: 'manual', // Mise à jour pour utiliser le mode 'manual'
+            focusDistance:  focusDistance// Définir la distance de mise au point (1 cm par exemple)
+          }
+        ]
+      };
+  
+      // Appliquer les nouvelles contraintes
+      await videoTrack.applyConstraints(newConstraints);
+  
+      // Arrêter le flux initial
       videoTrack.stop();
-
+  
+      // Récupérer un nouveau flux avec les contraintes complètes
       let newStream = await navigator.mediaDevices.getUserMedia(videoConstraintsFull);
       if (videoRef.current) {
         videoRef.current.srcObject = newStream;
         setStream(newStream);
       }
+    } catch (err) {
+      console.error("Error accessing camera: ", err);
+    }
+  };
+  
+  
+
+  const startCameraAutoFocus = async () => {
+    try {
+      console.log("START CAMERA");
+  
+      // Log des contraintes de la caméra au départ
+      console.log("Video Constraints Start: ", videoConstraintsStart);
+  
+      let basicStream = await navigator.mediaDevices.getUserMedia(videoConstraintsStart);
+      if (videoRef.current) {
+        videoRef.current.srcObject = basicStream;
+        setStream(basicStream);
+      }
+  
+      const videoTrack = basicStream.getVideoTracks()[0];
+      console.log("Initial Video Track Settings: ", videoTrack.getSettings()); // Log des paramètres réels
+  
+      // Application directe du focusMode
+      const currentConstraints = videoTrack.getConstraints();
+      const newConstraints = {
+        ...currentConstraints,
+        advanced: [
+          {
+            ...currentConstraints.advanced?.[0], // Si l'advanced existe, on le modifie
+            focusMode: 'continuous' // Tentative de mettre "continuous" sans vérifier les capacités
+          }
+        ]
+      };
+  
+      // Appliquer les nouvelles contraintes
+      await videoTrack.applyConstraints(newConstraints);
+      console.log("Focus mode set to continuous");
+  
+      // Arrêter le flux initial
+      videoTrack.stop();
+  
+      console.log("Video Constraints Full: ", videoConstraintsFull);
+  
+      let newStream = await navigator.mediaDevices.getUserMedia(videoConstraintsFull);
+      if (videoRef.current) {
+        videoRef.current.srcObject = newStream;
+        setStream(newStream);
+      }
+  
+      // Log des paramètres réels de la nouvelle caméra
+      const newVideoTrack = newStream.getVideoTracks()[0];
+      console.log("New Video Track Settings: ", newVideoTrack.getSettings());
+  
     } catch (err) {
       console.error("Error accessing camera: ", err);
     }
@@ -192,6 +271,12 @@ function Camera() {
     stopCamera();
     startCamera();
   };
+
+  const restartCameraAutoFocus = async () => {
+    stopCamera();
+    startCameraAutoFocus();
+  };
+
 
 
   const startCountdown = async (secondes: number) => {
@@ -456,6 +541,7 @@ function Camera() {
   };
 
   const handleCancel = () => {
+    restartCamera();
     setCapturedPhoto(null);
     setPhotoBlob(null);
     setTextShown(true);
@@ -556,6 +642,7 @@ function Camera() {
 
   const handlePrintClick = () => {
     if (config.qrCodePrint) {
+      restartCameraAutoFocus();
       setPopUpOn(true);
     } else {
       handlePrint();
@@ -661,6 +748,11 @@ function Camera() {
     }
     
     console.log(config)
+  };
+
+  const setNewFocus = (newFocus: number) => {
+      setFocusDistance(newFocus);
+      restartCamera();
   };
 
   const currentSelectedFilter = getFilterBankFromFormat(format)[filter];
@@ -870,7 +962,7 @@ function Camera() {
         </div>
       )}
 
-      <Settings onCopiesUpdated={handleCopiesUpdated} onPrint={handlePrint} setNewConfig={setNewConfig} />
+      <Settings onCopiesUpdated={handleCopiesUpdated} onPrint={handlePrint} setNewConfig={setNewConfig}  setNewFocus={setNewFocus}/>
 
     </div>
   );

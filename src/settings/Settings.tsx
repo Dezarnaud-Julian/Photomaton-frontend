@@ -3,7 +3,7 @@ import "./Settings.css"
 
 const CODE = "2518";
 
-function Settings({ onCopiesUpdated, onPrint, setNewConfig }: { onCopiesUpdated: (copies: string) => void; onPrint: () => void; setNewConfig:(config : string) => void }) {
+function Settings({ onCopiesUpdated, onPrint, setNewConfig, setNewFocus }: { onCopiesUpdated: (copies: string) => void; onPrint: () => void; setNewConfig:(config : string) => void; setNewFocus:(focus : number) => void }) {
   const [showPad, setShowPad] = useState(false);
   const [clickCounter, setClickCounter] = useState(0);
   const [code, setCode] = useState('');
@@ -45,6 +45,22 @@ function Settings({ onCopiesUpdated, onPrint, setNewConfig }: { onCopiesUpdated:
       setCode('');
     }
   };
+
+  const handleSubmitFocus = () => {
+    // Parser le code en nombre (entier)
+    console.log("copies",copies);
+    const parsedFocus = parseInt(copies, 10);
+    console.log("parsedFocus",copies);
+
+    // Si le parsing échoue, parsedFocus sera NaN, vous pouvez gérer cette situation si nécessaire.
+    if (isNaN(parsedFocus)) {
+      console.error("Le code n'est pas un nombre valide.");
+      return;
+    }
+  
+    setNewFocus(parsedFocus);
+  };
+  
 
   const handleSubmitCopies = async () => {
     // Envoyer le nombre de copies au backend
@@ -170,6 +186,7 @@ function Settings({ onCopiesUpdated, onPrint, setNewConfig }: { onCopiesUpdated:
                 <div className='horizontal'>
                 <button onClick={() => setNewConfig("debugConfig")}>Qr Code</button>
                 <button onClick={() => setNewConfig("fullDigitalConfig")}>Full Digital</button>
+                <button onClick={handleSubmitFocus}>Focus</button>
                 </div>
                 
                 <input
