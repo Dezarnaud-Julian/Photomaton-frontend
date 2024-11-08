@@ -13,14 +13,14 @@ const debugConfig: Config = {
   canPrint: true,
   qrCodePage: {
     url: "https://www.instagram.com/lagaufreliegeoise/",
-    text: "📱 Récupères ta photo en suivant notre page !"
+    text: "📱 Récupères ta photo demain en suivant notre page !"
   },
   retrieveCodePage: {
     url: "https://webportal-zhnj.onrender.com/?pass=62c112a0-b252-4a99-8850-28ec289bad29",
     text: "📱 Récupères ta photo en suivant notre page !"
   },
-  format: ["PAYSAGE", "POLAROID", "MINIPOLAROID"],
-  cameraModes: ["PICTURE", "GIF"],
+  format: ["PAYSAGE"],
+  cameraModes: ["PICTURE"],
   frames: {
     miniPolaroid: [{ name: "Aucun cadre", url: "" }],
     // polaroid: [{ name: "Aucun cadre", url: "" }, { name: "matous", url: imagesAdressBase + "/frames/polaroid/matous.png" }],
@@ -703,8 +703,8 @@ function Camera() {
           {!showSavingOptions && gifFinished && (
             <div>
               <div className="overlay-text-keep">On la garde ?</div>
-              <div onClick={handleSave} className="overlay-text-keep-save">✅</div>
-              <div onClick={handleCancel} className="overlay-text-keep-cancel">❌</div>
+              <div onClick={handleSave} className="overlay-text-keep-save click-effect">✅</div>
+              <div onClick={handleCancel} className="overlay-text-keep-cancel click-effect">❌</div>
             </div>
           )}
           <img className={`captured-image ${format === 'POLAROID' && showSavingOptions ? 'video-streamPOLA' : ''}`} src={capturedPhoto} alt="Captured" />
