@@ -33,6 +33,7 @@ const QrReaderComponent = (props: { handlePrintQrCode: () => void }) => {
       // Vérifiez si le message est "IMPRESSION" et appelez handlePrintQrCode
       if (data.message === "IMPRESSION") {
         props.handlePrintQrCode(); // Appelez handlePrintQrCode via les props
+        setScannedResult("");
       }
     } catch (error) {
       console.error('Error checking code:', error);
