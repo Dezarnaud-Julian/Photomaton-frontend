@@ -3,7 +3,7 @@ import "./Settings.css"
 
 const CODE = "2518";
 
-function Settings({ onCopiesUpdated }: { onCopiesUpdated: (copies: string) => void }) {
+function Settings({ onCopiesUpdated, onPrint, setNewConfig }: { onCopiesUpdated: (copies: string) => void; onPrint: () => void; setNewConfig:(config : string) => void }) {
   const [showPad, setShowPad] = useState(false);
   const [clickCounter, setClickCounter] = useState(0);
   const [code, setCode] = useState('');
@@ -156,10 +156,22 @@ function Settings({ onCopiesUpdated }: { onCopiesUpdated: (copies: string) => vo
                 <div className='horizontal'>
                   <button onClick={() => { window.location.reload() }}>Restart app</button>
                   <button onClick={() => { window.close() }}>Close app</button>
-                  <button onClick={handleShutdownMachine}>Shutdown</button>
-                  <button onClick={handleRebootMachine}>Reboot</button>
+
+
                   {/* <button onClick={handleQuitApplication}>Quitter l'application</button> */}
                 </div>
+
+                <div className='horizontal'>
+                  <button onClick={handleShutdownMachine}>Shutdown</button>
+                  <button onClick={handleRebootMachine}>Reboot</button>
+                  <button onClick={onPrint}>Imprimer</button>
+                </div>
+
+                <div className='horizontal'>
+                <button onClick={() => setNewConfig("debugConfig")}>Qr Code</button>
+                <button onClick={() => setNewConfig("fullDigitalConfig")}>Full Digital</button>
+                </div>
+                
                 <input
                   type="number"
                   className="copies-input"

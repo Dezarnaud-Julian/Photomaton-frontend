@@ -12,7 +12,7 @@ const debugConfig: Config = {
   qrCodePrint: true,
   canPrint: true,
   qrCodePage: {
-    url: "https://www.instagram.com/baguette_et_reblochon/",
+    url: "https://www.instagram.com/lagaufreliegeoise/",
     text: "📱 Récupères ta photo en suivant notre page !"
   },
   retrieveCodePage: {
@@ -29,8 +29,30 @@ const debugConfig: Config = {
   },
   filters: {
     miniPolaroid: [{ name: "Aucun filtre", url: "" }],
-    polaroid: [{ name: "Aucun filtre", url: "" }, { name: "4L TROPHY", url: imagesAdressBase + "/filters/polaroid/B&RP.png" }],
-    landscape: [{ name: "Aucun filtre", url: "" }, { name: "Barbe", url: imagesAdressBase + "/filters/landscape/Barbe.png" }, { name: "Gravette", url: imagesAdressBase + "/filters/landscape/Gravette.png" }, { name: "Garoupe", url: imagesAdressBase + "/filters/landscape/Garoupe.png" }, { name: "Ondes", url: imagesAdressBase + "/filters/landscape/Ondes.png" }, { name: "B&R", url: imagesAdressBase + "/filters/landscape/B&R.png" }, { name: "4L", url: imagesAdressBase + "/filters/landscape/4L.png" }, { name: "moustaches", url: imagesAdressBase + "/filters/landscape/Moustaches.png" }],
+    polaroid: [{ name: "Aucun filtre", url: "" }, { name: "Gaufre", url: imagesAdressBase + "/filters/polaroid/gaufreP.png" }, { name: "Raclette", url: imagesAdressBase + "/filters/polaroid/cheeseP.png" }, { name: "Jus", url: imagesAdressBase + "/filters/polaroid/jusP.png" }],
+    landscape: [{ name: "Aucun filtre", url: "" }, { name: "Gaufre", url: imagesAdressBase + "/filters/landscape/gaufre.png" }, { name: "Raclette", url: imagesAdressBase + "/filters/landscape/cheese2.png" }, { name: "Jus", url: imagesAdressBase + "/filters/landscape/jus.png" }],
+    defaultLandscapeFilter: 1
+  }
+}
+const fullDigitalConfig: Config = {
+  qrCodePrint: false,
+  canPrint: false,
+  qrCodePage: {
+    url: "https://www.instagram.com/lagaufreliegeoise/",
+    text: "📱 Récupères ta photo en suivant notre page !"
+  },
+  format: ["PAYSAGE", "POLAROID", "MINIPOLAROID"],
+  cameraModes: ["PICTURE", "GIF"],
+  frames: {
+    miniPolaroid: [{ name: "Aucun cadre", url: "" }],
+    // polaroid: [{ name: "Aucun cadre", url: "" }, { name: "matous", url: imagesAdressBase + "/frames/polaroid/matous.png" }],
+    polaroid: [{ name: "Aucun cadre", url: "" }],
+    landscape: [{ name: "Aucun cadre", url: "" }]
+  },
+  filters: {
+    miniPolaroid: [{ name: "Aucun filtre", url: "" }],
+    polaroid: [{ name: "Aucun filtre", url: "" }, { name: "Gaufre", url: imagesAdressBase + "/filters/polaroid/gaufreP.png" }, { name: "Raclette", url: imagesAdressBase + "/filters/polaroid/cheeseP.png" }, { name: "Jus", url: imagesAdressBase + "/filters/polaroid/jusP.png" }],
+    landscape: [{ name: "Aucun filtre", url: "" }, { name: "Gaufre", url: imagesAdressBase + "/filters/landscape/gaufre.png" }, { name: "Raclette", url: imagesAdressBase + "/filters/landscape/cheese2.png" }, { name: "Jus", url: imagesAdressBase + "/filters/landscape/jus.png" }],
     defaultLandscapeFilter: 1
   }
 }
@@ -62,7 +84,6 @@ type Config = {
     defaultLandscapeFilter: number
   }
 }
-const config: Config = debugConfig;
 
 const emptyConfig: Config = {
   canPrint: false,
@@ -82,6 +103,10 @@ const emptyConfig: Config = {
   }
 } as Config;
 function Camera() {
+
+  const [config, setConfig] = useState<Config>(debugConfig);
+
+
   // État pour le texte de chargement
   const [loading, setLoading] = useState(false);
 
@@ -627,6 +652,17 @@ function Camera() {
       return [{ name: 'Aucun cadre', url: "" }]
     }
   }
+
+  const setNewConfig = (newConfig: string) => {
+    if(newConfig=="debugConfig"){
+      setConfig(debugConfig);
+    }else{
+      setConfig(fullDigitalConfig);
+    }
+    
+    console.log(config)
+  };
+
   const currentSelectedFilter = getFilterBankFromFormat(format)[filter];
   const currentSelectedFrame = getFrameBankFromFormat(format)[framePolaroid];
   return (
@@ -834,7 +870,7 @@ function Camera() {
         </div>
       )}
 
-      <Settings onCopiesUpdated={handleCopiesUpdated} />
+      <Settings onCopiesUpdated={handleCopiesUpdated} onPrint={handlePrint} setNewConfig={setNewConfig} />
 
     </div>
   );
