@@ -9,7 +9,7 @@ import QrReaderComponent from '../QrReader/QrReader';
 const backendAdress = process.env.REACT_APP_BACKEND_ADRESS ?? 'http://127.0.0.1:3001'
 const imagesAdressBase = backendAdress + "/images";
 const debugConfig: Config = {
-  qrCodePrint : true,
+  qrCodePrint: true,
   canPrint: true,
   qrCodePage: {
     url: "https://www.instagram.com/baguette_et_reblochon/",
@@ -30,7 +30,7 @@ const debugConfig: Config = {
   filters: {
     miniPolaroid: [{ name: "Aucun filtre", url: "" }],
     polaroid: [{ name: "Aucun filtre", url: "" }, { name: "4L TROPHY", url: imagesAdressBase + "/filters/polaroid/B&RP.png" }],
-    landscape: [{ name: "Aucun filtre", url: "" },{ name: "Barbe", url: imagesAdressBase + "/filters/landscape/Barbe.png" }, { name: "Gravette", url: imagesAdressBase + "/filters/landscape/Gravette.png" }, { name: "Garoupe", url: imagesAdressBase + "/filters/landscape/Garoupe.png" }, { name: "Ondes", url: imagesAdressBase + "/filters/landscape/Ondes.png" },  { name: "B&R", url: imagesAdressBase + "/filters/landscape/B&R.png" },{ name: "4L", url: imagesAdressBase + "/filters/landscape/4L.png" } ,{ name: "moustaches", url: imagesAdressBase + "/filters/landscape/Moustaches.png" }],
+    landscape: [{ name: "Aucun filtre", url: "" }, { name: "Barbe", url: imagesAdressBase + "/filters/landscape/Barbe.png" }, { name: "Gravette", url: imagesAdressBase + "/filters/landscape/Gravette.png" }, { name: "Garoupe", url: imagesAdressBase + "/filters/landscape/Garoupe.png" }, { name: "Ondes", url: imagesAdressBase + "/filters/landscape/Ondes.png" }, { name: "B&R", url: imagesAdressBase + "/filters/landscape/B&R.png" }, { name: "4L", url: imagesAdressBase + "/filters/landscape/4L.png" }, { name: "moustaches", url: imagesAdressBase + "/filters/landscape/Moustaches.png" }],
     defaultLandscapeFilter: 1
   }
 }
@@ -66,7 +66,7 @@ const config: Config = debugConfig;
 
 const emptyConfig: Config = {
   canPrint: false,
-  qrCodePrint : true,
+  qrCodePrint: true,
   format: ["PAYSAGE"],
   cameraModes: ["PICTURE"],
   frames: {
@@ -478,7 +478,7 @@ function Camera() {
   };
 
   const handlePrintQrCode = async () => {
-    setPopUpOn(false); 
+    setPopUpOn(false);
     setQrStep('display');
     handlePrint();
   }
@@ -693,37 +693,37 @@ function Camera() {
             <h1 style={{ fontSize: 100, margin: 0, color: "black" }} className='scan-anim'>☝️</h1>
             <h1 style={{ color: "black" }}>{config.qrCodePage?.text}</h1>
           </div>
-        </div>      
+        </div>
       )}
 
-      {showSavingOptions && config.qrCodePrint && popUpOn && config.retrieveCodePage &&(
-       <div className="popup">
-        <div className='qrcode-page-scann'>
-          {qrStep === 'display' ? (
-            <>
-              <div className="qrcode-header">Imprimez votre photo gratuitement en scannant ce QR code !</div>
-              <div className='qrcode-box-scann'>
-                <QRCode
-                  size={256}
-                  style={{ height: "auto", maxWidth: "100%", width: "100%" }}
-                  value={config.retrieveCodePage.url}
-                  viewBox={`0 0 256 256`}
-                />
-                <div className="qr-buttons-row">
-                  <button className="qr-buttons-close" onClick={() => { setPopUpOn(false); setQrStep('display'); }}> Fermer </button>
-                  <button className="qr-buttons" onClick={() => setQrStep('scan')}>J'ai mon code !</button>
+      {showSavingOptions && config.qrCodePrint && popUpOn && config.retrieveCodePage && (
+        <div className="popup">
+          <div className='qrcode-page-scann'>
+            {qrStep === 'display' ? (
+              <>
+                <div className="qrcode-header">Imprimez votre photo gratuitement en scannant ce QR code !</div>
+                <div className='qrcode-box-scann'>
+                  <QRCode
+                    size={256}
+                    style={{ height: "auto", maxWidth: "100%", width: "100%" }}
+                    value={config.retrieveCodePage.url}
+                    viewBox={`0 0 256 256`}
+                  />
+                  <div className="qr-buttons-row">
+                    <button className="qr-buttons-close" onClick={() => { setPopUpOn(false); setQrStep('display'); }}> Fermer </button>
+                    <button className="qr-buttons" onClick={() => setQrStep('scan')}>J'ai mon code !</button>
+                  </div>
                 </div>
-              </div>
-            </>
-          ) : (
-            <>
-              <div className="qr-reader-header">Scanner le QR code obtenu !</div>
-              <QrReaderComponent handlePrintQrCode={handlePrintQrCode} />
-              <button className="qr-buttons-close" onClick={() => { setPopUpOn(false); setQrStep('display'); }}> Fermer </button>
-            </>
-          )}
+              </>
+            ) : (
+              <>
+                <div className="qr-reader-header">Scanner le QR code obtenu !</div>
+                <QrReaderComponent handlePrintQrCode={handlePrintQrCode} />
+                <button className="qr-buttons-close" onClick={() => { setPopUpOn(false); setQrStep('display'); }}> Fermer </button>
+              </>
+            )}
+          </div>
         </div>
-      </div>       
       )}
 
       {showSavingOptions && mode === 'PICTURE' && printError !== 'LU' && framePolaroid !== 0 && format == "POLAROID" && (<img className="captured-image-frame-BAS" src={framesPOLAROID[framePolaroid].url} alt="Captured" />)}
@@ -752,7 +752,7 @@ function Camera() {
             /> */}
 
             {/* <div className={`form-button active`} onClick={handleSendEmail}>ENVOYER</div> */}
-            
+
             {/* {mode === 'PICTURE' && printError !== 'LU' && format === 'POLAROID' && (
               <div>
                 <div onClick={() => switchFrame(framePolaroid - 1)} className="form-button navigation left">&lt;</div>
