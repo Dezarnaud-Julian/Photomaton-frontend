@@ -8,9 +8,33 @@ function Settings({ onCopiesUpdated, onPrint, setNewConfig }: { onCopiesUpdated:
   const [clickCounter, setClickCounter] = useState(0);
   const [code, setCode] = useState('');
   const [isCodeValid, setIsCodeValid] = useState(false);
+  const [ipAddress, setIpAddress] = useState('');
   const [copies, setCopies] = useState('');
   const backendAdress = process.env.REACT_APP_BACKEND_ADRESS ?? 'http://127.0.0.1:3001'
 
+
+   // Fonction pour récupérer l'adresse IP depuis le backend
+   const fetchIPAddress = async () => {
+    try {
+      const response = await fetch(`${backendAdress}/ip`);
+      if (response.ok) {
+        const data = await response.json();
+        // Récupérer la première adresse IPv4 trouvée
+        const firstIP = Object.values(data).flat()[0];
+        if (typeof firstIP === 'string') {
+          setIpAddress(firstIP);
+        } else {
+          setIpAddress('Adresse IP non disponible');
+        }
+      } else {
+        console.error('Erreur lors de la récupération de l\'adresse IP');
+        setIpAddress('Erreur lors de la récupération de l\'adresse IP');
+      }
+    } catch (error) {
+      console.error('Erreur réseau:', error);
+      setIpAddress('Erreur réseau');
+    }
+  };
 
   const handleClick = () => {
     setClickCounter(clickCounter + 1);
@@ -41,6 +65,7 @@ function Settings({ onCopiesUpdated, onPrint, setNewConfig }: { onCopiesUpdated:
   const handleSubmitCode = () => {
     if (code === CODE) {
       setIsCodeValid(true); // Le code est correct, demander maintenant le nombre de copies
+      fetchIPAddress();
     } else {
       setCode('');
     }
@@ -171,8 +196,14 @@ function Settings({ onCopiesUpdated, onPrint, setNewConfig }: { onCopiesUpdated:
                 <div className='horizontal'>
                 <button onClick={() => setNewConfig("debugConfig")}>Qr Code</button>
                 <button onClick={() => setNewConfig("fullDigitalConfig")}>Full Digital</button>
+                {ipAddress && (
+                  <p>{ipAddress}</p>
+                )}
                 </div>
+
+
                 
+                                
                 <input
                   type="number"
                   className="copies-input"

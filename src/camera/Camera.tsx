@@ -46,8 +46,8 @@ const fullDigitalConfig: Config = {
   cameraModes: ["PICTURE", "GIF"],
   frames: {
     miniPolaroid: [{ name: "Aucun cadre", url: "" }],
-    // polaroid: [{ name: "Aucun cadre", url: "" }, { name: "matous", url: imagesAdressBase + "/frames/polaroid/matous.png" }],
-    polaroid: [{ name: "Aucun cadre", url: "" }],
+    polaroid: [{ name: "Aucun cadre", url: "" }, { name: "matous", url: imagesAdressBase + "/frames/polaroid/matous.png" }],
+    //polaroid: [{ name: "Aucun cadre", url: "" }],
     landscape: [{ name: "Aucun cadre", url: "" }]
   },
   filters: {
@@ -146,13 +146,6 @@ function Camera() {
   let videoConstraintsFull = {
     width: 3840,
     height: 2160,
-  };
-
-  const stopCamera = () => {
-    if (stream) {
-      stream.getTracks().forEach(track => track.stop());
-      setStream(null);
-    }
   };
 
   const startCountdown = async (secondes: number) => {
