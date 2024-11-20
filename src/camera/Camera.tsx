@@ -5,6 +5,7 @@ import POLAROIDBASE from '../frames/POLAROIDBASE.png';
 import Settings from '../settings/Settings';
 import QRCode from 'react-qr-code';
 import QrReaderComponent from '../QrReader/QrReader';
+import Webcam from 'react-webcam';
 
 const backendAdress = process.env.REACT_APP_BACKEND_ADRESS ?? 'http://127.0.0.1:3001'
 const imagesAdressBase = backendAdress + "/images";
@@ -19,12 +20,12 @@ const debugConfig: Config = {
     url: "https://webportal-zhnj.onrender.com/?pass=62c112a0-b252-4a99-8850-28ec289bad29",
     text: "📱 Récupères ta photo en suivant notre page !"
   },
-  format: ["PAYSAGE"],
-  cameraModes: ["PICTURE"],
+  format: ["PAYSAGE", "POLAROID", "MINIPOLAROID"],
+  cameraModes: ["PICTURE", "GIF"],
   frames: {
     miniPolaroid: [{ name: "Aucun cadre", url: "" }],
-    // polaroid: [{ name: "Aucun cadre", url: "" }, { name: "matous", url: imagesAdressBase + "/frames/polaroid/matous.png" }],
-    polaroid: [{ name: "Aucun cadre", url: "" }],
+    polaroid: [{ name: "Aucun cadre", url: "" }, { name: "matous", url: imagesAdressBase + "/frames/polaroid/matous.png" }],
+    // polaroid: [{ name: "Aucun cadre", url: "" }],
     landscape: [{ name: "Aucun cadre", url: "" }]
   },
   filters: {
@@ -109,8 +110,8 @@ function Camera() {
 
   // État pour le texte de chargement
   const [loading, setLoading] = useState(false);
-
-  const videoRef = useRef<HTMLVideoElement>(null);
+  
+  const videoRef = useRef<Webcam>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
   const [filter, setFilter] = useState<number>(config.filters.defaultLandscapeFilter);
@@ -136,128 +137,15 @@ function Camera() {
   const [printError, setPrintError] = useState<string | null>(null);
   const [gifFinished, setGifFinished] = useState(true);
   const [showMenu, setShowMenu] = useState(true);
-  const [enteringEmail, setEnteringEmail] = useState(false);
   const [formats, setFormats] = useState<string[]>(config.format);
   const [format, setFormat] = useState(config.format[0]);
 
   const [popUpOn, setPopUpOn] = useState(false);
   const [qrStep, setQrStep] = useState('display'); // 'display' pour afficher le QR code, 'scan' pour le lecteur
 
-  const [focusDistance, setFocusDistance] = useState<number>(337);
-
-
-
-
-  let videoConstraintsStart = {
-    video: {
-      width: 500,
-      height: 500,
-      facingMode: 'user',
-    },
-  };
   let videoConstraintsFull = {
-    video: {
-      width: 3840,
-      height: 2160,
-      facingMode: 'user',
-    },
-  };
-
-  const startCamera = async () => {
-    try {
-      console.log("START CAMERA");
-  
-      // Récupérer le flux de la caméra avec les contraintes initiales
-      let basicStream = await navigator.mediaDevices.getUserMedia(videoConstraintsStart);
-      if (videoRef.current) {
-        videoRef.current.srcObject = basicStream;
-        setStream(basicStream);
-      }
-  
-      const videoTrack = basicStream.getVideoTracks()[0];
-  
-      // Appliquer le mode focus manuel avec une distance de mise au point spécifique
-      const currentConstraints = videoTrack.getConstraints();
-      const newConstraints = {
-        ...currentConstraints,
-        advanced: [
-          {
-            ...currentConstraints.advanced?.[0], // Si l'advanced existe, on le modifie
-            focusMode: 'manual', // Mise à jour pour utiliser le mode 'manual'
-            focusDistance:  focusDistance// Définir la distance de mise au point (1 cm par exemple)
-          }
-        ]
-      };
-  
-      // Appliquer les nouvelles contraintes
-      await videoTrack.applyConstraints(newConstraints);
-  
-      // Arrêter le flux initial
-      videoTrack.stop();
-  
-      // Récupérer un nouveau flux avec les contraintes complètes
-      let newStream = await navigator.mediaDevices.getUserMedia(videoConstraintsFull);
-      if (videoRef.current) {
-        videoRef.current.srcObject = newStream;
-        setStream(newStream);
-      }
-    } catch (err) {
-      console.error("Error accessing camera: ", err);
-    }
-  };
-  
-  
-
-  const startCameraAutoFocus = async () => {
-    try {
-      console.log("START CAMERA");
-  
-      // Log des contraintes de la caméra au départ
-      console.log("Video Constraints Start: ", videoConstraintsStart);
-  
-      let basicStream = await navigator.mediaDevices.getUserMedia(videoConstraintsStart);
-      if (videoRef.current) {
-        videoRef.current.srcObject = basicStream;
-        setStream(basicStream);
-      }
-  
-      const videoTrack = basicStream.getVideoTracks()[0];
-      console.log("Initial Video Track Settings: ", videoTrack.getSettings()); // Log des paramètres réels
-  
-      // Application directe du focusMode
-      const currentConstraints = videoTrack.getConstraints();
-      const newConstraints = {
-        ...currentConstraints,
-        advanced: [
-          {
-            ...currentConstraints.advanced?.[0], // Si l'advanced existe, on le modifie
-            focusMode: 'continuous' // Tentative de mettre "continuous" sans vérifier les capacités
-          }
-        ]
-      };
-  
-      // Appliquer les nouvelles contraintes
-      await videoTrack.applyConstraints(newConstraints);
-      console.log("Focus mode set to continuous");
-  
-      // Arrêter le flux initial
-      videoTrack.stop();
-  
-      console.log("Video Constraints Full: ", videoConstraintsFull);
-  
-      let newStream = await navigator.mediaDevices.getUserMedia(videoConstraintsFull);
-      if (videoRef.current) {
-        videoRef.current.srcObject = newStream;
-        setStream(newStream);
-      }
-  
-      // Log des paramètres réels de la nouvelle caméra
-      const newVideoTrack = newStream.getVideoTracks()[0];
-      console.log("New Video Track Settings: ", newVideoTrack.getSettings());
-  
-    } catch (err) {
-      console.error("Error accessing camera: ", err);
-    }
+    width: 3840,
+    height: 2160,
   };
 
   const stopCamera = () => {
@@ -267,18 +155,6 @@ function Camera() {
     }
   };
 
-  const restartCamera = async () => {
-    stopCamera();
-    startCamera();
-  };
-
-  const restartCameraAutoFocus = async () => {
-    stopCamera();
-    startCameraAutoFocus();
-  };
-
-
-
   const startCountdown = async (secondes: number) => {
     setTextShown(false);
     setCountdown(secondes);
@@ -286,13 +162,14 @@ function Camera() {
     return new Promise<void>((resolve) => {
       const interval = setInterval(() => {
         setCountdown((prevCount) => {
-          if (prevCount === 1) {
-            clearInterval(interval);
+          if (prevCount === 2) {
             if (overlayRef.current) overlayRef.current.classList.add('active');
             setTimeout(() => {
               if (overlayRef.current) overlayRef.current.classList.remove('active');
               resolve();
-            }, 500);
+            }, 300);
+            setCountdown(0);
+            clearInterval(interval);
           }
           return prevCount - 1;
         });
@@ -304,13 +181,6 @@ function Camera() {
     setShowMenu(false);
     await capture();
   };
-
-  useEffect(() => {
-    startCamera();
-    return () => {
-      stopCamera();
-    };
-  }, []);
 
   const capture = async () => {
     if (mode === "PICTURE") {
@@ -371,100 +241,104 @@ function Camera() {
   }
 
   const capturePhoto = async () => {
-    if (canvasRef.current && videoRef.current) {
-      const context = canvasRef.current.getContext('2d');
-      if (context) {
-        const { videoWidth, videoHeight } = videoRef.current;
+    let canvasWidth = 3840;
+    let canvasHeight = 2160;
 
-        let canvasWidth = videoWidth;
-        let canvasHeight = videoHeight;
-        if (format === "POLAROID") {
-          canvasWidth = 2160;
-          canvasHeight = 2160;
-        } else if (format === "MINIPOLAROID") {
-          canvasWidth = 1400;
-          canvasHeight = 2160;
-        } else if (format === "PAYSAGE") {
-          canvasWidth = 3228;
-          canvasHeight = 2160;
-        }
+    if (format === "POLAROID") {
+        canvasWidth = 2160;
+        canvasHeight = 2160;
+    } else if (format === "MINIPOLAROID") {
+        canvasWidth = 1400;
+        canvasHeight = 2160;
+    } else if (format === "PAYSAGE") {
+        canvasWidth = 3228;
+        canvasHeight = 2160;
+    }
 
-        canvasRef.current.width = canvasWidth;
-        canvasRef.current.height = canvasHeight;
+    const pic = videoRef.current?.getScreenshot({ width: 3840, height: 2160 });
 
-        context.save();
+    if (pic) {
+        return new Promise((resolve, reject) => { // Correct context for resolve/reject
+            const img = new Image();
+            img.crossOrigin = "anonymous";
+            img.src = pic;
 
-        // Calculate the scale to maintain aspect ratio
-        const scale = Math.max(canvasWidth / videoWidth, canvasHeight / videoHeight);
-        const drawWidth = videoWidth * scale;
-        const drawHeight = videoHeight * scale;
+            img.onload = () => {
+                const canvas = document.createElement("canvas");
+                canvas.width = canvasWidth;
+                canvas.height = canvasHeight;
 
-        // Calculate the offsets to center the video
-        const offsetX = (canvasWidth - drawWidth) / 2;
-        const offsetY = (canvasHeight - drawHeight) / 2;
+                const ctx = canvas.getContext("2d");
 
-        // Draw the video on the canvas, cropping as needed
-        context.drawImage(videoRef.current, offsetX, offsetY, drawWidth, drawHeight);
-        context.restore();
+                if (ctx) {
+                    const dx = (img.width - canvasWidth) / 2;
+                    const dy = (img.height - canvasHeight) / 2;
 
-        // Gestion des filters
-        if (currentSelectedFilter.url !== "") {
-          const frameImage = new Image();
+                    ctx.drawImage(
+                        img,
+                        dx,
+                        dy,
+                        canvasWidth,
+                        canvasHeight,
+                        0,
+                        0,
+                        canvasWidth,
+                        canvasHeight
+                    );
 
-          frameImage.src = currentSelectedFilter.url;
-          frameImage.crossOrigin = "anonymous"; // do that to avoid "Tainted canvas" error when executing toBlob on canvas 
-          return new Promise((resolve, reject) => {
-            frameImage.onload = () => {
-              // Vérification de canvasRef.current avant d'utiliser ses méthodes
-              if (canvasRef.current) {
-                // Dessiner le frame par-dessus l'image capturée
-                context.drawImage(frameImage, 0, 0, canvasRef.current.width, canvasRef.current.height);
-                canvasRef.current.toBlob((blob) => {
-                  if (blob) {
-                    const url = URL.createObjectURL(blob);
-                    setCapturedPhoto(url);
-                    setPhotoBlob(blob);
-                    resolve(url);
-                  } else {
-                    console.error('Failed to capture image');
-                    reject(new Error('Failed to capture image'));
-                  }
-                }, 'image/jpeg');
-              } else {
-                reject(new Error('Canvas reference is null'));
-              }
-            };
+                    if (currentSelectedFilter.url !== "") {
+                        const filterImg = new Image();
+                        filterImg.crossOrigin = "anonymous";
+                        filterImg.src = currentSelectedFilter.url;
 
-            frameImage.onerror = () => {
-              console.error('Failed to load the frame image');
-              reject(new Error('Failed to load the frame image'));
-            };
-          });
-        } else {
-          // Sans frame
-          return new Promise((resolve, reject) => {
-            if (canvasRef.current) {
-              canvasRef.current.toBlob((blob) => {
-                if (blob) {
-                  const url = URL.createObjectURL(blob);
-                  setCapturedPhoto(url);
-                  setPhotoBlob(blob);
-                  resolve(url);
+                        filterImg.onload = () => {
+                            ctx.drawImage(filterImg, 0, 0, canvasWidth, canvasHeight);
+
+                            canvas.toBlob(
+                                (blob) => {
+                                    if (blob) {
+                                        const photoURL = URL.createObjectURL(blob);
+                                        setCapturedPhoto(photoURL);
+                                        setPhotoBlob(blob);
+                                        resolve(photoURL); // Resolve with the URL
+                                    } else {
+                                        reject(new Error("Failed to create blob"));
+                                    }
+                                },
+                                "image/png",
+                                1
+                            );
+                        };
+
+                        filterImg.onerror = (error) => reject(error);
+                    } else {
+                        canvas.toBlob(
+                            (blob) => {
+                                if (blob) {
+                                    const photoURL = URL.createObjectURL(blob);
+                                    setCapturedPhoto(photoURL);
+                                    setPhotoBlob(blob);
+                                    resolve(photoURL); // Resolve with the URL
+                                } else {
+                                    reject(new Error("Failed to create blob"));
+                                }
+                            },
+                            "image/png",
+                            1
+                        );
+                    }
                 } else {
-                  console.error('Failed to capture image');
-                  reject(new Error('Failed to capture image'));
+                    reject(new Error("Failed to get canvas context"));
                 }
-              }, 'image/jpeg', 1.0);
-            } else {
-              reject(new Error('Canvas reference is null'));
-            }
-          });
-        }
-      }
+            };
+
+            img.onerror = (error) => reject(error);
+        });
     } else {
-      return Promise.reject(new Error('Canvas or video element not found'));
+        throw new Error("No picture captured");
     }
   };
+
 
 
   const handleSave = async () => {
@@ -510,45 +384,13 @@ function Camera() {
     }
   };
 
-  const handleSendEmail = async () => {
-    setEnteringEmail(false)
-    if (photoBlob && email) {
-      if (photoPath) {
-        setLoading(true);
-        try {
-          const response = await fetch(`${backendAdress}/sendEmail`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ filePath: photoPath, email }),
-          });
-
-          if (!response.ok) {
-            throw new Error('Failed to send email');
-          }
-        } catch (error) {
-          console.error('Error sending email:', error);
-        } finally {
-          setLoading(false);
-        }
-      } else {
-        console.error('Failed to save photo before sending email');
-      }
-    } else {
-      console.error('No photo blob to send or email not provided');
-    }
-  };
-
   const handleCancel = () => {
-    restartCamera();
     setCapturedPhoto(null);
     setPhotoBlob(null);
     setTextShown(true);
     setShowSavingOptions(false);
     setEmail('');
     setShowMenu(true);
-    setEnteringEmail(false);
     setPopUpOn(false);
     setQrStep('display');
   };
@@ -642,22 +484,11 @@ function Camera() {
 
   const handlePrintClick = () => {
     if (config.qrCodePrint) {
-      restartCameraAutoFocus();
       setPopUpOn(true);
     } else {
       handlePrint();
     }
   };
-
-  const onKeyboardChange = (input: string) => {
-    console.log("Input changed", input);
-    setEmail(input)
-  }
-
-  const onKeyPress = (button: string) => {
-    console.log("Button pressed", button);
-    if (button === "{enter}") setEnteringEmail(false)
-  }
 
   const putFilter = async (filterIndex: number) => {
     if (filterIndex === -5) {
@@ -750,30 +581,28 @@ function Camera() {
     console.log(config)
   };
 
-  const setNewFocus = (newFocus: number) => {
-      setFocusDistance(newFocus);
-      restartCamera();
-  };
-
   const currentSelectedFilter = getFilterBankFromFormat(format)[filter];
   const currentSelectedFrame = getFrameBankFromFormat(format)[framePolaroid];
   return (
     <div className="camera-container">
       <div className="camera-left" onClick={textShown ? captureMedia : undefined}>
-        <video
-          ref={videoRef}
-          autoPlay
-          playsInline
-          className="video-stream"
-          style={{
-            height: '100%',
-            width: format === "POLAROID" ? '100vh' :
-              format === "MINIPOLAROID" ? '720px' :
-                format === "PAYSAGE" ? '1614px' : '100%',
-            objectFit: 'cover',
-          }}
+        <Webcam
+              audio={false}
+              width={3840}
+              height={2160}
+              ref={videoRef}
+              screenshotFormat="image/png"
+              videoConstraints={videoConstraintsFull}
+              className="video-stream"
+              style={{
+                height: '100%',
+                width: format === "POLAROID" ? '100vh' :
+                  format === "MINIPOLAROID" ? '720px' :
+                    format === "PAYSAGE" ? '1614px' : '100%',
+                objectFit: 'cover',
+              }}
         />
-        {currentSelectedFilter.url && <div className='captured-image-filter-container'><img className="captured-image-filter" style={{ aspectRatio: videoRef.current?.videoWidth! + "/" + videoRef.current?.videoHeight! }} src={currentSelectedFilter.url} alt="Captured" /></div>}
+        {currentSelectedFilter.url && <div className='captured-image-filter-container'><img className="captured-image-filter" style={{ aspectRatio: 3840 + "/" + 2160 }} src={currentSelectedFilter.url} alt="Captured" /></div>}
         {textShown && (
           <div className="overlay-text-left">
             <p style={{ margin: 0, textWrap: "nowrap" }}>Appuie pour prendre une photo</p>
@@ -869,24 +698,13 @@ function Camera() {
             <div className="sauv">
               SAUVEGARDÉ 💾✅
             </div>
-            {/* <input
-              className={`${mode === 'PICTURE' ? 'email-input-short' : 'email-input-long'}`}
-              type="email"
-              value={email}
-              onFocus={() => setEnteringEmail(true)}
-              // onBlur={() => setEnteringEmail(false)}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Entres ton adresse email"
-            /> */}
 
-            {/* <div className={`form-button active`} onClick={handleSendEmail}>ENVOYER</div> */}
-
-            {/* {mode === 'PICTURE' && printError !== 'LU' && format === 'POLAROID' && (
+            {mode === 'PICTURE' && printError !== 'LU' && format === 'POLAROID' && (
               <div>
                 <div onClick={() => switchFrame(framePolaroid - 1)} className="form-button navigation left">&lt;</div>
                 <div onClick={() => switchFrame(framePolaroid + 1)} className="form-button navigation right">&gt;</div>
               </div>
-            )} */}
+            )}
 
             {config.canPrint && mode === 'PICTURE' && printError !== 'LU' && (
               <div className="form-impr">
@@ -911,13 +729,6 @@ function Camera() {
             )}
 
           </div>
-          {/* {enteringEmail && <div style={{ width: "100%"}}>
-            <Keyboard
-              onChange={onKeyboardChange}
-              onKeyPress={onKeyPress}
-              layout={layout}
-            />
-          </div>}      */}
         </div>
       )}
 
@@ -962,7 +773,7 @@ function Camera() {
         </div>
       )}
 
-      <Settings onCopiesUpdated={handleCopiesUpdated} onPrint={handlePrint} setNewConfig={setNewConfig}  setNewFocus={setNewFocus}/>
+      <Settings onCopiesUpdated={handleCopiesUpdated} onPrint={handlePrint} setNewConfig={setNewConfig}/>
 
     </div>
   );
