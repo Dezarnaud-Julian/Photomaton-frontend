@@ -127,7 +127,7 @@ function Camera() {
 
   // État pour le texte de chargement
   const [loading, setLoading] = useState(false);
-  
+
   const videoRef = useRef<Webcam>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
@@ -160,9 +160,9 @@ function Camera() {
   const [popUpOn, setPopUpOn] = useState(false);
   const [qrStep, setQrStep] = useState('display'); // 'display' pour afficher le QR code, 'scan' pour le lecteur
 
-  let videoConstraintsFull = {
-    width: 1920,
-    height: 1080,
+  let videoConstraintsFull: MediaStreamConstraints["video"] = {
+    width: 3840,
+    height: 2160,
   };
 
   const startCountdown = async (secondes: number) => {
@@ -255,93 +255,98 @@ function Camera() {
     let canvasHeight = 2160;
 
     if (format === "POLAROID") {
-        canvasWidth = 2160;
-        canvasHeight = 2160;
+      canvasWidth = 2160;
+      canvasHeight = 2160;
     } else if (format === "MINIPOLAROID") {
-        canvasWidth = 1400;
-        canvasHeight = 2160;
+      canvasWidth = 1400;
+      canvasHeight = 2160;
     } else if (format === "PAYSAGE") {
-        canvasWidth = 3840;
-        canvasHeight = 2160;
+      canvasWidth = 3228;
+      canvasHeight = 2160;
     }
 
-    const pic = videoRef.current?.getScreenshot({ width: 1920, height: 1080 });
+    const pic = videoRef.current?.getScreenshot({ width: 3840, height: 2160 });
 
     if (pic) {
-        return new Promise((resolve, reject) => { // Correct context for resolve/reject
-            const img = new Image();
-            img.crossOrigin = "anonymous";
-            img.src = pic;
+      return new Promise((resolve, reject) => { // Correct context for resolve/reject
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+        img.src = pic;
 
-            img.onload = () => {
-                const canvas = document.createElement("canvas");
-                canvas.width = canvasWidth;
-                canvas.height = canvasHeight;
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          canvas.width = canvasWidth;
+          canvas.height = canvasHeight;
 
-                const ctx = canvas.getContext("2d");
+          const ctx = canvas.getContext("2d");
 
-                if (ctx) {
-                    const dx = (img.width - canvasWidth) / 2;
-                    const dy = (img.height - canvasHeight) / 2;
+          if (ctx) {
+            const sx = (img.width - canvasWidth) / 2;
+            const sy = (img.height - canvasHeight) / 2;
 
-                    ctx.drawImage(
-                        img,
-                        0,
-                        0,
-                        canvasWidth,
-                        canvasHeight,
-                    );
+            ctx.drawImage(
+              img,
+              // take only the part of the image that fits in the canvas (center image) sx,sy,sw,sh
+              sx,
+              sy,
+              canvasWidth,
+              canvasHeight,
+              // draw the whole image dx,dy,dw,dh
+              0, 0,
+              canvasWidth,
+              canvasHeight,
+            );
 
-                    if (currentSelectedFilter.url !== "") {
-                        const filterImg = new Image();
-                        filterImg.crossOrigin = "anonymous";
-                        filterImg.src = currentSelectedFilter.url;
+            if (currentSelectedFilter.url !== "") {
+              const filterImg = new Image();
+              filterImg.crossOrigin = "anonymous";
+              filterImg.src = currentSelectedFilter.url;
 
-                        filterImg.onload = () => {
-                            ctx.drawImage(filterImg, 0, 0, canvasWidth, canvasHeight);
+              filterImg.onload = () => {
+                ctx.drawImage(filterImg, 0, 0, canvasWidth, canvasHeight);
 
-                            canvas.toBlob(
-                                (blob) => {
-                                    if (blob) {
-                                        const photoURL = URL.createObjectURL(blob);
-                                        setCapturedPhoto(photoURL);
-                                        setPhotoBlob(blob);
-                                        resolve(photoURL); // Resolve with the URL
-                                    } else {
-                                        reject(new Error("Failed to create blob"));
-                                    }
-                                },
-                                "image/png",
-                                1
-                            );
-                        };
-
-                        filterImg.onerror = (error) => reject(error);
+                canvas.toBlob(
+                  (blob) => {
+                    if (blob) {
+                      const photoURL = URL.createObjectURL(blob);
+                      setCapturedPhoto(photoURL);
+                      setPhotoBlob(blob);
+                      resolve(photoURL); // Resolve with the URL
                     } else {
-                        canvas.toBlob(
-                            (blob) => {
-                                if (blob) {
-                                    const photoURL = URL.createObjectURL(blob);
-                                    setCapturedPhoto(photoURL);
-                                    setPhotoBlob(blob);
-                                    resolve(photoURL); // Resolve with the URL
-                                } else {
-                                    reject(new Error("Failed to create blob"));
-                                }
-                            },
-                            "image/png",
-                            1
-                        );
+                      reject(new Error("Failed to create blob"));
                     }
-                } else {
-                    reject(new Error("Failed to get canvas context"));
-                }
-            };
+                  },
+                  "image/png",
+                  1
+                );
+              };
 
-            img.onerror = (error) => reject(error);
-        });
+              filterImg.onerror = (error) => reject(error);
+            } else {
+              canvas.toBlob(
+                (blob) => {
+                  if (blob) {
+                    const photoURL = URL.createObjectURL(blob);
+                    setCapturedPhoto(photoURL);
+                    setPhotoBlob(blob);
+                    resolve(photoURL); // Resolve with the URL
+                  } else {
+                    reject(new Error("Failed to create blob"));
+                  }
+                },
+                "image/png",
+                1
+              );
+            }
+          } else {
+            reject(new Error("Failed to get canvas context"));
+          }
+        };
+
+        img.onerror = (error) => reject(error);
+      });
     } else {
-        throw new Error("No picture captured");
+      throw new Error("No picture captured");
     }
   };
 
@@ -578,12 +583,12 @@ function Camera() {
   }
 
   const setNewConfig = (newConfig: string) => {
-    if(newConfig=="debugConfig"){
+    if (newConfig == "debugConfig") {
       setConfig(debugConfig);
-    }else{
+    } else {
       setConfig(fullDigitalConfig);
     }
-    
+
     console.log(config)
   };
 
@@ -593,20 +598,19 @@ function Camera() {
     <div className="camera-container">
       <div className="camera-left" onClick={textShown ? captureMedia : undefined}>
         <Webcam
-              audio={false}
-              width={1920}
-              height={1080}
-              ref={videoRef}
-              screenshotFormat="image/png"
-              videoConstraints={videoConstraintsFull}
-              className="video-stream"
-              style={{
-                height: '100%',
-                width: format === "POLAROID" ? '100vh' :
-                  format === "MINIPOLAROID" ? '720px' :
-                    format === "PAYSAGE" ? '1614px' : '100%',
-                objectFit: 'cover',
-              }}
+          audio={false}
+          ref={videoRef}
+          screenshotFormat="image/png"
+          videoConstraints={videoConstraintsFull}
+          screenshotQuality={1}
+          className="video-stream"
+          style={{
+            height: '100%',
+            width: format === "POLAROID" ? '100vh' :
+              format === "MINIPOLAROID" ? '720px' :
+                format === "PAYSAGE" ? '1614px' : '100%',
+            objectFit: 'cover',
+          }}
         />
         {currentSelectedFilter.url && <div className='captured-image-filter-container'><img className="captured-image-filter" style={{ aspectRatio: 3840 + "/" + 2160 }} src={currentSelectedFilter.url} alt="Captured" /></div>}
         {textShown && (
@@ -779,7 +783,7 @@ function Camera() {
         </div>
       )}
 
-      <Settings onCopiesUpdated={handleCopiesUpdated} onPrint={handlePrint} setNewConfig={setNewConfig}/>
+      <Settings onCopiesUpdated={handleCopiesUpdated} onPrint={handlePrint} setNewConfig={setNewConfig} />
 
     </div>
   );
