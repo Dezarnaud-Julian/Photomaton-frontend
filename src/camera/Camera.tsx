@@ -57,6 +57,23 @@ const fullDigitalConfig: Config = {
     defaultLandscapeFilter: 1
   }
 }
+const weAreItConfig: Config = {
+  qrCodePrint: false,
+  canPrint: true,
+  format: ["PAYSAGE"],
+  cameraModes: ["PICTURE", "GIF"],
+  frames: {
+    miniPolaroid: [{ name: "Aucun cadre", url: "" }],
+    polaroid: [{ name: "Aucun cadre", url: "" }],
+    landscape: [{ name: "Aucun cadre", url: "" }]
+  },
+  filters: {
+    miniPolaroid: [{ name: "Aucun filtre", url: "" }],
+    polaroid: [{ name: "Aucun filtre", url: "" }],
+    landscape: [{ name: "Aucun filtre", url: "" }],
+    defaultLandscapeFilter: 0
+  }
+}
 type Image = {
   name: string, url: string
 }
@@ -105,7 +122,7 @@ const emptyConfig: Config = {
 } as Config;
 function Camera() {
 
-  const [config, setConfig] = useState<Config>(debugConfig);
+  const [config, setConfig] = useState<Config>(weAreItConfig);
 
 
   // État pour le texte de chargement
@@ -248,7 +265,7 @@ function Camera() {
         canvasHeight = 2160;
     }
 
-    const pic = videoRef.current?.getScreenshot({ width: 3840, height: 2160 });
+    const pic = videoRef.current?.getScreenshot({ width: 1920, height: 1080 });
 
     if (pic) {
         return new Promise((resolve, reject) => { // Correct context for resolve/reject
@@ -581,8 +598,8 @@ function Camera() {
       <div className="camera-left" onClick={textShown ? captureMedia : undefined}>
         <Webcam
               audio={false}
-              width={3840}
-              height={2160}
+              width={1920}
+              height={1080}
               ref={videoRef}
               screenshotFormat="image/png"
               videoConstraints={videoConstraintsFull}
