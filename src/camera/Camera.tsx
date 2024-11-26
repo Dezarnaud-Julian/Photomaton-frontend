@@ -261,7 +261,7 @@ function Camera() {
         canvasWidth = 1400;
         canvasHeight = 2160;
     } else if (format === "PAYSAGE") {
-        canvasWidth = 3228;
+        canvasWidth = 3840;
         canvasHeight = 2160;
     }
 
@@ -286,14 +286,10 @@ function Camera() {
 
                     ctx.drawImage(
                         img,
-                        dx,
-                        dy,
+                        0,
+                        0,
                         canvasWidth,
                         canvasHeight,
-                        0,
-                        0,
-                        canvasWidth,
-                        canvasHeight
                     );
 
                     if (currentSelectedFilter.url !== "") {
