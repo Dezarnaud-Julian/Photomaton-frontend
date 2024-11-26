@@ -61,7 +61,7 @@ const weAreItConfig: Config = {
   qrCodePrint: false,
   canPrint: true,
   format: ["PAYSAGE"],
-  cameraModes: ["PICTURE", "GIF"],
+  cameraModes: ["PICTURE"],
   frames: {
     miniPolaroid: [{ name: "Aucun cadre", url: "" }],
     polaroid: [{ name: "Aucun cadre", url: "" }],
@@ -161,8 +161,8 @@ function Camera() {
   const [qrStep, setQrStep] = useState('display'); // 'display' pour afficher le QR code, 'scan' pour le lecteur
 
   let videoConstraintsFull = {
-    width: 3840,
-    height: 2160,
+    width: 1920,
+    height: 1080,
   };
 
   const startCountdown = async (secondes: number) => {
@@ -172,12 +172,12 @@ function Camera() {
     return new Promise<void>((resolve) => {
       const interval = setInterval(() => {
         setCountdown((prevCount) => {
-          if (prevCount === 2) {
+          if (prevCount === 1) {
             if (overlayRef.current) overlayRef.current.classList.add('active');
             setTimeout(() => {
               if (overlayRef.current) overlayRef.current.classList.remove('active');
               resolve();
-            }, 300);
+            }, 500);
             setCountdown(0);
             clearInterval(interval);
           }
