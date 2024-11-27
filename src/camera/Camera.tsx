@@ -70,8 +70,8 @@ const weAreItConfig: Config = {
   filters: {
     miniPolaroid: [{ name: "Aucun filtre", url: "" }],
     polaroid: [{ name: "Aucun filtre", url: "" }],
-    landscape: [{ name: "Aucun filtre", url: "" }],
-    defaultLandscapeFilter: 0
+    landscape: [{ name: "Aucun filtre", url: "" }, { name: "4L", url: imagesAdressBase + "/filters/landscape/B&R_weareit2.png" }, { name: "Moustaches", url: imagesAdressBase + "/filters/landscape/Moustaches.png" }],
+    defaultLandscapeFilter: 1
   }
 }
 type Image = {
@@ -483,7 +483,10 @@ function Camera() {
           setPrintError(error.message);
           console.error('Error printing photo:', error);
         } finally {
-          setLoading(false);
+          setTimeout(() => {
+            setLoading(false);
+          }, 20000) // force waiting of printing
+
         }
       } else {
         console.error('Failed to save photo before printing');
