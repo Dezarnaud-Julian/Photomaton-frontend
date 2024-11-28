@@ -3,7 +3,7 @@ import "./Settings.css"
 
 const CODE = "2518";
 
-function Settings({ onCopiesUpdated, onPrint, setNewConfig }: { onCopiesUpdated: (copies: string) => void; onPrint: () => void; setNewConfig:(config : string) => void}) {
+function Settings({ onCopiesUpdated, onPrint, setNewConfig, credits  }: { credits: number; onCopiesUpdated: (copies: string) => void; onPrint: () => void; setNewConfig:(config : string) => void}) {
   const [showPad, setShowPad] = useState(false);
   const [clickCounter, setClickCounter] = useState(0);
   const [code, setCode] = useState('');
@@ -143,6 +143,23 @@ function Settings({ onCopiesUpdated, onPrint, setNewConfig }: { onCopiesUpdated:
     }
   };  
 
+  const handleRestartApplication = async () => {
+    try {
+      const response = await fetch(`${backendAdress}/cupsenable`, { method: 'POST' });
+      if (response.ok) {
+        alert('L\'application va restart.');
+      } else {
+        console.error('Erreur lors du restart de l\'application');
+        alert('Erreur lors du restart de l\'application');
+      }
+      window.location.reload()
+    } catch (error) {
+      console.error('Erreur réseau:', error);
+      alert('Erreur réseau' + error);
+    }
+  };  
+
+
   return (
     <div className='settings'>
       <div
@@ -180,9 +197,8 @@ function Settings({ onCopiesUpdated, onPrint, setNewConfig }: { onCopiesUpdated:
                 Paramètres
                 <button onClick={closeSettings} className='close-btn'>X</button>
                 <div className='horizontal'>
-                  <button onClick={() => { window.location.reload() }}>Restart app</button>
-                  <button onClick={() => { window.close() }}>Close app</button>
-
+                  <p>{credits} crédits</p>
+                  <button onClick={() => { handleRestartApplication() }}>Restart app</button>
 
                   {/* <button onClick={handleQuitApplication}>Quitter l'application</button> */}
                 </div>

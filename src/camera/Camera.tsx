@@ -157,8 +157,12 @@ function Camera() {
   const [formats, setFormats] = useState<string[]>(config.format);
   const [format, setFormat] = useState(config.format[0]);
 
+  const [credits, setCredits] = useState<number>(100);
+
   const [popUpOn, setPopUpOn] = useState(false);
   const [qrStep, setQrStep] = useState('display'); // 'display' pour afficher le QR code, 'scan' pour le lecteur
+
+  const goBackToMainTimeOut = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   let videoConstraintsFull: MediaStreamConstraints["video"] = {
     width: 3840,
@@ -187,6 +191,28 @@ function Camera() {
     });
   };
 
+  const fetchCredits = async () => {
+    try {
+      const response = await fetch(`${backendAdress}/credits`);
+      if (response.ok) {
+        const data = await response.json();
+        setCredits(data);
+        
+      } else {
+        console.error('Erreur lors de la récupération des crédits');
+      }
+    } catch (error) {
+      console.error('Erreur réseau:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchCredits();
+    if (goBackToMainTimeOut.current) {
+      clearTimeout(goBackToMainTimeOut.current);
+    }
+  });
+
   const captureMedia = async () => {
     setShowMenu(false);
     await capture();
@@ -195,7 +221,9 @@ function Camera() {
   const capture = async () => {
     if (mode === "PICTURE") {
       await startCountdown(4);
-      capturePhoto();
+      setLoading(true);
+      await capturePhoto();
+      setLoading(false);
     } else if (mode === "GIF") {
       setGifFinished(false);
       let photosForGif: string[] = [];
@@ -312,8 +340,10 @@ function Camera() {
                       setCapturedPhoto(photoURL);
                       setPhotoBlob(blob);
                       resolve(photoURL); // Resolve with the URL
+                      setLoading(false);
                     } else {
                       reject(new Error("Failed to create blob"));
+                      setLoading(false);
                     }
                   },
                   "image/png",
@@ -328,6 +358,7 @@ function Camera() {
                   if (blob) {
                     const photoURL = URL.createObjectURL(blob);
                     setCapturedPhoto(photoURL);
+                    setLoading(false);
                     setPhotoBlob(blob);
                     resolve(photoURL); // Resolve with the URL
                   } else {
@@ -340,6 +371,7 @@ function Camera() {
             }
           } else {
             reject(new Error("Failed to get canvas context"));
+            setLoading(false);
           }
         };
 
@@ -347,7 +379,9 @@ function Camera() {
       });
     } else {
       throw new Error("No picture captured");
+      setLoading(false);
     }
+    setLoading(false);
   };
 
 
@@ -357,6 +391,7 @@ function Camera() {
       setPhotoPath(await savePhoto());
       console.log("Photo saved at path :", photoPath)
       setShowSavingOptions(true);
+      resetTimeout(); 
     } else {
       console.error('Photo not saved : no photo blob to upload');
     }
@@ -396,6 +431,10 @@ function Camera() {
   };
 
   const handleCancel = () => {
+    if (goBackToMainTimeOut.current) {
+      clearTimeout(goBackToMainTimeOut.current);
+    }
+    setPrintCopies(1);
     setCapturedPhoto(null);
     setPhotoBlob(null);
     setTextShown(true);
@@ -485,7 +524,12 @@ function Camera() {
         } finally {
           setTimeout(() => {
             setLoading(false);
-          }, 20000) // force waiting of printing
+            if (format === "POLAROID") {
+              setCredits(credits-(printCopies*2))
+            }else{
+              setCredits(credits-printCopies)
+            }
+          }, 20000*printCopies) // force waiting of printing
 
         }
       } else {
@@ -494,6 +538,7 @@ function Camera() {
     } else {
       console.error('No photo blob to print');
     }
+    resetTimeout();
   };
 
   const handlePrintClick = () => {
@@ -541,12 +586,14 @@ function Camera() {
       newIndex = 0;
     }
     if (format === "POLAROID") setFramePolaroid(newIndex);
+    resetTimeout();
   };
 
   const putCopies = async (copies: number) => {
     if (copies < 1) { setPrintCopies(1) }
     else if (copies > 6) { setPrintCopies(6) }
     else { setPrintCopies(copies) }
+    resetTimeout();
   };
 
   function extractTextFromPath(path: string) {
@@ -593,6 +640,15 @@ function Camera() {
     }
 
     console.log(config)
+  };
+
+  const resetTimeout = () => {
+    if (goBackToMainTimeOut.current) {
+      clearTimeout(goBackToMainTimeOut.current);
+    }
+    goBackToMainTimeOut.current = setTimeout(() => {
+      handleCancel();
+    }, 20000*6);
   };
 
   const currentSelectedFilter = getFilterBankFromFormat(format)[filter];
@@ -786,10 +842,14 @@ function Camera() {
         </div>
       )}
 
-      <Settings onCopiesUpdated={handleCopiesUpdated} onPrint={handlePrint} setNewConfig={setNewConfig} />
+      <Settings onCopiesUpdated={handleCopiesUpdated} onPrint={handlePrint} setNewConfig={setNewConfig} credits={credits} />
 
     </div>
   );
 }
 
 export default Camera;
+
+function ngOnInit() {
+  throw new Error('Function not implemented.');
+}
