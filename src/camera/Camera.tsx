@@ -208,9 +208,6 @@ function Camera() {
 
   useEffect(() => {
     fetchCredits();
-    if (goBackToMainTimeOut.current) {
-      clearTimeout(goBackToMainTimeOut.current);
-    }
   });
 
   const captureMedia = async () => {
@@ -507,21 +504,27 @@ function Camera() {
               filePath: photoPath,
               copies: printCopies,
               format: format,
-              frame: frameValue // Utilisation de la valeur de frame
             }),
           });
-
+        
           if (!response.ok) {
-            const errorData = await response.json().catch(() => null); // En cas d'erreur de parsing JSON
-            const errorMessage = errorData && errorData.message ? errorData.message : `Erreur lors de l'impression: ${response.statusText}`;
+            const errorData = await response.json().catch(() => null);
+            const errorMessage = errorData && errorData.message
+              ? errorData.message
+              : `Erreur lors de l'impression: ${response.statusText}`;
+              
+            setLoading(false);
+            setPrintError(errorMessage); // Affiche une erreur utilisateur compréhensible
             throw new Error(errorMessage);
           }
-
+        
           console.log('Photo sent for printing');
         } catch (error: any) {
-          setPrintError(error.message);
+          setLoading(false);
+          setPrintError(error.message || 'Une erreur inconnue est survenue');
           console.error('Error printing photo:', error);
-        } finally {
+        }
+         finally {
           setTimeout(() => {
             setLoading(false);
             if (format === "POLAROID") {
@@ -533,9 +536,11 @@ function Camera() {
 
         }
       } else {
+        setLoading(false);
         console.error('Failed to save photo before printing');
       }
     } else {
+      setLoading(false);
       console.error('No photo blob to print');
     }
     resetTimeout();
