@@ -38,26 +38,21 @@ const debugConfig: Config = {
 const fullDigitalConfig: Config = {
   qrCodePrint: false,
   canPrint: false,
-  qrCodePage: {
-    url: "https://www.instagram.com/lagaufreliegeoise/",
-    text: "📱 Récupères ta photo en suivant notre page !"
-  },
-  format: ["PAYSAGE", "POLAROID", "MINIPOLAROID"],
-  cameraModes: ["PICTURE", "GIF"],
+  format: ["PAYSAGE"],
+  cameraModes: ["PICTURE"],
   frames: {
     miniPolaroid: [{ name: "Aucun cadre", url: "" }],
-    polaroid: [{ name: "Aucun cadre", url: "" }, { name: "matous", url: imagesAdressBase + "/frames/polaroid/matous.png" }],
-    //polaroid: [{ name: "Aucun cadre", url: "" }],
+    polaroid: [{ name: "Aucun cadre", url: "" }],
     landscape: [{ name: "Aucun cadre", url: "" }]
   },
   filters: {
     miniPolaroid: [{ name: "Aucun filtre", url: "" }],
-    polaroid: [{ name: "Aucun filtre", url: "" }, { name: "Gaufre", url: imagesAdressBase + "/filters/polaroid/gaufreP.png" }, { name: "Raclette", url: imagesAdressBase + "/filters/polaroid/cheeseP.png" }, { name: "Jus", url: imagesAdressBase + "/filters/polaroid/jusP.png" }],
-    landscape: [{ name: "Aucun filtre", url: "" }, { name: "Gaufre", url: imagesAdressBase + "/filters/landscape/gaufre.png" }, { name: "Raclette", url: imagesAdressBase + "/filters/landscape/cheese2.png" }, { name: "Jus", url: imagesAdressBase + "/filters/landscape/jus.png" }],
+    polaroid: [{ name: "Aucun filtre", url: "" }],
+    landscape: [{ name: "Gala", url: imagesAdressBase + "/filters/landscape/Gala.png" }],
     defaultLandscapeFilter: 1
   }
 }
-const weAreItConfig: Config = {
+const birthdayConfig: Config = {
   qrCodePrint: false,
   canPrint: true,
   format: ["PAYSAGE"],
@@ -70,8 +65,25 @@ const weAreItConfig: Config = {
   filters: {
     miniPolaroid: [{ name: "Aucun filtre", url: "" }],
     polaroid: [{ name: "Aucun filtre", url: "" }],
-    landscape: [{ name: "Aucun filtre", url: "" }, { name: "4L", url: imagesAdressBase + "/filters/landscape/B&R_weareit2.png" }, { name: "Moustaches", url: imagesAdressBase + "/filters/landscape/Moustaches.png" }],
+    landscape: [{ name: "Aucun filtre", url: "" }, { name: "Caroline", url: imagesAdressBase + "/filters/landscape/50ans.png" }, { name: "Moustaches", url: imagesAdressBase + "/filters/landscape/Moustaches.png" }],
     defaultLandscapeFilter: 1
+  }
+}
+const galaConfig: Config = {
+  qrCodePrint: false,
+  canPrint: true,
+  format: ["PAYSAGE"],
+  cameraModes: ["PICTURE"],
+  frames: {
+    miniPolaroid: [{ name: "Aucun cadre", url: "" }],
+    polaroid: [{ name: "Aucun cadre", url: "" }],
+    landscape: [{ name: "Aucun cadre", url: "" }]
+  },
+  filters: {
+    miniPolaroid: [{ name: "Aucun filtre", url: "" }],
+    polaroid: [{ name: "Aucun filtre", url: "" }],
+    landscape: [{ name: "Gala", url: imagesAdressBase + "/filters/landscape/Gala.png" }],
+    defaultLandscapeFilter: 0
   }
 }
 type Image = {
@@ -122,7 +134,7 @@ const emptyConfig: Config = {
 } as Config;
 function Camera() {
 
-  const [config, setConfig] = useState<Config>(weAreItConfig);
+  const [config, setConfig] = useState<Config>(galaConfig);
 
 
   // État pour le texte de chargement
@@ -164,6 +176,8 @@ function Camera() {
 
   const goBackToMainTimeOut = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  const [waitingMessage, setWaitingMessage] = useState<string>("Impression validé !");
+
   let videoConstraintsFull: MediaStreamConstraints["video"] = {
     width: 3840,
     height: 2160,
@@ -197,7 +211,7 @@ function Camera() {
       if (response.ok) {
         const data = await response.json();
         setCredits(data);
-        
+
       } else {
         console.error('Erreur lors de la récupération des crédits');
       }
@@ -218,6 +232,7 @@ function Camera() {
   const capture = async () => {
     if (mode === "PICTURE") {
       await startCountdown(4);
+      setWaitingMessage("😍 Que vous êtes beaux !")
       setLoading(true);
       await capturePhoto();
       setLoading(false);
@@ -388,7 +403,7 @@ function Camera() {
       setPhotoPath(await savePhoto());
       console.log("Photo saved at path :", photoPath)
       setShowSavingOptions(true);
-      resetTimeout(); 
+      resetTimeout();
     } else {
       console.error('Photo not saved : no photo blob to upload');
     }
@@ -487,6 +502,7 @@ function Camera() {
   const handlePrint = async () => {
     if (photoBlob) {
       if (photoPath) {
+        setWaitingMessage("🖨️ Impression validée !")
         setLoading(true);
         setPrintError(null); // Réinitialiser l'erreur avant chaque impression
         try {
@@ -506,33 +522,34 @@ function Camera() {
               format: format,
             }),
           });
-        
+
           if (!response.ok) {
             const errorData = await response.json().catch(() => null);
             const errorMessage = errorData && errorData.message
               ? errorData.message
               : `Erreur lors de l'impression: ${response.statusText}`;
-              
+
             setLoading(false);
             setPrintError(errorMessage); // Affiche une erreur utilisateur compréhensible
             throw new Error(errorMessage);
           }
-        
+
           console.log('Photo sent for printing');
         } catch (error: any) {
           setLoading(false);
           setPrintError(error.message || 'Une erreur inconnue est survenue');
           console.error('Error printing photo:', error);
         }
-         finally {
+        finally {
           setTimeout(() => {
             setLoading(false);
             if (format === "POLAROID") {
-              setCredits(credits-(printCopies*2))
-            }else{
-              setCredits(credits-printCopies)
+              setCredits(credits - (printCopies * 2))
+            } else {
+              setCredits(credits - printCopies)
             }
-          }, 20000*printCopies) // force waiting of printing
+            handleCancel();
+          }, 1000 * printCopies) // force waiting of printing
 
         }
       } else {
@@ -653,7 +670,7 @@ function Camera() {
     }
     goBackToMainTimeOut.current = setTimeout(() => {
       handleCancel();
-    }, 20000*6);
+    }, 20000 * 6);
   };
 
   const currentSelectedFilter = getFilterBankFromFormat(format)[filter];
@@ -833,7 +850,7 @@ function Camera() {
 
       {loading && (
         <div className="loading-overlay">
-          <div className="loading-text">Patientez</div>
+          <div className="loading-text">{waitingMessage}</div>
           <div className="spinner"></div>
         </div>
       )}
