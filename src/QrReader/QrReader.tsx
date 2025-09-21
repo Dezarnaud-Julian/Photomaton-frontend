@@ -5,7 +5,7 @@ import Html5QrcodePlugin from "./Html5QrcodePlugin";
 import { relative } from "path";
 
 const QrReaderComponent = (props: { handlePrintQrCode: () => void }) => {
-  const backendAdress = process.env.REACT_APP_BACKEND_ADRESS ?? 'http://127.0.0.1:3001'
+  const backendAdress = import.meta.env.VITE_BACKEND_ADRESS ?? 'http://127.0.0.1:3001'
   const [scannedResult, setScannedResult] = useState<string | undefined>("");
   const [error, setError] = useState<string | undefined>("");
 

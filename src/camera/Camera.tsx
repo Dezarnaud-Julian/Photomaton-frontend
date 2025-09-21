@@ -7,7 +7,7 @@ import QRCode from 'react-qr-code';
 import QrReaderComponent from '../QrReader/QrReader';
 import Webcam from 'react-webcam';
 
-const backendAdress = process.env.REACT_APP_BACKEND_ADRESS ?? 'http://127.0.0.1:3001'
+const backendAdress = import.meta.env.VITE_BACKEND_ADRESS ?? 'http://127.0.0.1:3001'
 const imagesAdressBase = backendAdress + "/images";
 const debugConfig: Config = {
   qrCodePrint: true,

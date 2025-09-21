@@ -3,18 +3,18 @@ import "./Settings.css"
 
 const CODE = "2518";
 
-function Settings({ onCopiesUpdated, onPrint, setNewConfig, credits  }: { credits: number; onCopiesUpdated: (copies: string) => void; onPrint: () => void; setNewConfig:(config : string) => void}) {
+function Settings({ onCopiesUpdated, onPrint, setNewConfig, credits }: { credits: number; onCopiesUpdated: (copies: string) => void; onPrint: () => void; setNewConfig: (config: string) => void }) {
   const [showPad, setShowPad] = useState(false);
   const [clickCounter, setClickCounter] = useState(0);
   const [code, setCode] = useState('');
   const [isCodeValid, setIsCodeValid] = useState(false);
   const [ipAddress, setIpAddress] = useState('');
   const [copies, setCopies] = useState('');
-  const backendAdress = process.env.REACT_APP_BACKEND_ADRESS ?? 'http://127.0.0.1:3001'
+  const backendAdress = import.meta.env.VITE_BACKEND_ADRESS ?? 'http://127.0.0.1:3001'
 
 
-   // Fonction pour récupérer l'adresse IP depuis le backend
-   const fetchIPAddress = async () => {
+  // Fonction pour récupérer l'adresse IP depuis le backend
+  const fetchIPAddress = async () => {
     try {
       const response = await fetch(`${backendAdress}/ip`);
       if (response.ok) {
@@ -70,7 +70,7 @@ function Settings({ onCopiesUpdated, onPrint, setNewConfig, credits  }: { credit
       setCode('');
     }
   };
-  
+
 
   const handleSubmitCopies = async () => {
     // Envoyer le nombre de copies au backend
@@ -141,7 +141,7 @@ function Settings({ onCopiesUpdated, onPrint, setNewConfig, credits  }: { credit
       console.error('Erreur réseau:', error);
       alert('Erreur réseau' + error);
     }
-  };  
+  };
 
   const handleRestartApplication = async () => {
     try {
@@ -157,7 +157,7 @@ function Settings({ onCopiesUpdated, onPrint, setNewConfig, credits  }: { credit
       console.error('Erreur réseau:', error);
       alert('Erreur réseau' + error);
     }
-  };  
+  };
 
 
   return (
@@ -210,16 +210,16 @@ function Settings({ onCopiesUpdated, onPrint, setNewConfig, credits  }: { credit
                 </div>
 
                 <div className='horizontal'>
-                <button onClick={() => setNewConfig("debugConfig")}>Qr Code</button>
-                <button onClick={() => setNewConfig("fullDigitalConfig")}>Full Digital</button>
-                {ipAddress && (
-                  <p>{ipAddress}</p>
-                )}
+                  <button onClick={() => setNewConfig("debugConfig")}>Qr Code</button>
+                  <button onClick={() => setNewConfig("fullDigitalConfig")}>Full Digital</button>
+                  {ipAddress && (
+                    <p>{ipAddress}</p>
+                  )}
                 </div>
 
 
-                
-                                
+
+
                 <input
                   type="number"
                   className="copies-input"
